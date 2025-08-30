@@ -13,7 +13,7 @@ import {
   GroupTripStatus, 
   TimeSlot,
   Prisma
-} from '@/lib/generated/prisma';
+} from '@prisma/client';
 import {
   sendPrivateBookingConfirmation,
   sendGroupBookingConfirmation,

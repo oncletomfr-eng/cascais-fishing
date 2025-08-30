@@ -1,4 +1,4 @@
-import { PrismaClient, BadgeCategory, FishingExperience, FishingSpecialty } from '@/lib/generated/prisma';
+import { PrismaClient, BadgeCategory, FishingExperience, FishingSpecialty } from '@prisma/client';
 
 const prisma = new PrismaClient();
 

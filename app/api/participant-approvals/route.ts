@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { PrismaClient, ApprovalStatus } from '@/lib/generated/prisma'
+import { PrismaClient, ApprovalStatus } from '@prisma/client'
 import { z } from 'zod'
 
 const prisma = new PrismaClient()

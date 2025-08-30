@@ -12,7 +12,7 @@ import type {
   ParticipantApprovalMode,
   SkillCriteriaType,
   FishingExperience
-} from '@/lib/generated/prisma';
+} from '@prisma/client';
 
 // 🎯 Enhanced FishingEvent extending GroupTrip
 export interface FishingEventDisplay extends GroupTripDisplay {

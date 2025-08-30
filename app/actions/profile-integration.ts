@@ -1,7 +1,7 @@
 'use server'
 
 import { auth } from '@/auth'
-import { PrismaClient, BadgeCategory } from '@/lib/generated/prisma'
+import { PrismaClient, BadgeCategory } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { awardBadgesBasedOnActivity } from '@/app/api/badges/route'
 

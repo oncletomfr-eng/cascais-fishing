@@ -13,7 +13,7 @@ import {
   EquipmentType,
   SocialEventMode,
   ParticipantApprovalMode
-} from '@/lib/generated/prisma';
+} from '@prisma/client';
 import { broadcastGroupTripUpdate } from '../group-trips/ws/route';
 import type { CreateFishingEventRequest, FishingEventFilters } from '@/lib/types/fishing-events';
 

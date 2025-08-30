@@ -36,7 +36,7 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react'
-import { BookingStatus } from '@/lib/generated/prisma'
+import { BookingStatus } from '@prisma/client'
 
 type BookingData = {
   id: string

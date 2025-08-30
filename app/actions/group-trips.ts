@@ -1,6 +1,6 @@
 'use server';
 
-import { PrismaClient, GroupTripStatus, BookingStatus } from '@/lib/generated/prisma';
+import { PrismaClient, GroupTripStatus, BookingStatus } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { GroupTripUpdate } from '@/lib/types/group-events';
 import { transformTripToDisplay } from '@/lib/utils/group-trips-utils';

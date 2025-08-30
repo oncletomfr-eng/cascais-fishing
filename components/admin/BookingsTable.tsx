@@ -42,7 +42,7 @@ import {
   Clock
 } from 'lucide-react'
 import { getAllBookings, updateBookingStatus } from '@/app/actions/admin'
-import { BookingStatus } from '@/lib/generated/prisma'
+import { BookingStatus } from '@prisma/client'
 import { useToast } from '@/hooks/use-toast'
 import { BookingDetailsModal } from './BookingDetailsModal'
 import { BookingsFilters, type BookingFilters } from './BookingsFilters'

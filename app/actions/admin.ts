@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { checkAdminAuth } from '@/lib/auth-helpers'
-import { BookingStatus, GroupTripStatus, TimeSlot, Prisma } from '@/lib/generated/prisma'
+import { BookingStatus, GroupTripStatus, TimeSlot, Prisma } from '@prisma/client'
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns'
 import { revalidatePath } from 'next/cache'
 

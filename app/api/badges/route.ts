@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { PrismaClient, BadgeCategory, FishingExperience } from '@/lib/generated/prisma'
+import { PrismaClient, BadgeCategory, FishingExperience } from '@prisma/client'
 import { z } from 'zod'
 
 const prisma = new PrismaClient()

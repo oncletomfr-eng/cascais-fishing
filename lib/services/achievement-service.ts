@@ -3,7 +3,7 @@
  * Автоматическое присвоение достижений на основе действий пользователя
  */
 
-import { prisma } from '@/lib/generated/prisma';
+import { prisma } from '@prisma/client';
 import { 
   AchievementTrigger,
   SetAchievementProgressRequest,

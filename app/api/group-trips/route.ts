@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { transformTripToDisplay } from '@/lib/utils/group-trips-utils';
-import { GroupTripStatus, BookingStatus } from '@/lib/generated/prisma';
+import { GroupTripStatus, BookingStatus } from '@prisma/client';
 import { broadcastGroupTripUpdate } from './ws/route';
 import { AchievementTriggers } from '@/lib/services/achievement-service';
 

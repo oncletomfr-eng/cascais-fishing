@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { prisma } from '@/lib/generated/prisma';
+import { prisma } from '@prisma/client';
 import { 
   SetAchievementProgressRequest,
   SetAchievementProgressResponse,

@@ -187,7 +187,7 @@ async function sendCurrentTripStates(client: WebSocket, tripIds: string[]) {
     
     // Импортируем prisma и типы
     const { prisma } = await import('@/lib/prisma');
-    const { BookingStatus } = await import('@/lib/generated/prisma');
+    const { BookingStatus } = await import('@prisma/client');
     
     // Получаем реальные данные из базы данных
     const trips = await prisma.groupTrip.findMany({

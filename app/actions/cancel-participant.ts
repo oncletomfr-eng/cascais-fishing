@@ -2,7 +2,7 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import { BookingStatus } from '@/lib/generated/prisma'
+import { BookingStatus } from '@prisma/client'
 import { broadcastGroupTripUpdate } from '@/app/api/group-trips/ws/route'
 
 /**
