@@ -1,0 +1,1540 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model EventSkillCriteria {
+  id              String             @id @default(cuid())
+  tripId          String
+  criteriaType    SkillCriteriaType
+  minimumValue    Int?
+  requiredSkills  FishingTechnique[] @default([])
+  requiredSpecies FishSpecies[]      @default([])
+  description     String?
+  isRequired      Boolean            @default(true)
+  weight          Int                @default(1)
+  createdAt       DateTime           @default(now())
+  trip            GroupTrip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@map("event_skill_criteria")
+}
+
+model Achievement {
+  id                String            @id @default(cuid())
+  type              AchievementType   @unique
+  name              String
+  description       String
+  icon              String
+  category          BadgeCategory
+  rarity            AchievementRarity @default(COMMON)
+  maxProgress       Int               @default(1) // Максимальный прогресс для разблокировки
+  progressStep      Int               @default(1) // Шаг уведомлений о прогрессе
+  lockedVisible     Boolean           @default(true) // Видимо ли заблокированное достижение
+  lockedDescVisible Boolean           @default(false) // Видимо ли описание заблокированного
+  isActive          Boolean           @default(true)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  // Связь с пользователями через UserAchievement
+  userAchievements UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String    @id @default(cuid())
+  userId        String
+  achievementId String
+  progress      Int       @default(0) // Текущий прогресс
+  unlocked      Boolean   @default(false) // Разблокировано ли
+  unlockedAt    DateTime? // Когда разблокировано
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Связи
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+model FisherBadge {
+  id            String            @id @default(cuid())
+  profileId     String
+  name          String
+  description   String?
+  icon          String
+  category      BadgeCategory     @default(ACHIEVEMENT)
+  rarity        AchievementRarity @default(COMMON)
+  requiredValue Int?
+  earnedAt      DateTime          @default(now())
+  fisherProfile FisherProfile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("fisher_badges")
+}
+
+model FisherProfile {
+  id                    String             @id @default(cuid())
+  userId                String             @unique
+  experienceLevel       FishingExperience  @default(BEGINNER)
+  specialties           FishingSpecialty[]
+  bio                   String?
+  rating                Decimal            @default(5.0) @db.Decimal(2, 1)
+  completedTrips        Int                @default(0)
+  createdTrips          Int                @default(0) // Созданных событий
+  reliability           Decimal            @default(100.0) @db.Decimal(5, 2)
+  totalReviews          Int                @default(0)
+  positiveReviews       Int                @default(0) // Положительные отзывы
+  level                 Int                @default(1) // Уровень рыболова
+  experiencePoints      Int                @default(0) // Очки опыта
+  activeDays            Int                @default(0) // Активные дни
+  activeDaysConsecutive Int                @default(0) // Последовательные активные дни
+  totalFishCaught       Int                @default(0) // Всего поймано рыбы (кг)
+  uniqueSpecies         String[]           @default([]) // Уникальные виды рыб
+  favoriteLocation      String? // Любимое место
+  isActive              Boolean            @default(true)
+  lastActiveAt          DateTime           @default(now())
+  country               String?
+  city                  String?
+  latitude              Decimal?           @db.Decimal(10, 8) // Для географических достижений
+  longitude             Decimal?           @db.Decimal(11, 8)
+  secretCode            String? // Секретный код для входа
+  
+  // 🎯 Расширенная система репутации
+  // Experience - детальная статистика опыта
+  experienceStats Json? // ExperienceStats: biggestCatch, techniques, seasonal activity
+  
+  // Social - социальные рейтинги
+  mentorRating      Decimal @default(5.0) @db.Decimal(2, 1) // Как учит новичков
+  teamworkRating    Decimal @default(5.0) @db.Decimal(2, 1) // Работа в команде
+  reliabilityRating Decimal @default(5.0) @db.Decimal(2, 1) // Надежность
+  respectRating     Decimal @default(5.0) @db.Decimal(2, 1) // Соблюдение правил
+  reviewBreakdown   Json? // Детальная разбивка отзывов по оценкам
+  
+  // Certificates & Achievements - сертификаты и достижения
+  certificates       Json? // Certificate[]: профессиональные сертификаты
+  fishingPreferences Json? // FishingPreferences: предпочтения рыболова
+  
+  // Catch Records - записи уловов
+  totalWeightCaught   Decimal  @default(0.0) @db.Decimal(10, 2) // Общий вес улова (кг)
+  averageTripDuration Decimal? @db.Decimal(5, 2) // Средняя продолжительность поездки (часы)
+  successRate         Decimal  @default(0.0) @db.Decimal(5, 2) // Процент успешных поездок
+  catchRecords        Json? // CatchRecord[]: значимые уловы
+  
+  // Technique Skills - навыки техник
+  techniqueSkills Json? // TechniqueSkill[]: опыт с разными техниками
+  
+  // Seasonal & Location Data  
+  seasonalActivity  Json? // Активность по сезонам
+  favoriteLocations String[] @default([]) // Любимые места рыбалки
+  fishingZones      String[] @default([]) // Зоны где рыбачил
+
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  badges    FisherBadge[]
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("fisher_profiles")
+}
+
+model GroupBooking {
+  id              String        @id @default(cuid())
+  tripId          String
+  participants    Int           @default(1)
+  totalPrice      Decimal       @db.Decimal(10, 2)
+  contactName     String
+  contactPhone    String
+  contactEmail    String?
+  status          BookingStatus @default(PENDING)
+  paymentStatus   String        @default("pending")
+  specialRequests String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  userId          String?
+  trip            GroupTrip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  user            User?         @relation(fields: [userId], references: [id])
+
+  @@index([tripId])
+  @@index([userId])
+  @@map("group_bookings")
+}
+
+model GroupTrip {
+  id                   String                  @id @default(cuid())
+  date                 DateTime
+  timeSlot             TimeSlot
+  maxParticipants      Int                     @default(8)
+  minRequired          Int                     @default(6)
+  pricePerPerson       Decimal                 @default(95.00) @db.Decimal(10, 2)
+  status               GroupTripStatus         @default(FORMING)
+  description          String?
+  meetingPoint         String?
+  specialNotes         String?
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  captainId            String?
+  approvalMode         ParticipantApprovalMode @default(MANUAL)
+  departureLocation    String?
+  difficultyRating     Int                     @default(3)
+  equipment            EquipmentType           @default(PROVIDED)
+  estimatedFishCatch   Int?
+  eventType            FishingEventType        @default(COMMERCIAL)
+  fishingTechniques    FishingTechnique[]      @default([])
+  fishingZones         String[]                @default([])
+  maxGroupSize         Int?
+  minimumWeatherScore  Int                     @default(6)
+  recommendedFor       String[]                @default([])
+  skillLevel           SkillLevelRequired      @default(ANY)
+  socialMode           SocialEventMode         @default(COLLABORATIVE)
+  targetSpecies        FishSpecies[]           @default([])
+  weatherDependency    Boolean                 @default(true)
+  skillCriteria        EventSkillCriteria[]
+  bookings             GroupBooking[]
+  captain              User?                   @relation(fields: [captainId], references: [id])
+  participantApprovals ParticipantApproval[]
+  reviews              Review[]
+  payments             Payment[]
+  
+  // Умные рекомендации
+  recommendations SmartRecommendation[] // Рекомендации этой поездки
+  similarityAsTrip1 TripSimilarity[] @relation("Trip1Similarities") // Сходства где эта поездка первая
+  similarityAsTrip2 TripSimilarity[] @relation("Trip2Similarities") // Сходства где эта поездка вторая
+
+  @@map("group_trips")
+}
+
+model ParticipantApproval {
+  id             String         @id @default(cuid())
+  tripId         String
+  participantId  String
+  message        String?
+  status         ApprovalStatus @default(PENDING)
+  approvedBy     String?
+  rejectedReason String?
+  processedAt    DateTime?
+  appliedAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  participant    User           @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  trip           GroupTrip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@unique([tripId, participantId])
+  @@map("participant_approvals")
+}
+
+model PrivateBooking {
+  id              String        @id @default(cuid())
+  date            DateTime
+  timeSlot        TimeSlot
+  participants    Int           @default(1)
+  contactName     String
+  contactPhone    String
+  contactEmail    String?
+  totalPrice      Decimal       @default(400.00) @db.Decimal(10, 2)
+  status          BookingStatus @default(PENDING)
+  specialRequests String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("private_bookings")
+}
+
+model Review {
+  id         String    @id @default(cuid())
+  tripId     String
+  fromUserId String
+  toUserId   String
+  rating     Int
+  comment    String?
+  verified   Boolean   @default(false)
+  helpful    Int       @default(0)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  fromUser   User      @relation("UserFromReviews", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser     User      @relation("UserToReviews", fields: [toUserId], references: [id], onDelete: Cascade)
+  trip       GroupTrip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@unique([tripId, fromUserId, toUserId])
+  @@map("reviews")
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+
+  @@map("system_settings")
+}
+
+model User {
+  id                   String                @id @default(cuid())
+  name                 String?
+  email                String                @unique
+  emailVerified        DateTime?
+  image                String?
+  role                 UserRole              @default(PARTICIPANT)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  accounts             Account[]
+  fisherProfile        FisherProfile?
+  groupBookings        GroupBooking[]
+  captainedTrips       GroupTrip[]
+  participantApprovals ParticipantApproval[]
+  reviewsFrom          Review[]              @relation("UserFromReviews")
+  reviewsTo            Review[]              @relation("UserToReviews")
+  sessions             Session[]
+  achievements         UserAchievement[] // Достижения пользователя
+  
+  // Монетизация
+  subscriptions     Subscription[]
+  payments          Payment[]
+  courseEnrollments CourseEnrollment[]
+  advertisements    Advertisement[]
+  
+  // Морской календарь
+  catchRecords CatchRecord[] // Записи об уловах
+
+  // Цифровой дневник рыболова
+  diaryEntries FishingDiaryEntry[] // Записи дневника
+
+  // Умные рекомендации
+  recommendationsReceived SmartRecommendation[] @relation("UserRecommendations") // Полученные рекомендации
+  recommendationsFromCaptain SmartRecommendation[] @relation("CaptainRecommendations") // Рекомендации как капитан
+  recommendationInteractions RecommendationInteraction[] // Взаимодействия с рекомендациями
+  captainRecommendations CaptainRecommendation[] @relation("CaptainRecommendationsAuthored") // Авторские рекомендации капитана
+  captainRecommendationVotes CaptainRecommendationVote[] // Голоса за рекомендации капитанов
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+  @@map("verification_tokens")
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum BadgeCategory {
+  ACHIEVEMENT
+  MILESTONE
+  SPECIAL
+  SEASONAL
+  FISH_SPECIES // Достижения по видам рыб
+  TECHNIQUE // Достижения по техникам
+  SOCIAL // Социальные достижения
+  GEOGRAPHY // Географические достижения
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum BookingType {
+  PRIVATE
+  GROUP
+}
+
+enum EquipmentType {
+  PROVIDED
+  BRING_OWN
+  RENTAL_AVAILABLE
+  PARTIALLY_PROVIDED
+}
+
+enum FishSpecies {
+  SEABASS
+  DORADO
+  SEABREAM
+  MACKEREL
+  SARDINE
+  TUNA
+  ALBACORE
+  BONITO
+  SWORDFISH
+  MAHI_MAHI
+  BLUE_MARLIN
+  WHITE_MARLIN
+  SAILFISH
+  GROUPER
+  RED_SNAPPER
+  JOHN_DORY
+  SOLE
+  TURBOT
+  AMBERJACK
+  CONGER_EEL
+  OCTOPUS
+  CUTTLEFISH
+  MIXED_SPECIES
+}
+
+enum FishingEventType {
+  COMMERCIAL
+  COMMUNITY
+  TOURNAMENT
+  LEARNING
+}
+
+enum FishingExperience {
+  BEGINNER
+  INTERMEDIATE
+  EXPERT
+}
+
+enum FishingSpecialty {
+  DEEP_SEA
+  SHORE
+  FLY_FISHING
+  SPORT_FISHING
+}
+
+enum FishingTechnique {
+  TROLLING
+  JIGGING
+  BOTTOM_FISHING
+  FLY_FISHING
+  SPINNING
+  SURFCASTING
+  DRIFTING
+  POPPING
+  LIVE_BAIT
+  DEEP_DROP
+}
+
+enum GroupTripStatus {
+  FORMING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum ParticipantApprovalMode {
+  AUTO
+  MANUAL
+  SKILL_BASED
+  HYBRID
+}
+
+enum SkillCriteriaType {
+  MINIMUM_EXPERIENCE
+  COMPLETED_TRIPS
+  SPECIES_EXPERIENCE
+  TECHNIQUE_SKILL
+  CERTIFICATION
+  EQUIPMENT_OWNERSHIP
+  RATING_THRESHOLD
+  LANGUAGE_REQUIREMENT
+}
+
+enum SkillLevelRequired {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+  ANY
+}
+
+enum SocialEventMode {
+  COMPETITIVE
+  COLLABORATIVE
+  EDUCATIONAL
+  RECREATIONAL
+  FAMILY
+}
+
+enum TimeSlot {
+  MORNING_9AM
+  AFTERNOON_2PM
+}
+
+enum UserRole {
+  PARTICIPANT
+  CAPTAIN
+  ADMIN
+}
+
+enum AchievementRarity {
+  COMMON // Обычное (легко получить)
+  UNCOMMON // Необычное
+  RARE // Редкое
+  EPIC // Эпическое
+  LEGENDARY // Легендарное
+  MYTHIC // Мифическое (самое редкое)
+}
+
+enum AchievementType {
+  // Виды рыб
+  TUNA_MASTER // Мастер тунца (поймал 10+ тунцов)
+  DORADO_HUNTER // Охотник на дорадо (поймал 5+ дорадо)
+  SEABASS_EXPERT // Эксперт морского окуня
+  MARLIN_LEGEND // Легенда марлина
+  SPECIES_COLLECTOR // Коллекционер видов (поймал 5+ разных видов)
+  
+  // Техники
+  TROLLING_EXPERT // Троллинг-эксперт (10+ поездок с троллингом)
+  JIGGING_MASTER // Джиг-мастер
+  BOTTOM_FISHING_PRO // Профи донной ловли
+  FLY_FISHING_ARTIST // Художник нахлыста
+  TECHNIQUE_VERSATILE // Универсал техник (использовал 4+ техники)
+  
+  // Социальные
+  NEWBIE_MENTOR // Наставник новичков (помог 5+ новичкам)
+  GROUP_ORGANIZER // Организатор групп (создал 10+ событий)
+  COMMUNITY_BUILDER // Строитель сообщества
+  REVIEW_MASTER // Мастер отзывов (оставил 20+ отзывов)
+  RELIABLE_FISHER // Надежный рыболов (100% посещаемость)
+  
+  // География
+  REEF_EXPLORER // Исследователь рифов
+  DEEP_SEA_ADVENTURER // Глубоководный авантюрист
+  COASTAL_SPECIALIST // Специалист прибрежной ловли
+  WORLD_TRAVELER // Путешественник (рыбачил в 3+ местах)
+  LOCAL_EXPERT // Местный эксперт (50+ поездок в одном месте)
+}
+
+// ============================================================================
+// МОНЕТИЗАЦИЯ И БИЗНЕС-ЛОГИКА
+// ============================================================================
+
+// Подписки для капитанов (Premium €50/месяц)
+model Subscription {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Stripe данные
+  stripeCustomerId     String? @unique
+  stripeSubscriptionId String? @unique
+  stripePriceId        String?
+  
+  // Подписка
+  tier   SubscriptionTier   @default(FREE)
+  status SubscriptionStatus @default(INACTIVE)
+  
+  // Даты
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean   @default(false)
+  
+  // Метаданные
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Связи
+  payments Payment[]
+  
+  @@map("subscriptions")
+}
+
+enum SubscriptionTier {
+  FREE
+  CAPTAIN_PREMIUM // €50/месяц с расширенными возможностями
+}
+
+enum SubscriptionStatus {
+  INACTIVE
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+// Платежи и комиссии
+model Payment {
+  id String @id @default(cuid())
+  
+  // Связи
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  
+  tripId String?
+  trip   GroupTrip? @relation(fields: [tripId], references: [id], onDelete: SetNull)
+  
+  // Stripe данные
+  stripePaymentId String? @unique
+  stripeInvoiceId String? @unique
+  
+  // Платеж
+  type     PaymentType
+  amount   Int // В центах
+  currency String        @default("EUR")
+  status   PaymentStatus @default(PENDING)
+  
+  // Комиссии (для туров)
+  commissionAmount Int? // Комиссия платформы в центах
+  commissionRate   Float? // Процент комиссии (15-20%)
+  
+  // Метаданные
+  description String?
+  metadata    Json?
+  
+  // Даты
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  paidAt    DateTime?
+  
+  @@map("payments")
+}
+
+enum PaymentType {
+  SUBSCRIPTION // Подписка капитана
+  TOUR_BOOKING // Бронирование тура
+  COURSE_PURCHASE // Покупка курса
+  ADVERTISING // Реклама в ленте
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELED
+  REFUNDED
+}
+
+// Сертификационные курсы онлайн
+model Course {
+  id String @id @default(cuid())
+  
+  // Информация о курсе
+  title       String
+  description String?
+  category    CourseCategory
+  
+  // Цена
+  price         Int // В центах
+  stripePriceId String? @unique
+  
+  // Контент
+  content    Json? // Структурированный контент курса
+  duration   Int? // Продолжительность в минутах
+  difficulty CourseDifficulty @default(BEGINNER)
+  
+  // Статус
+  published Boolean @default(false)
+  
+  // Метаданные
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Связи
+  enrollments CourseEnrollment[]
+  
+  @@map("courses")
+}
+
+enum CourseCategory {
+  BASIC_FISHING // Основы рыбалки
+  ADVANCED_TECHNIQUES // Продвинутые техники  
+  CAPTAIN_LICENSE // Лицензия капитана
+  SAFETY // Безопасность
+  EQUIPMENT // Снаряжение
+}
+
+enum CourseDifficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+// Записи на курсы
+model CourseEnrollment {
+  id String @id @default(cuid())
+  
+  // Связи
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  // Прогресс
+  status   EnrollmentStatus @default(ENROLLED)
+  progress Float            @default(0) // 0-100%
+  score    Float? // Итоговая оценка
+  
+  // Даты
+  enrolledAt  DateTime  @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+  
+  // Сертификат
+  certificateIssued Boolean @default(false)
+  certificateUrl    String?
+  
+  @@unique([userId, courseId])
+  @@map("course_enrollments")
+}
+
+enum EnrollmentStatus {
+  ENROLLED
+  IN_PROGRESS
+  COMPLETED
+  DROPPED
+}
+
+// Реклама в ленте событий
+model Advertisement {
+  id String @id @default(cuid())
+  
+  // Рекламодатель
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Контент рекламы
+  title       String
+  description String?
+  imageUrl    String?
+  targetUrl   String?
+  
+  // Настройки показа
+  type     AdType     @default(EQUIPMENT_PROMOTION)
+  priority AdPriority @default(NORMAL)
+  
+  // Таргетинг
+  targetAudience Json? // Настройки таргетинга
+  locations      String[] // Географические области
+  
+  // Бюджет и статистика
+  budget       Int // В центах
+  costPerClick Int? // Цена за клик в центах
+  impressions  Int  @default(0)
+  clicks       Int  @default(0)
+  conversions  Int  @default(0)
+  
+  // Статус и даты
+  status    AdStatus  @default(DRAFT)
+  startDate DateTime?
+  endDate   DateTime?
+  
+  // Метаданные
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("advertisements")
+}
+
+enum AdType {
+  EQUIPMENT_PROMOTION // Реклама снастей/оборудования
+  FEATURED_LISTING // Выделенное объявление
+  SPONSOR_MESSAGE // Спонсорское сообщение
+}
+
+enum AdPriority {
+  LOW
+  NORMAL
+  HIGH
+  PREMIUM
+}
+
+enum AdStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  PAUSED
+  COMPLETED
+  REJECTED
+}
+
+// ============================================================================
+// МОРСКОЙ КАЛЕНДАРЬ И АСТРОНОМИЧЕСКИЕ ДАННЫЕ
+// ============================================================================
+
+// Лунные фазы и их влияние на рыбалку
+model LunarPhase {
+  id               String         @id @default(cuid())
+  date             DateTime // Дата фазы
+  type             LunarPhaseType
+  angle            Float // Угол фазы (0-360°)
+  illumination     Float // Процент освещенности (0-100)
+  distanceKm       Float // Расстояние до Луны в км
+  apparentDiameter Float // Видимый диаметр в градусах
+  
+  // Китайский лунный календарь
+  chineseLunarData Json? // ChineseLunarDay данные
+  
+  // Влияние на рыбалку
+  fishingInfluence Json? // LunarInfluence данные
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Связи
+  fishingConditions FishingConditions[]
+  catchRecords      CatchRecord[]
+  
+  @@unique([date])
+  @@map("lunar_phases")
+}
+
+enum LunarPhaseType {
+  NEW_MOON
+  WAXING_CRESCENT
+  FIRST_QUARTER
+  WAXING_GIBBOUS
+  FULL_MOON
+  WANING_GIBBOUS
+  LAST_QUARTER
+  WANING_CRESCENT
+}
+
+// Прогноз рыбалки на день
+model FishingConditions {
+  id       String   @id @default(cuid())
+  date     DateTime // Дата прогноза
+  location Json // FishingLocation данные
+  
+  // Общие условия
+  overallRating Int // Общая оценка клёва (1-10)
+  lunarPhaseId  String
+  lunarPhase    LunarPhase @relation(fields: [lunarPhaseId], references: [id])
+  
+  // Влияния
+  tidalInfluence Json? // TidalInfluence данные
+  weatherImpact  Json? // Влияние погоды на клёв
+  
+  // Рекомендации
+  bestHours       Json? // TimeWindow[] лучшие часы
+  recommendations String[] // Рекомендации
+  
+  // Виды рыб
+  speciesInfluence Json? // SpeciesFishingInfluence[] данные
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([date, location])
+  @@map("fishing_conditions")
+}
+
+// Исторические данные об уловах
+model CatchRecord {
+  id String @id @default(cuid())
+  
+  // Основная информация
+  date     DateTime // Дата улова
+  location Json // FishingLocation данные
+  anglerId String? // Рыболов (может быть null для анонимных данных)
+  angler   User?    @relation(fields: [anglerId], references: [id])
+  
+  // Лунные условия
+  lunarPhaseId String
+  lunarPhase   LunarPhase @relation(fields: [lunarPhaseId], references: [id])
+  
+  // Улов
+  catches     Json // CatchDetails[] пойманные рыбы
+  totalWeight Float // Общий вес улова в кг
+  totalCount  Int // Общее количество рыбы
+  
+  // Условия
+  weatherData Json? // WeatherConditions данные
+  tackleUsed  Json? // TackleUsed[] использованные снасти
+  techniques  FishingTechnique[] // Использованные техники
+  
+  // Дополнительно
+  duration Int? // Продолжительность рыбалки в минутах
+  success  Boolean @default(true) // Успешная ли рыбалка
+  notes    String? // Заметки
+  
+  // Проверка и качество данных
+  verified   Boolean         @default(false) // Проверенные данные
+  dataSource CatchDataSource @default(USER_REPORT) // Источник данных
+  confidence Float           @default(1.0) // Уверенность в данных (0-1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([date])
+  @@index([lunarPhaseId])
+  @@index([anglerId])
+  @@map("catch_records")
+}
+
+enum CatchDataSource {
+  USER_REPORT // Отчет пользователя
+  CAPTAIN_LOG // Журнал капитана  
+  AUTOMATED // Автоматические данные (сенсоры)
+  HISTORICAL // Исторические архивы
+  RESEARCH // Научные исследования
+}
+
+// Детализация видов рыб (расширение существующего enum)
+model FishSpeciesDetail {
+  id      String      @id @default(cuid())
+  species FishSpecies @unique // Связь с существующим enum
+  
+  // Названия
+  nameRu         String
+  nameEn         String
+  scientificName String
+  
+  // Характеристики
+  seasonality      Json // SeasonalAvailability данные
+  migrationPattern Json? // MigrationPattern данные
+  depthPreferences Json // DepthRange данные
+  temperatureRange Json // TemperatureRange данные
+  
+  // Рыбалка
+  preferredTechniques FishingTechnique[]
+  bestLunarPhases     LunarPhaseType[]
+  difficulty          Int                @default(5) // Сложность ловли (1-10)
+  
+  // Биология
+  averageSize    Json? // Размеры {min, max, average} в см
+  averageWeight  Json? // Вес {min, max, average} в кг
+  spawningPeriod Json? // Период нереста
+  feedingHabits  Json? // Питание и поведение
+  
+  // Коммерческая ценность
+  marketValue Float? // Рыночная стоимость за кг
+  gameValue   Int? // Спортивная ценность (1-10)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("fish_species_details")
+}
+
+// Миграционные события
+model MigrationEvent {
+  id      String      @id @default(cuid())
+  species FishSpecies // Вид рыбы
+  
+  // Событие
+  eventType   MigrationEventType
+  date        DateTime // Дата события
+  probability Float // Вероятность события (0-1)
+  
+  // Географически
+  location  Json // Местоположение события
+  direction String? // Направление миграции
+  depth     Float? // Глубина обнаружения
+  
+  // Условия
+  waterTemperature Float? // Температура воды
+  currentStrength  Float? // Сила течения
+  
+  // Источник данных
+  dataSource String // Источник информации
+  confidence Float  @default(0.8) // Уверенность в прогнозе
+
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([species])
+  @@index([date])
+  @@map("migration_events")
+}
+
+enum MigrationEventType {
+  ARRIVAL // Прибытие в регион
+  PEAK // Пик активности
+  DEPARTURE // Отбытие из региона
+}
+
+// Лучшие места для рыбалки
+model FishingHotspot {
+  id String @id @default(cuid())
+  
+  // Локация
+  name              String
+  latitude          Decimal @db.Decimal(10, 8)
+  longitude         Decimal @db.Decimal(11, 8)
+  depth             Float? // Средняя глубина
+  distanceFromShore Float? // Расстояние от берега в км
+  
+  // Характеристики
+  bottomType    String? // Тип дна
+  structureType String? // Тип структуры (риф, затонувший корабль и т.д.)
+  targetSpecies FishSpecies[] // Основные виды рыб
+  
+  // Условия
+  bestSeasons     Json? // Лучшие сезоны
+  bestTides       Json? // Лучшие приливы
+  bestWeather     Json? // Лучшие погодные условия
+  bestLunarPhases LunarPhaseType[] // Лучшие лунные фазы
+  
+  // Рейтинг
+  rating        Float @default(5.0) // Общий рейтинг (1-10)
+  difficulty    Int   @default(5) // Сложность (1-10)
+  accessibility Int   @default(5) // Доступность (1-10)
+  
+  // Статистика
+  totalVisits  Int   @default(0)
+  successRate  Float @default(0.5) // Процент успешных рыбалок
+  averageCatch Float @default(0.0) // Средний улов в кг
+  
+  // Дополнительно
+  description String?
+  tips        String[] // Советы для рыбалки
+  hazards     String[] // Опасности и предостережения
+  
+  // Данные
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([latitude, longitude])
+  @@map("fishing_hotspots")
+}
+
+// Приливы и отливы
+model TidalData {
+  id String @id @default(cuid())
+  
+  // Время и место
+  datetime DateTime // Время прилива/отлива
+  location Json // Координаты
+  
+  // Данные о приливе
+  type     TideType // Прилив или отлив
+  height   Float // Высота в метрах
+  strength Int // Сила (1-10)
+  
+  // Влияние на рыбалку
+  fishingImpact FishingImpact // Влияние на клёв
+  bestSpecies   FishSpecies[] // Виды, наиболее активные в это время
+  
+  createdAt DateTime @default(now())
+  
+  @@index([datetime])
+  @@index([location])
+  @@map("tidal_data")
+}
+
+enum TideType {
+  HIGH_TIDE // Прилив
+  LOW_TIDE // Отлив
+}
+
+enum FishingImpact {
+  VERY_NEGATIVE
+  NEGATIVE
+  NEUTRAL
+  POSITIVE
+  VERY_POSITIVE
+}
+
+// Историческая статистика по лунным фазам
+model LunarFishingStats {
+  id String @id @default(cuid())
+  
+  // Параметры
+  lunarPhase LunarPhaseType
+  species    FishSpecies
+  location   Json // Регион/координаты
+  season     Int // Сезон (1-4)
+  
+  // Статистика
+  totalObservations Int // Количество наблюдений
+  averageSuccess    Float // Средняя успешность
+  averageCatch      Float // Средний улов в кг
+  bestHours         Json? // Лучшие часы дня
+  
+  // Корреляция
+  correlationStrength Float // Сила корреляции с лунной фазой (-1 to 1)
+  confidence          Float // Уверенность в данных
+  
+  // Обновление данных
+  lastCalculated DateTime // Когда последний раз рассчитывалось
+  dataPoints     Int // Количество точек данных
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([lunarPhase, species, location, season])
+  @@map("lunar_fishing_stats")
+}
+
+// ==== ЦИФРОВОЙ ДНЕВНИК РЫБОЛОВА ====
+
+// Основная запись дневника рыболова
+model FishingDiaryEntry {
+  id String @id @default(cuid())
+
+  // Основная информация
+  userId      String
+  title       String // Заголовок записи
+  description String? // Описание рыбалки
+  date        DateTime // Дата рыбалки
+
+  // Локация с GPS
+  locationName String? // Название места
+  latitude     Float? // GPS координаты
+  longitude    Float?
+  accuracy     Float? // Точность GPS (в метрах)
+
+  // Детали рыбалки  
+  weather       Json? // Погодные условия
+  temperature   Float? // Температура воды/воздуха
+  windSpeed     Float? // Скорость ветра
+  windDirection WindDirection? // Направление ветра
+
+  // Улов
+  fishCaught  DiaryFishCatch[] // Пойманная рыба
+  totalWeight Float? // Общий вес улова
+  totalCount  Int              @default(0) // Общее количество рыбы
+
+  // Снасти и приманки
+  rodType   String? // Тип удилища
+  reelType  String? // Тип катушки
+  lineType  String? // Тип лески
+  baitUsed  String[] @default([]) // Использованные приманки
+  lureColor String? // Цвет приманки
+
+  // Медиа
+  media DiaryMedia[] // Фото и видео
+
+  // Метки и категории
+  tags      String[] @default([]) // Теги
+  isPrivate Boolean  @default(false) // Приватная запись
+  rating    Int? // Личная оценка (1-5)
+
+  // Связи
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, date])
+  @@index([latitude, longitude])
+  @@map("fishing_diary_entries")
+}
+
+// Пойманная рыба в записи дневника
+model DiaryFishCatch {
+  id      String @id @default(cuid())
+  entryId String
+
+  // Информация о рыбе
+  species  FishSpecies // Вид рыбы
+  weight   Float? // Вес в кг
+  length   Float? // Длина в см
+  quantity Int         @default(1) // Количество
+
+  // Детали поимки
+  timeOfCatch DateTime? // Точное время поимки
+  depth       Float? // Глубина ловли
+  method      FishingTechnique? // Способ ловли
+  baitUsed    String? // Конкретная приманка
+
+  // Дополнительно
+  wasReleased Boolean @default(false) // Была ли отпущена
+  notes       String? // Заметки о поимке
+
+  // Связи
+  entry FishingDiaryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([entryId])
+  @@index([species])
+  @@map("diary_fish_catches")
+}
+
+// Медиафайлы дневника (фото/видео)
+model DiaryMedia {
+  id      String @id @default(cuid())
+  entryId String
+
+  // Файл
+  fileName  String // Имя файла
+  fileUrl   String // URL файла
+  fileSize  Int? // Размер файла в байтах
+  mimeType  String // MIME тип файла
+  mediaType DiaryMediaType // Тип медиа
+
+  // EXIF метаданные (извлеченные из фото)
+  exifData     Json? // Все EXIF данные
+  gpsLatitude  Float? // GPS из EXIF
+  gpsLongitude Float? // GPS из EXIF
+  captureTime  DateTime? // Время съемки из EXIF
+  cameraModel  String? // Модель камеры
+  lensModel    String? // Модель объектива
+
+  // Дополнительная информация
+  title       String? // Заголовок медиа
+  description String? // Описание
+  isPublic    Boolean @default(true) // Публичное ли фото
+
+  // Связи
+  entry FishingDiaryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([entryId])
+  @@index([mediaType])
+  @@map("diary_media")
+}
+
+// ==== УМНЫЕ РЕКОМЕНДАЦИИ ====
+
+// Основная модель для хранения умных рекомендаций
+model SmartRecommendation {
+  id String @id @default(cuid())
+
+  // Тип рекомендации
+  type RecommendationType // Тип: история, погода, социальная
+
+  // Целевая аудитория
+  targetUserId String? // Персональная рекомендация для конкретного пользователя
+  targetUserRole UserRole[] @default([]) // Или для группы ролей
+  skillLevel SkillLevelRequired[] @default([]) // Уровень навыков
+
+  // Содержание рекомендации
+  title String // Заголовок рекомендации
+  description String // Описание
+  aiGeneratedText String? // Текст, сгенерированный AI
+  
+  // Контекст для рекомендации
+  triggerContext Json? // Контекст, который вызвал рекомендацию
+  weatherConditions Json? // Погодные условия
+  
+  // Связанные объекты
+  recommendedTripId String? // ID рекомендуемой поездки
+  recommendedTrip GroupTrip? @relation(fields: [recommendedTripId], references: [id], onDelete: Cascade)
+  
+  recommendedSpecies FishSpecies[] @default([]) // Рекомендуемые виды рыб
+  recommendedTechniques FishingTechnique[] @default([]) // Рекомендуемые техники
+  recommendedLocation Json? // Координаты места
+  
+  // Капитан, давший рекомендацию (для социальных)
+  fromCaptainId String?
+  fromCaptain User? @relation("CaptainRecommendations", fields: [fromCaptainId], references: [id], onDelete: SetNull)
+
+  // Приоритет и релевантность
+  priority Int @default(5) // Приоритет (1-10)
+  relevanceScore Float @default(0.5) // Оценка релевантности AI (0-1)
+  confidenceScore Float @default(0.5) // Уверенность в рекомендации (0-1)
+
+  // Статистика эффективности
+  impressions Int @default(0) // Показы
+  clicks Int @default(0) // Клики
+  conversions Int @default(0) // Конверсии (действия пользователей)
+  
+  // Временные ограничения
+  validFrom DateTime @default(now()) // Действительна с
+  validUntil DateTime? // Действительна до
+  
+  // Статус и метаданные
+  isActive Boolean @default(true)
+  metadata Json? // Дополнительные данные
+  
+  // Связи
+  targetUser User? @relation("UserRecommendations", fields: [targetUserId], references: [id], onDelete: Cascade)
+  interactions RecommendationInteraction[] // Взаимодействия
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([type])
+  @@index([targetUserId])
+  @@index([isActive, validFrom, validUntil])
+  @@map("smart_recommendations")
+}
+
+// Взаимодействия пользователей с рекомендациями
+model RecommendationInteraction {
+  id String @id @default(cuid())
+  
+  userId String
+  recommendationId String
+  
+  // Тип взаимодействия
+  interactionType RecommendationInteractionType
+  
+  // Контекст
+  sessionId String? // ID сессии
+  deviceType String? // Тип устройства
+  userAgent String? // User agent
+  
+  // Результат взаимодействия
+  result Json? // Результат действия (например, забронированная поездка)
+  satisfaction Int? // Оценка удовлетворенности (1-5)
+  feedback String? // Обратная связь
+  
+  // Связи
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recommendation SmartRecommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([recommendationId])
+  @@index([interactionType])
+  @@map("recommendation_interactions")
+}
+
+// Погодные рекомендации от AI
+model WeatherRecommendation {
+  id String @id @default(cuid())
+  
+  // Погодные условия
+  weatherConditions Json // Детальные погодные данные
+  windSpeed Float? // Скорость ветра
+  windDirection WindDirection?
+  temperature Float? // Температура
+  pressure Float? // Давление
+  humidity Float? // Влажность
+  cloudCover Float? // Облачность (0-1)
+  
+  // Рекомендации
+  recommendedSpecies FishSpecies[] // Какая рыба лучше клюет
+  recommendedTechniques FishingTechnique[] // Какие техники использовать
+  recommendedTimeOfDay Json? // Лучшее время дня [start_hour, end_hour]
+  recommendedDepth Float? // Рекомендуемая глубина
+  
+  // AI анализ
+  aiAnalysis String // Анализ от OpenAI
+  aiReasoning String? // Объяснение логики
+  confidenceLevel Float @default(0.5) // Уверенность AI (0-1)
+  
+  // Локация
+  location Json? // Координаты
+  regionId String? // ID региона
+  
+  // Валидность
+  validFor DateTime // До какого времени действительна
+  
+  // Статистика
+  usageCount Int @default(0) // Сколько раз использовалась
+  successRate Float @default(0.0) // Процент успешных исходов
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([validFor])
+  @@index([location])
+  @@map("weather_recommendations")
+}
+
+// Рекомендации от капитанов
+model CaptainRecommendation {
+  id String @id @default(cuid())
+  
+  captainId String
+  
+  // Содержание рекомендации
+  title String
+  content String // Основной текст рекомендации
+  category CaptainRecommendationCategory
+  
+  // Целевая аудитория
+  targetSkillLevel SkillLevelRequired[] @default([])
+  targetSpecies FishSpecies[] @default([]) // Для каких видов рыб
+  targetTechniques FishingTechnique[] @default([]) // Для каких техник
+  
+  // Контекст
+  seasonalContext Int[] @default([]) // Месяцы (1-12)
+  weatherContext Json? // При каких погодных условиях
+  locationContext Json? // Для каких мест
+  
+  // Связанные поездки
+  relatedTripIds String[] @default([]) // ID связанных поездок
+  
+  // Авторитетность и проверка
+  isVerified Boolean @default(false) // Проверена ли администрацией
+  endorsements Int @default(0) // Количество одобрений
+  
+  // Статистика
+  views Int @default(0)
+  helpfulVotes Int @default(0) // Голоса "полезно"
+  notHelpfulVotes Int @default(0) // Голоса "не полезно"
+  
+  // Статус
+  isActive Boolean @default(true)
+  moderationStatus ModerationStatus @default(PENDING)
+  
+  // Связи
+  captain User @relation("CaptainRecommendationsAuthored", fields: [captainId], references: [id], onDelete: Cascade)
+  votes CaptainRecommendationVote[] // Голоса за эту рекомендацию
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([captainId])
+  @@index([category])
+  @@index([isActive, moderationStatus])
+  @@map("captain_recommendations")
+}
+
+// Голосование за рекомендации капитанов
+model CaptainRecommendationVote {
+  id String @id @default(cuid())
+  
+  userId String
+  recommendationId String
+  
+  isHelpful Boolean // true = helpful, false = not helpful
+  
+  // Связи
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recommendation CaptainRecommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, recommendationId])
+  @@index([recommendationId])
+  @@map("captain_recommendation_votes")
+}
+
+// Похожесть поездок для collaborative filtering
+model TripSimilarity {
+  id String @id @default(cuid())
+  
+  tripId1 String
+  tripId2 String
+  
+  // Метрики похожести
+  overallSimilarity Float // Общая похожесть (0-1)
+  
+  // Компоненты похожести
+  speciesSimilarity Float @default(0) // По видам рыб
+  techniqueSimilarity Float @default(0) // По техникам
+  locationSimilarity Float @default(0) // По местам
+  skillSimilarity Float @default(0) // По уровню навыков
+  seasonSimilarity Float @default(0) // По сезону/времени
+  participantSimilarity Float @default(0) // По участникам
+  
+  // Метаданные расчета
+  calculatedAt DateTime @default(now()) // Когда рассчитано
+  calculationMethod String // Метод расчета
+  isStale Boolean @default(false) // Устарел ли расчет
+  
+  // Связи
+  trip1 GroupTrip @relation("Trip1Similarities", fields: [tripId1], references: [id], onDelete: Cascade)
+  trip2 GroupTrip @relation("Trip2Similarities", fields: [tripId2], references: [id], onDelete: Cascade)
+  
+  @@unique([tripId1, tripId2])
+  @@index([overallSimilarity])
+  @@index([calculatedAt])
+  @@map("trip_similarities")
+}
+
+// ==== НОВЫЕ ENUMS ====
+
+enum WindDirection {
+  NORTH
+  NORTHEAST
+  EAST
+  SOUTHEAST
+  SOUTH
+  SOUTHWEST
+  WEST
+  NORTHWEST
+  CALM
+
+  @@map("wind_direction")
+}
+
+enum DiaryMediaType {
+  PHOTO
+  VIDEO
+  AUDIO
+
+  @@map("diary_media_type")
+}
+
+enum RecommendationType {
+  HISTORY_BASED // На основе истории похожих поездок
+  WEATHER_AI // Погодные AI рекомендации
+  SOCIAL_CAPTAIN // Социальные рекомендации от капитанов
+  COLLABORATIVE // Коллаборативная фильтрация
+  CONTENT_BASED // На основе контента
+  HYBRID // Гибридные рекомендации
+  
+  @@map("recommendation_type")
+}
+
+enum RecommendationInteractionType {
+  VIEW // Просмотр
+  CLICK // Клик по рекомендации
+  LIKE // Лайк
+  DISLIKE // Дизлайк
+  SHARE // Поделился
+  BOOK // Забронировал рекомендованную поездку
+  DISMISS // Отклонил рекомендацию
+  REPORT // Пожаловался на рекомендацию
+  
+  @@map("recommendation_interaction_type")
+}
+
+enum CaptainRecommendationCategory {
+  TECHNIQUE_ADVICE // Советы по техникам
+  SPECIES_TARGETING // Советы по видам рыб
+  LOCATION_TIPS // Советы по местам
+  EQUIPMENT_RECOMMENDATION // Рекомендации снаряжения
+  WEATHER_STRATEGY // Стратегии для погоды
+  SAFETY_ADVICE // Советы по безопасности
+  BEGINNER_GUIDE // Руководство для новичков
+  SEASONAL_TIPS // Сезонные советы
+  
+  @@map("captain_recommendation_category")
+}
+
+enum ModerationStatus {
+  PENDING // Ожидает модерации
+  APPROVED // Одобрено
+  REJECTED // Отклонено
+  FLAGGED // Помечено для проверки
+  
+  @@map("moderation_status")
+}
