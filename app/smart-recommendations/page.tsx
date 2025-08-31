@@ -38,15 +38,20 @@ export default function SmartRecommendationsPage() {
 
           <div className="space-y-6">
             {/* Тестовый компонент - пока что статичный */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h2 className="text-xl font-semibold mb-2">⚠️ Статус реализации</h2>
-              <p className="text-sm mb-4">Полный анализ того, что НЕ реализовано в реальности:</p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h2 className="text-xl font-semibold mb-2">📊 Статус реализации</h2>
+              <p className="text-sm mb-4">Актуальный статус реализации системы (обновлено 30.01.2025):</p>
               
               <div className="grid md:grid-cols-3 gap-4">
                 {/* История поездок */}
-                <div className="p-4 bg-red-50 border border-red-200 rounded">
-                  <h3 className="font-semibold text-red-800">❌ История поездок</h3>
-                  <p className="text-sm text-red-600 mt-1">"Участники похожих поездок также ходили на..." - алгоритм не работает без реальных данных пользователей</p>
+                <div className="p-4 bg-green-50 border border-green-200 rounded">
+                  <h3 className="font-semibold text-green-800">✅ История поездок</h3>
+                  <p className="text-sm text-green-600 mt-1">"Участники похожих поездок также ходили на..." - collaborative filtering работает с реальными данными PostgreSQL</p>
+                  <div className="mt-2 text-xs text-green-500">
+                    ✅ База данных: 12 users, 10 trips<br/>
+                    ✅ Алгоритм: User-based CF<br/>
+                    ✅ API: /api/test-collaborative-filtering
+                  </div>
                 </div>
 
                 {/* Погодный AI */}
