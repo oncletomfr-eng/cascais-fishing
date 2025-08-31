@@ -167,11 +167,11 @@ async function processEvent(event: Stripe.Event) {
       console.log(`🔔 Event handler not implemented for: ${event.type}`);
   }
 
-    return NextResponse.json({ 
-      success: true, 
-      received: true,
-      event_type: event.type 
-    });
+  return NextResponse.json({ 
+    success: true, 
+    received: true,
+    event_type: event.type 
+  });
 
   } catch (error) {
     console.error('❌ Error processing webhook:', error);
