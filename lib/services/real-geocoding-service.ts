@@ -30,12 +30,23 @@ interface GeocodingResponse {
 }
 
 export class RealGeocodingService {
-  private client: Client;
+  private client: Client | null = null;
   private apiKey: string;
 
   constructor() {
     this.apiKey = process.env.GOOGLE_MAPS_API_KEY || '';
-    this.client = new Client({});
+    
+    // Only create client if API key is available
+    if (this.apiKey) {
+      try {
+        this.client = new Client({});
+      } catch (error) {
+        console.warn('🔧 Failed to initialize Google Maps client:', error);
+        this.client = null;
+      }
+    } else {
+      console.warn('🔧 Google Maps API key not configured, using fallback geocoding only');
+    }
   }
 
   /**
@@ -43,8 +54,8 @@ export class RealGeocodingService {
    */
   async geocodeAddress(address: string): Promise<GeocodingResponse | null> {
     try {
-      if (!this.apiKey) {
-        console.warn('Google Maps API key не задан, используем fallback геолокацию');
+      if (!this.apiKey || !this.client) {
+        console.warn('🔧 Google Maps API не доступен, используем fallback геолокацию');
         return this.getFallbackGeocoding(address);
       }
 
@@ -87,8 +98,8 @@ export class RealGeocodingService {
    */
   async reverseGeocode(latitude: number, longitude: number): Promise<GeocodingResponse | null> {
     try {
-      if (!this.apiKey) {
-        console.warn('Google Maps API key не задан, используем fallback геолокацию');
+      if (!this.apiKey || !this.client) {
+        console.warn('🔧 Google Maps API не доступен, используем fallback геолокацию');
         return this.getFallbackReverseGeocoding(latitude, longitude);
       }
 
@@ -195,8 +206,8 @@ export class RealGeocodingService {
    */
   async searchPlaces(query: string, location?: { lat: number; lng: number }, radius?: number): Promise<GeocodingResponse[]> {
     try {
-      if (!this.apiKey) {
-        console.warn('Google Maps API key не задан, используем fallback поиск');
+      if (!this.apiKey || !this.client) {
+        console.warn('🔧 Google Maps API не доступен, используем fallback поиск');
         return this.getFallbackPlaceSearch(query);
       }
 
@@ -400,7 +411,7 @@ export class RealGeocodingService {
    */
   async validateApiKey(): Promise<boolean> {
     try {
-      if (!this.apiKey) return false;
+      if (!this.apiKey || !this.client) return false;
 
       const response = await this.client.geocode({
         params: {
