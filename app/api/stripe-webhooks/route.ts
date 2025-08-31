@@ -115,8 +115,9 @@ export async function POST(request: NextRequest) {
  * Handles all allowed Stripe events with proper error handling
  */
 async function processEvent(event: Stripe.Event) {
-  // Extract customer ID if present (common pattern across events)
-  const eventData = event.data.object as any;
+  try {
+    // Extract customer ID if present (common pattern across events)
+    const eventData = event.data.object as any;
   const customerId = eventData.customer;
   
   if (customerId && typeof customerId !== 'string') {
