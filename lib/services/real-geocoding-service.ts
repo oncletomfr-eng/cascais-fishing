@@ -1,4 +1,4 @@
-import { Client } from '@googlemaps/google-maps-services-js';
+// import { Client } from '@googlemaps/google-maps-services-js'; // TEMPORARILY DISABLED FOR DEPLOYMENT
 
 interface GeolocationData {
   latitude: number;
@@ -30,42 +30,23 @@ interface GeocodingResponse {
 }
 
 export class RealGeocodingService {
-  private client: Client | null = null;
+  // private client: Client | null = null; // DISABLED FOR DEPLOYMENT
   private apiKey: string;
   private clientInitialized = false;
 
   constructor() {
     this.apiKey = process.env.GOOGLE_MAPS_API_KEY || '';
-    console.log('🔧 RealGeocodingService constructor completed', { 
+    console.log('🔧 RealGeocodingService using FALLBACK MODE (Google Maps disabled for deployment)', { 
       hasApiKey: !!this.apiKey,
-      keyLength: this.apiKey ? this.apiKey.length : 0
+      keyLength: this.apiKey ? this.apiKey.length : 0,
+      mode: 'FALLBACK_ONLY'
     });
-    // НЕ создаем Client в конструкторе - только при необходимости
   }
 
-  private getClient(): Client | null {
-    if (!this.apiKey) {
-      return null;
-    }
-    
-    if (!this.clientInitialized) {
-      try {
-        // Создаем Client только с валидным API ключом
-        this.client = new Client({
-          config: {
-            key: this.apiKey
-          }
-        });
-        console.log('🔧 Google Maps Client initialized successfully');
-        this.clientInitialized = true;
-      } catch (error) {
-        console.error('🔧 Failed to initialize Google Maps client:', error);
-        this.client = null;
-        this.clientInitialized = true; // Помечаем как инициализированный чтобы не пытаться снова
-      }
-    }
-    
-    return this.client;
+  private getClient(): null {
+    // ALWAYS return null to force fallback mode during deployment
+    console.log('🔧 Google Maps Client disabled for deployment, using fallback geocoding');
+    return null;
   }
 
   /**
@@ -73,40 +54,9 @@ export class RealGeocodingService {
    */
   async geocodeAddress(address: string): Promise<GeocodingResponse | null> {
     try {
-      const client = this.getClient();
-      if (!client) {
-        console.warn('🔧 Google Maps API не доступен, используем fallback геолокацию');
-        return this.getFallbackGeocoding(address);
-      }
-
-      const response = await client.geocode({
-        params: {
-          address: address,
-          key: this.apiKey,
-          language: 'ru'
-        },
-        timeout: 10000
-      });
-
-      if (response.data.results && response.data.results.length > 0) {
-        const result = response.data.results[0];
-        const location = result.geometry.location;
-        const components = result.address_components;
-
-        return {
-          address: result.formatted_address,
-          coordinates: {
-            latitude: location.lat,
-            longitude: location.lng
-          },
-          components: this.parseAddressComponents(components),
-          accuracy: result.geometry.location_type || 'APPROXIMATE',
-          placeId: result.place_id,
-          types: result.types
-        };
-      }
-
-      return null;
+      // Google Maps temporarily disabled for deployment - using fallback only
+      console.warn('🔧 Google Maps DISABLED for deployment, using fallback геолокацию');
+      return this.getFallbackGeocoding(address);
     } catch (error) {
       console.error('Ошибка геокодинга адреса:', error);
       return this.getFallbackGeocoding(address);
@@ -118,41 +68,9 @@ export class RealGeocodingService {
    */
   async reverseGeocode(latitude: number, longitude: number): Promise<GeocodingResponse | null> {
     try {
-      const client = this.getClient();
-      if (!client) {
-        console.warn('🔧 Google Maps API не доступен, используем fallback геолокацию');
-        return this.getFallbackReverseGeocoding(latitude, longitude);
-      }
-
-      const response = await client.reverseGeocode({
-        params: {
-          latlng: { lat: latitude, lng: longitude },
-          key: this.apiKey,
-          language: 'ru',
-          result_type: ['street_address', 'locality', 'administrative_area_level_1']
-        },
-        timeout: 10000
-      });
-
-      if (response.data.results && response.data.results.length > 0) {
-        const result = response.data.results[0];
-        const location = result.geometry.location;
-        const components = result.address_components;
-
-        return {
-          address: result.formatted_address,
-          coordinates: {
-            latitude: location.lat,
-            longitude: location.lng
-          },
-          components: this.parseAddressComponents(components),
-          accuracy: result.geometry.location_type || 'APPROXIMATE',
-          placeId: result.place_id,
-          types: result.types
-        };
-      }
-
-      return null;
+      // Google Maps temporarily disabled for deployment - using fallback only
+      console.warn('🔧 Google Maps DISABLED for deployment, using fallback геолокацию');
+      return this.getFallbackReverseGeocoding(latitude, longitude);
     } catch (error) {
       console.error('Ошибка обратного геокодинга:', error);
       return this.getFallbackReverseGeocoding(latitude, longitude);
@@ -227,11 +145,9 @@ export class RealGeocodingService {
    */
   async searchPlaces(query: string, location?: { lat: number; lng: number }, radius?: number): Promise<GeocodingResponse[]> {
     try {
-      const client = this.getClient();
-      if (!client) {
-        console.warn('🔧 Google Maps API не доступен, используем fallback поиск');
-        return this.getFallbackPlaceSearch(query);
-      }
+      // Google Maps temporarily disabled for deployment - using fallback only
+      console.warn('🔧 Google Maps DISABLED for deployment, using fallback поиск');
+      return this.getFallbackPlaceSearch(query);
 
       const params: any = {
         query: query,
@@ -433,8 +349,9 @@ export class RealGeocodingService {
    */
   async validateApiKey(): Promise<boolean> {
     try {
-      const client = this.getClient();
-      if (!client) return false;
+      // Google Maps temporarily disabled for deployment - always return false
+      console.warn('🔧 Google Maps DISABLED for deployment, API validation skipped');
+      return false;
 
       const response = await client.geocode({
         params: {
