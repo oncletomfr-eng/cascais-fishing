@@ -8,6 +8,7 @@ import {
   UseGroupTripsWebSocket,
   WebSocketConfig 
 } from '@/lib/types/group-events';
+import { getWebSocketConfig } from '@/lib/config/websocket';
 
 export interface UseGroupTripsWebSocketProps {
   url: string;
@@ -306,6 +307,9 @@ export function useGroupTripsWebSocket({
 
 // Вспомогательный хук для множественных подписок
 export function useGroupTripSubscriptions(tripIds: string[] = []) {
+  // Получаем правильный WebSocket URL из конфигурации
+  const wsConfig = getWebSocketConfig();
+  
   const {
     subscribe,
     unsubscribe,
@@ -313,7 +317,7 @@ export function useGroupTripSubscriptions(tripIds: string[] = []) {
     lastUpdate,
     error
   } = useGroupTripsWebSocket({
-    url: 'ws://localhost:3000/api/group-trips/ws'
+    url: wsConfig.wsUrl
   });
 
   // Автоматическая подписка и отписка при изменении списка

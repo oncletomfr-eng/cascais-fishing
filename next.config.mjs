@@ -1,3 +1,5 @@
+import { withNextWS } from 'next-ws';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -45,4 +47,4 @@ const nextConfig = {
   },
 }
 
-export default nextConfig
+export default withNextWS(nextConfig)
