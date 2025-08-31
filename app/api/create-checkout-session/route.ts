@@ -12,6 +12,15 @@ import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
   try {
+    // Проверяем наличие Stripe API ключей
+    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_placeholder_for_build_only') {
+      console.error('❌ STRIPE_SECRET_KEY not configured properly');
+      return NextResponse.json(
+        { error: 'Payment processing is not configured' },
+        { status: 503 }
+      );
+    }
+
     const session = await auth();
     
     if (!session?.user?.email) {
@@ -212,6 +221,15 @@ export async function POST(request: NextRequest) {
 // GET endpoint to retrieve existing checkout sessions
 export async function GET(request: NextRequest) {
   try {
+    // Проверяем наличие Stripe API ключей
+    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_placeholder_for_build_only') {
+      console.error('❌ STRIPE_SECRET_KEY not configured properly');
+      return NextResponse.json(
+        { error: 'Payment processing is not configured' },
+        { status: 503 }
+      );
+    }
+
     const session = await auth();
     
     if (!session?.user?.email) {

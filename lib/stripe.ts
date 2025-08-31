@@ -2,27 +2,39 @@ import Stripe from 'stripe';
 
 // Stripe клиент для сервера - Production Ready Configuration
 // Based on Context7 Stripe Node.js documentation and best practices
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  // Pin specific API version for consistency (Context7 recommendation)
-  apiVersion: '2024-12-18.acacia',
-  
-  // Enable TypeScript support
-  typescript: true,
-  
-  // Production-ready settings
-  maxNetworkRetries: 3, // Automatic retries with exponential backoff
-  timeout: 10000, // 10 second timeout
-  
-  // App identification (Context7 best practice)
-  appInfo: {
-    name: 'Cascais Fishing Platform',
-    version: '1.0.0',
-    url: 'https://cascaisfishing.com',
-  },
-  
-  // Enable telemetry for better performance insights
-  telemetry: true,
-});
+
+// Проверяем наличие API ключа
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+if (!stripeSecretKey) {
+  console.warn('⚠️ STRIPE_SECRET_KEY is not set in environment variables');
+  console.warn('💡 Using fallback test key for build process');
+}
+
+export const stripe = new Stripe(
+  stripeSecretKey || 'sk_test_placeholder_for_build_only', 
+  {
+    // Pin specific API version for consistency (Context7 recommendation)
+    apiVersion: '2024-12-18.acacia',
+    
+    // Enable TypeScript support
+    typescript: true,
+    
+    // Production-ready settings
+    maxNetworkRetries: 3, // Automatic retries with exponential backoff
+    timeout: 10000, // 10 second timeout
+    
+    // App identification (Context7 best practice)
+    appInfo: {
+      name: 'Cascais Fishing Platform',
+      version: '1.0.0',
+      url: 'https://cascaisfishing.com',
+    },
+    
+    // Enable telemetry for better performance insights
+    telemetry: true,
+  }
+);
 
 // Публичные константы
 export const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string;
