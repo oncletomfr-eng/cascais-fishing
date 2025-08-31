@@ -29,7 +29,7 @@ export default function SmartRecommendationsPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">🧠 Умные рекомендации</h1>
+            <h1 className="text-3xl font-bold mb-2">🧠 Умные рекомендации (обновлено)</h1>
             <p className="text-muted-foreground text-lg">
               Персонализированные AI-советы для успешной рыбалки на основе погоды, 
               вашей истории поездок и опыта лучших капитанов
@@ -40,7 +40,7 @@ export default function SmartRecommendationsPage() {
             {/* Тестовый компонент - пока что статичный */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h2 className="text-xl font-semibold mb-2">📊 Статус реализации</h2>
-              <p className="text-sm mb-4">Актуальный статус реализации системы (обновлено 30.01.2025):</p>
+              <p className="text-sm mb-4">🔄 FORCE UPDATE: Актуальный статус реализации системы (30.01.2025 - 20:45):</p>
               
               <div className="grid md:grid-cols-3 gap-4">
                 {/* История поездок */}
