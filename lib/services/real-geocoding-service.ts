@@ -452,4 +452,19 @@ export class RealGeocodingService {
   }
 }
 
-export const realGeocodingService = new RealGeocodingService();
+// Lazy initialization to avoid creating instance during module import
+let _realGeocodingService: RealGeocodingService | null = null;
+
+export function getRealGeocodingService(): RealGeocodingService {
+  if (!_realGeocodingService) {
+    _realGeocodingService = new RealGeocodingService();
+  }
+  return _realGeocodingService;
+}
+
+// Backward compatibility export
+export const realGeocodingService = new Proxy({} as RealGeocodingService, {
+  get(target, prop) {
+    return getRealGeocodingService()[prop as keyof RealGeocodingService];
+  }
+});
