@@ -10,7 +10,6 @@ import {
 import { Solar, Lunar } from 'lunar-javascript';
 import { 
   LunarPhase, 
-  LunarPhaseType, 
   FishingConditions,
   LunarInfluence,
   FishActivityLevel,
@@ -18,6 +17,7 @@ import {
   ChineseLunarDay,
   MarineCalendarConfig
 } from '../types/marine-calendar';
+import type { LunarPhaseType } from '@prisma/client';
 
 /**
  * Сервис для расчета лунных фаз и их влияния на рыбалку

@@ -2,7 +2,6 @@ import * as Astronomy from 'astronomy-engine';
 import { Solar, Lunar } from 'lunar-javascript';
 import { 
   LunarPhase, 
-  LunarPhaseType, 
   FishingConditions, 
   LunarInfluence,
   FishActivityLevel,
@@ -10,6 +9,7 @@ import {
   ChineseLunarData,
   MarineCalendarConfig
 } from '../types/marine-calendar';
+import type { LunarPhaseType } from '@prisma/client';
 
 export class RealLunarService {
   private config: MarineCalendarConfig;
