@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     }
 
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.OPENAI_API_KEY || 'sk-placeholder-for-build-only',
     });
 
     // Тестовый запрос для рыболовной рекомендации
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     }
 
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.OPENAI_API_KEY || 'sk-placeholder-for-build-only',
     });
 
     const weatherInfo = weatherData ? `

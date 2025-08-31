@@ -13,8 +13,16 @@ import {
 } from '@prisma/client';
 
 // Инициализация OpenAI клиента
+// Проверяем наличие API ключа
+const openaiApiKey = process.env.OPENAI_API_KEY;
+
+if (!openaiApiKey) {
+  console.warn('⚠️ OPENAI_API_KEY is not set in environment variables (smart-recommendations-service)');
+  console.warn('💡 OpenAI service will use fallback recommendations only');
+}
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: openaiApiKey || 'sk-placeholder-for-build-only',
 });
 
 export class SmartRecommendationsService {
@@ -71,6 +79,12 @@ export class SmartRecommendationsService {
 
 Базируй рекомендации на реальных знаниях о поведении рыб при разных погодных условиях.
 `;
+
+    // Проверяем доступность OpenAI API
+    if (!openaiApiKey) {
+      console.log('⚠️ OpenAI API key not available, using fallback recommendations');
+      return this.generateFallbackWeatherRecommendation(weatherData);
+    }
 
     try {
       const completion = await openai.chat.completions.create({
@@ -498,6 +512,54 @@ export class SmartRecommendationsService {
         { createdAt: 'desc' },
       ],
       take: limit,
+    });
+  }
+
+  /**
+   * Fallback рекомендации при недоступности OpenAI API
+   */
+  private generateFallbackWeatherRecommendation(weatherData: any): Promise<{
+    recommendation: string;
+    recommendedSpecies: FishSpecies[];
+    recommendedTechniques: FishingTechnique[];
+    confidenceLevel: number;
+    reasoning: string;
+  }> {
+    console.log('🔄 Используем fallback рекомендации (smart-recommendations-service)...');
+    
+    let species: FishSpecies[] = [];
+    let techniques: FishingTechnique[] = [];
+    let recommendation = '';
+    let confidence = 0.6;
+    
+    // Простые правила на основе температуры
+    if (weatherData.temperature >= 20) {
+      species = [FishSpecies.DORADO, FishSpecies.TUNA];
+      techniques = [FishingTechnique.TROLLING];
+      recommendation = 'При теплой воде хорошо идет дорадо на троллинг';
+    } else if (weatherData.temperature >= 15) {
+      species = [FishSpecies.SEABASS, FishSpecies.MACKEREL];
+      techniques = [FishingTechnique.JIGGING];
+      recommendation = 'При умеренной температуре попробуйте окуня на джиг';
+    } else {
+      species = [FishSpecies.COD, FishSpecies.FLOUNDER];
+      techniques = [FishingTechnique.BOTTOM_FISHING];
+      recommendation = 'В прохладной воде лучше донная рыбалка';
+    }
+
+    // Корректировка по ветру
+    if (weatherData.windSpeed > 10) {
+      techniques = [FishingTechnique.BOTTOM_FISHING];
+      recommendation += ' (сильный ветер - лучше донные снасти)';
+      confidence = 0.4;
+    }
+
+    return Promise.resolve({
+      recommendation,
+      recommendedSpecies: species,
+      recommendedTechniques: techniques,
+      confidenceLevel: confidence,
+      reasoning: 'Рекомендация основана на базовых правилах (OpenAI API недоступен)'
     });
   }
 }
