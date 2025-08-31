@@ -17,8 +17,16 @@ import {
 } from '@prisma/client';
 
 // Инициализация OpenAI клиента с оптимизированными настройками
+// Проверяем наличие API ключа
+const openaiApiKey = process.env.OPENAI_API_KEY;
+
+if (!openaiApiKey) {
+  console.warn('⚠️ OPENAI_API_KEY is not set in environment variables');
+  console.warn('💡 OpenAI service will use fallback recommendations only');
+}
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: openaiApiKey || 'sk-placeholder-for-build-only',
 });
 
 // Конфигурация для рыболовного контекста
@@ -121,6 +129,12 @@ export class SmartRecommendationsServiceV2 {
 ☁️ Облачность: ${Math.round(weatherData.cloudCover * 100)}%
 
 На основе этих условий дайте экспертную рекомендацию.`;
+
+    // Проверяем доступность OpenAI API
+    if (!openaiApiKey) {
+      console.log('⚠️ OpenAI API key not available, using fallback recommendations');
+      return this.generateFallbackRecommendation(weatherData);
+    }
 
     try {
       const response = await openai.chat.completions.create({
@@ -365,6 +379,15 @@ export class SmartRecommendationsServiceV2 {
     message: string;
     canMakeRequests: boolean;
   }> {
+    // Проверяем доступность API ключа
+    if (!openaiApiKey) {
+      return {
+        status: 'error',
+        message: 'OPENAI_API_KEY не установлен в переменных окружения',
+        canMakeRequests: false
+      };
+    }
+
     try {
       const testResponse = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
