@@ -13,7 +13,7 @@ import {
   CheckCircle, 
   XCircle, 
   AlertTriangle,
-  Touch,
+  Hand,
   Eye,
   Navigation,
   Zap,
@@ -231,7 +231,7 @@ function TestMobileOptimizationPage() {
                 </div>
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-1">
-                    {touchCapable ? <Touch className="w-5 h-5 text-green-500" /> : <Wifi className="w-5 h-5 text-gray-400" />}
+                    {touchCapable ? <Hand className="w-5 h-5 text-green-500" /> : <Wifi className="w-5 h-5 text-gray-400" />}
                     <span className="text-sm">{touchCapable ? 'Touch' : 'No Touch'}</span>
                   </div>
                   <p className="text-sm text-gray-600">Input Type</p>
