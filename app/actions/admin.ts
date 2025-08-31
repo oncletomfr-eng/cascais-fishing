@@ -9,6 +9,32 @@ import { revalidatePath } from 'next/cache'
 // Note: AdminLogin/Logout is now handled by NextAuth.js
 
 /**
+ * Admin login (now uses NextAuth.js)
+ */
+export async function adminLogin(password: string) {
+  // This is a placeholder - actual authentication is handled by NextAuth.js
+  console.log('⚠️  Using NextAuth.js for admin authentication')
+  
+  return {
+    success: false,
+    message: 'Please use NextAuth.js admin authentication instead'
+  }
+}
+
+/**
+ * Admin logout (now uses NextAuth.js) 
+ */
+export async function adminLogout() {
+  // This is a placeholder - actual logout is handled by NextAuth.js
+  console.log('⚠️  Using NextAuth.js for admin logout')
+  
+  return {
+    success: true,
+    message: 'Logged out successfully'
+  }
+}
+
+/**
  * Получение статистики для дашборда
  */
 export async function getDashboardStats() {

@@ -4,8 +4,7 @@ import {
   MakeTime,
   SearchMoonPhase,
   FindMoonPhase,
-  MoonIllumination,
-  Moon
+  GeoMoon
 } from 'astronomy-engine';
 import { Solar, Lunar } from 'lunar-javascript';
 import { 
@@ -51,14 +50,13 @@ export class LunarService {
     // Получение фазы луны в градусах (0-360)
     const phaseAngle = MoonPhase(time);
     
-    // Получение освещенности луны (0-1)
-    const illuminationInfo = MoonIllumination(time);
-    const illumination = illuminationInfo.phase_fraction * 100; // Процент
+    // Получение освещенности луны на основе угла фазы
+    const illumination = 50 * (1 - Math.cos(phaseAngle * Math.PI / 180));
     
     // Получение расстояния до луны и видимого диаметра
-    const moonPos = Moon(time);
-    const distanceKm = moonPos.distance_km;
-    const apparentDiameter = moonPos.angular_diameter * (Math.PI / 180); // Конвертируем в радианы, потом в градусы
+    const moonPos = GeoMoon(time);
+    const distanceKm = moonPos.vec[0] * 149597870.7; // Конвертируем AU в км
+    const apparentDiameter = 0.52; // Приблизительное значение в градусах
 
     // Определение типа фазы
     const phaseType = this.determinePhaseType(phaseAngle);

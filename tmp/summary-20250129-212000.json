@@ -1,4 +1,0 @@
-{
-  "summary": "Завершено полное развертывание проекта Cascais Fishing на 95%. Все основные этапы выполнены: GitHub push, Vercel import, Environment Variables, Supabase restore, Prisma migrations, custom domain setup. Домены cascaisfishing.com и www.cascaisfishing.com настроены в Vercel. Остается только настроить DNS записи CNAME на Dynadot (столкнулись с техническими трудностями в браузере, но предоставлена подробная инструкция пользователю).",
-  "current_status": "Проект практически готов к production. Инфраструктура полностью развернута, осталось только настроить DNS записи у провайдера домена Dynadot для активации custom domain. После этого сайт будет полностью функционировать по адресу cascaisfishing.com."
-}
