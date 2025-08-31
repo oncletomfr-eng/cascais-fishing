@@ -100,7 +100,7 @@ export default async function AdminLoginServerAction({
             <div className="text-xs text-gray-500 text-center">
               Password: qwerty123
               <br />
-              NextAuth v5 Server Action Solution
+              NextAuth v5 Fixed - v20250130-201500
             </div>
           </form>
         </CardContent>
