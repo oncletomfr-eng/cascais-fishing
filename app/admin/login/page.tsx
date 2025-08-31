@@ -23,24 +23,36 @@ export default async function AdminLoginServerAction({
     console.log('🔐 Server action authenticate called with password:', password)
     
     try {
-      console.log('📡 Attempting signIn...')
-      const result = await signIn("credentials", {
+      console.log('📡 Attempting signIn with redirectTo...')
+      await signIn("credentials", {
         password,
-        redirect: false
+        redirectTo: "/admin",
       })
-      
-      console.log('🔑 SignIn result:', result)
-      
-      if (result?.error) {
-        console.log('❌ Authentication failed:', result.error)
-        redirect('/admin/login?error=CredentialsSignin')
-      } else {
-        console.log('✅ Authentication successful! Redirecting to /admin')
-        redirect('/admin')
-      }
     } catch (error: any) {
-      console.log('❌ Exception during authentication:', error)
-      redirect('/admin/login?error=AuthError')
+      console.log('❌ Authentication error:', error)
+      console.log('🔍 Error type:', error?.type)
+      console.log('🔍 Error digest:', error?.digest)
+      
+      // В NextAuth v5 успешная аутентификация выбрасывает NEXT_REDIRECT
+      if (error?.digest?.includes('NEXT_REDIRECT')) {
+        console.log('✅ Authentication successful - redirect thrown')
+        throw error // Переброс для корректного редиректа
+      }
+      
+      // Обработка ошибок аутентификации
+      if (error instanceof AuthError) {
+        console.log('🚫 AuthError detected:', error.type)
+        switch (error.type) {
+          case 'CredentialsSignin':
+            redirect('/admin/login?error=CredentialsSignin')
+          default:
+            redirect('/admin/login?error=AuthError')
+        }
+      }
+      
+      // Для других ошибок
+      console.log('🔄 Redirecting to login with unknown error')
+      redirect('/admin/login?error=UnknownError')
     }
   }
 
@@ -51,7 +63,7 @@ export default async function AdminLoginServerAction({
           <div className="flex justify-center mb-4">
             <Shield className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Admin Access (Server Action)</CardTitle>
+          <CardTitle className="text-2xl">Admin Access (Fixed v2)</CardTitle>
           <p className="text-sm text-muted-foreground">
             Enter your password to access the admin panel
           </p>
@@ -73,7 +85,10 @@ export default async function AdminLoginServerAction({
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>
-                  {error === 'CredentialsSignin' ? 'Неверный пароль' : 'Ошибка аутентификации'}
+                  {error === 'CredentialsSignin' && 'Неверный пароль. Попробуйте: qwerty123'}
+                  {error === 'AuthError' && 'Ошибка аутентификации. Попробуйте еще раз.'}
+                  {error === 'UnknownError' && 'Неизвестная ошибка. Обратитесь к администратору.'}
+                  {!['CredentialsSignin', 'AuthError', 'UnknownError'].includes(error) && 'Произошла ошибка входа'}
                 </AlertDescription>
               </Alert>
             )}
