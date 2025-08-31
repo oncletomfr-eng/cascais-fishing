@@ -1,4 +1,5 @@
 import { MoonQuarterInfo, IlluminationInfo } from 'astronomy-engine';
+import type { LunarPhaseType } from '@prisma/client';
 
 /**
  * Основные типы для Морского Календаря
@@ -30,7 +31,7 @@ export interface LunarPhase {
   chineseLunarData?: ChineseLunarData;
 }
 
-export type LunarPhaseType = 'NEW_MOON' | 'WAXING_CRESCENT' | 'FIRST_QUARTER' | 'WAXING_GIBBOUS' | 'FULL_MOON' | 'WANING_GIBBOUS' | 'LAST_QUARTER' | 'WANING_CRESCENT';
+// LunarPhaseType теперь импортируется из @prisma/client
 
 export interface ChineseLunarData {
   /** Год в системе ствоы-ветви */

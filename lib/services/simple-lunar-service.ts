@@ -1,4 +1,5 @@
-import { LunarPhase, LunarPhaseType, LunarInfluence, FishActivityLevel } from '../types/marine-calendar';
+import { LunarPhase, LunarInfluence, FishActivityLevel } from '../types/marine-calendar';
+import type { LunarPhaseType } from '@prisma/client';
 
 /**
  * Упрощенный сервис для расчета лунных фаз (без внешних библиотек)

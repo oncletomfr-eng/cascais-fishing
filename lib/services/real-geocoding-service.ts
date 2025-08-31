@@ -35,13 +35,7 @@ export class RealGeocodingService {
 
   constructor() {
     this.apiKey = process.env.GOOGLE_MAPS_API_KEY || '';
-    this.client = new Client({
-      config: {
-        params: {
-          key: this.apiKey
-        }
-      }
-    });
+    this.client = new Client({});
   }
 
   /**
