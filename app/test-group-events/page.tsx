@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import TripsFeedComponent from '@/components/group-trips/TripsFeedComponent';
+import { TripsFeedComponent } from '@/components/group-trips/TripsFeedComponent';
 import QueryProvider from '@/components/providers/QueryProvider';
 import { useQuery } from '@tanstack/react-query';
 
