@@ -32,21 +32,40 @@ interface GeocodingResponse {
 export class RealGeocodingService {
   private client: Client | null = null;
   private apiKey: string;
+  private clientInitialized = false;
 
   constructor() {
     this.apiKey = process.env.GOOGLE_MAPS_API_KEY || '';
-    
-    // Only create client if API key is available
-    if (this.apiKey) {
-      try {
-        this.client = new Client({});
-      } catch (error) {
-        console.warn('🔧 Failed to initialize Google Maps client:', error);
-        this.client = null;
-      }
-    } else {
-      console.warn('🔧 Google Maps API key not configured, using fallback geocoding only');
+    console.log('🔧 RealGeocodingService constructor completed', { 
+      hasApiKey: !!this.apiKey,
+      keyLength: this.apiKey ? this.apiKey.length : 0
+    });
+    // НЕ создаем Client в конструкторе - только при необходимости
+  }
+
+  private getClient(): Client | null {
+    if (!this.apiKey) {
+      return null;
     }
+    
+    if (!this.clientInitialized) {
+      try {
+        // Создаем Client только с валидным API ключом
+        this.client = new Client({
+          config: {
+            key: this.apiKey
+          }
+        });
+        console.log('🔧 Google Maps Client initialized successfully');
+        this.clientInitialized = true;
+      } catch (error) {
+        console.error('🔧 Failed to initialize Google Maps client:', error);
+        this.client = null;
+        this.clientInitialized = true; // Помечаем как инициализированный чтобы не пытаться снова
+      }
+    }
+    
+    return this.client;
   }
 
   /**
@@ -54,12 +73,13 @@ export class RealGeocodingService {
    */
   async geocodeAddress(address: string): Promise<GeocodingResponse | null> {
     try {
-      if (!this.apiKey || !this.client) {
+      const client = this.getClient();
+      if (!client) {
         console.warn('🔧 Google Maps API не доступен, используем fallback геолокацию');
         return this.getFallbackGeocoding(address);
       }
 
-      const response = await this.client.geocode({
+      const response = await client.geocode({
         params: {
           address: address,
           key: this.apiKey,
@@ -98,12 +118,13 @@ export class RealGeocodingService {
    */
   async reverseGeocode(latitude: number, longitude: number): Promise<GeocodingResponse | null> {
     try {
-      if (!this.apiKey || !this.client) {
+      const client = this.getClient();
+      if (!client) {
         console.warn('🔧 Google Maps API не доступен, используем fallback геолокацию');
         return this.getFallbackReverseGeocoding(latitude, longitude);
       }
 
-      const response = await this.client.reverseGeocode({
+      const response = await client.reverseGeocode({
         params: {
           latlng: { lat: latitude, lng: longitude },
           key: this.apiKey,
@@ -206,7 +227,8 @@ export class RealGeocodingService {
    */
   async searchPlaces(query: string, location?: { lat: number; lng: number }, radius?: number): Promise<GeocodingResponse[]> {
     try {
-      if (!this.apiKey || !this.client) {
+      const client = this.getClient();
+      if (!client) {
         console.warn('🔧 Google Maps API не доступен, используем fallback поиск');
         return this.getFallbackPlaceSearch(query);
       }
@@ -225,7 +247,7 @@ export class RealGeocodingService {
         params.radius = radius;
       }
 
-      const response = await this.client.findPlaceFromText({
+      const response = await client.findPlaceFromText({
         params: {
           input: query,
           inputtype: 'textquery',
@@ -411,9 +433,10 @@ export class RealGeocodingService {
    */
   async validateApiKey(): Promise<boolean> {
     try {
-      if (!this.apiKey || !this.client) return false;
+      const client = this.getClient();
+      if (!client) return false;
 
-      const response = await this.client.geocode({
+      const response = await client.geocode({
         params: {
           address: 'Cascais, Portugal',
           key: this.apiKey
