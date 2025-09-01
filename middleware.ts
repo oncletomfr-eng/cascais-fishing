@@ -34,8 +34,7 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    // Temporarily disabled for auth debugging
-    // '/admin/:path*',
-    // '/api/admin/:path*'
+    '/admin/:path*',
+    '/api/admin/:path*'
   ]
 }

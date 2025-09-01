@@ -19,12 +19,14 @@ export default async function AdminLoginServerAction({
   async function authenticate(formData: FormData) {
     "use server"
     
+    const email = formData.get("email") as string
     const password = formData.get("password") as string
-    console.log('🔐 Server action authenticate called with password:', password)
+    console.log('🔐 Server action authenticate called with email:', email, 'password:', password)
     
     try {
       console.log('📡 Attempting signIn with standard NextAuth redirect...')
       await signIn("credentials", {
+        email,
         password,
         redirectTo: "/admin",
       })
@@ -71,6 +73,19 @@ export default async function AdminLoginServerAction({
         <CardContent>
           <form action={authenticate} className="space-y-4">
             <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="admin@cascaisfishing.com"
+                required
+                className="mt-1"
+                defaultValue="admin@cascaisfishing.com"
+              />
+            </div>
+            
+            <div>
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
@@ -98,9 +113,13 @@ export default async function AdminLoginServerAction({
             </Button>
             
             <div className="text-xs text-gray-500 text-center">
+              <strong>Admin Credentials:</strong>
+              <br />
+              Email: admin@cascaisfishing.com
+              <br />
               Password: qwerty123
               <br />
-              NextAuth v5 Fixed - v20250130-201500
+              <span className="text-gray-400">NextAuth v5 Fixed - v20250131-002000</span>
             </div>
           </form>
         </CardContent>

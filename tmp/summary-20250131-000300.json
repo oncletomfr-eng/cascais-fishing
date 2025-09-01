@@ -1,0 +1,4 @@
+{
+  "summary": "Успешно создан Google Cloud проект 'cascais-fishing', настроен OAuth consent screen (External audience) и получен новый GOOGLE_CLIENT_ID (506421224891-7oimjsqpl4kphcll80cn2nn5prcodkjj.apps.googleusercontent.com). Обновлен GOOGLE_CLIENT_ID в .env.local и Vercel environment variables. Выполнен деплой с новыми настройками. Остается получить GOOGLE_CLIENT_SECRET и настроить redirect URIs для завершения OAuth интеграции.",
+  "current_status": "Google OAuth setup частично завершен - проект создан, consent screen настроен, Client ID обновлен. Требуется GOOGLE_CLIENT_SECRET и настройка redirect URIs (https://cascaisfishing.com/api/auth/callback/google) для полной функциональности аутентификации."
+}

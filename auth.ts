@@ -29,11 +29,15 @@ const config: NextAuthConfig = {
     Credentials({
       name: "credentials",
       credentials: {
-        password: { label: "Password", type: "password" }
+        email: { label: "Email", type: "email", placeholder: "admin@cascaisfishing.com" },
+        password: { label: "Password", type: "password", placeholder: "Enter password" }
       },
       async authorize(credentials) {
+        console.log('🔐 Credentials authorize called:', credentials)
+        
         // Простая проверка для admin demo (НЕ для продакшена!)
-        if (credentials?.password === "qwerty123") {
+        if (credentials?.email === "admin@cascaisfishing.com" && credentials?.password === "qwerty123") {
+          console.log('✅ Admin credentials valid')
           return {
             id: "admin-user-id",
             name: "Admin User", 
@@ -41,6 +45,8 @@ const config: NextAuthConfig = {
             role: "ADMIN" as const
           }
         }
+        
+        console.log('❌ Invalid admin credentials')
         return null
       },
     }),
