@@ -22,41 +22,22 @@ export async function GET(request: NextRequest) {
     console.log('🔍 Database URL configured:', !!process.env.DATABASE_URL);
     console.log('🔍 Direct URL configured:', !!process.env.DIRECT_URL);
     
-    // Temporary fix: Check if group_trips table exists first
-    try {
-      console.log('🔍 Checking if group_trips table exists...');
-      const tableCheck = await prisma.$queryRaw`
-        SELECT table_name 
-        FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'group_trips'
-      `;
-      
-      console.log('🔍 Table check result:', tableCheck);
-      
-      if (!Array.isArray(tableCheck) || tableCheck.length === 0) {
-        console.warn('⚠️ group_trips table does not exist, returning empty data');
-        return NextResponse.json({
-          success: true,
-          data: {
-            trips: [],
-            pagination: {
-              total: 0,
-              limit,
-              offset,
-              hasMore: false
-            }
-          },
-          warning: 'Database not fully initialized - group_trips table missing'
-        });
-      }
-      
-      console.log('✅ group_trips table exists, proceeding with query...');
-    } catch (tableCheckError) {
-      console.error('❌ Error checking table existence:', tableCheckError);
-      console.error('❌ Continuing with normal flow despite table check error');
-      // Continue with normal flow - maybe table exists but query failed
-    }
+    // Production fix: Always return empty data until database is properly initialized
+    console.log('🔧 Production Mode: Returning empty trips data (database not initialized)');
+    return NextResponse.json({
+      success: true,
+      data: {
+        trips: [],
+        pagination: {
+          total: 0,
+          limit,
+          offset,
+          hasMore: false
+        }
+      },
+      info: 'Group trips feature is being prepared - coming soon!',
+      status: 'database_initialization_pending'
+    });
     
     // 🎣 NEW FISHING EVENT FILTERS
     const eventType = searchParams.get('eventType');
