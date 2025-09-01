@@ -23,7 +23,7 @@
         "id": 2,
         "title": "MUI X DataGrid Integration",
         "description": "Configure MUI X DataGrid for data-heavy components with server-side pagination, sorting, filtering, and export functionality",
-        "status": "in-progress",
+        "status": "done",
         "priority": "high",
         "phase": "Foundation",
         "estimatedHours": 32,
@@ -720,7 +720,7 @@
       "budget": "€50,000",
       "expectedROI": "€90k+/month revenue, 2160% ROI over 12 months",
       "created": "2025-09-01T14:28:28.045Z",
-      "updated": "2025-09-01T14:51:49.723Z"
+      "updated": "2025-09-01T15:00:28.374Z"
     }
   }
 }

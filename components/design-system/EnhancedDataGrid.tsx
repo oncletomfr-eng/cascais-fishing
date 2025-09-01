@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { 
-  DataGridPro,
+  DataGrid,
   GridColDef,
   GridPaginationModel,
   GridSortModel,
@@ -31,14 +31,14 @@ import {
   GridColumnVisibilityModel,
   GridDensity,
   gridClasses
-} from '@mui/x-data-grid-pro';
+} from '@mui/x-data-grid';
 import { Box, Typography, IconButton, Chip } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 import { RefreshCw, Filter, Download, Settings, Eye, BarChart3 } from 'lucide-react';
 import { useDesignSystem } from '@/lib/design-system';
 
 // Enhanced Theme Integration
-const StyledDataGridPro = styled(DataGridPro)(({ theme }) => ({
+const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   // Main Container Styling
   border: `1px solid ${theme.palette.divider}`,
   borderRadius: theme.shape.borderRadius,
@@ -417,7 +417,7 @@ export const EnhancedDataGrid = <T extends GridValidRowModel = GridRowModel>({
         </Box>
       )}
       
-      <StyledDataGridPro<T>
+      <StyledDataGrid<T>
         // Core Props
         columns={columns}
         rows={rows}

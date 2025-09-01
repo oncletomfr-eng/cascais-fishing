@@ -288,6 +288,5 @@ export const useThemeSwitcher = () => {
   }
 }
 
-// Export commonly used hooks and utilities
-export { useComponentTheme }
+// Export commonly used types
 export type { DesignSystemContextType, AccessibilityFeatures }

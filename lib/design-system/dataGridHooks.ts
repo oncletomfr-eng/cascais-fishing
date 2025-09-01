@@ -13,7 +13,7 @@ import {
   GridRowId,
   GridFilterItem,
   GridSortItem
-} from '@mui/x-data-grid-pro';
+} from '@mui/x-data-grid';
 
 // Server Response Types
 export interface ServerResponse<T = any> {

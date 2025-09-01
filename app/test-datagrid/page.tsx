@@ -30,7 +30,7 @@ import {
   GridPaginationModel,
   GridSortModel,
   GridFilterModel,
-} from '@mui/x-data-grid-pro';
+} from '@mui/x-data-grid';
 import { EnhancedDataGrid, StatusChip } from '@/components/design-system/EnhancedDataGrid';
 import { EnhancedThemeProvider } from '@/components/design-system/EnhancedThemeProvider';
 import { useServerDataSource, createMockFetcher, useClientData } from '@/lib/design-system/dataGridHooks';
