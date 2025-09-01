@@ -18,6 +18,36 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
     
+    // Temporary fix: Check if group_trips table exists first
+    try {
+      const tableCheck = await prisma.$queryRaw`
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'group_trips'
+      `;
+      
+      if (!Array.isArray(tableCheck) || tableCheck.length === 0) {
+        console.warn('⚠️ group_trips table does not exist, returning empty data');
+        return NextResponse.json({
+          success: true,
+          data: {
+            trips: [],
+            pagination: {
+              total: 0,
+              limit,
+              offset,
+              hasMore: false
+            }
+          },
+          warning: 'Database not fully initialized - group_trips table missing'
+        });
+      }
+    } catch (tableCheckError) {
+      console.error('❌ Error checking table existence:', tableCheckError);
+      // Continue with normal flow - maybe table exists but query failed
+    }
+    
     // 🎣 NEW FISHING EVENT FILTERS
     const eventType = searchParams.get('eventType');
     const skillLevel = searchParams.get('skillLevel');
