@@ -47,7 +47,8 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    '/admin/:path*',
-    // Note: API routes are filtered out in middleware logic, not matcher
+    // DISABLED - NextAuth session not properly available in middleware
+    // Need to investigate session handling in Edge Runtime
+    // '/admin/:path*',
   ]
 }
