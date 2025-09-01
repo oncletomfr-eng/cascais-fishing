@@ -527,9 +527,13 @@ export function AccessibilityControls({
 // Main accessibility provider
 export function AccessibilityProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<AccessibilitySettings>(() => {
-    // Check for system preferences
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const highContrast = window.matchMedia('(prefers-contrast: high)').matches;
+    // Check for system preferences (SSR-safe)
+    const reducedMotion = typeof window !== 'undefined' 
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+      : DEFAULT_SETTINGS.reducedMotion;
+    const highContrast = typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-contrast: high)').matches
+      : DEFAULT_SETTINGS.highContrast;
     
     return {
       ...DEFAULT_SETTINGS,
@@ -618,22 +622,24 @@ export function checkWCAGCompliance(element: HTMLElement): {
     }
   });
 
-  // Check for sufficient color contrast (simplified check)
-  const buttons = element.querySelectorAll('button');
-  buttons.forEach(button => {
-    const styles = window.getComputedStyle(button);
-    const bgColor = styles.backgroundColor;
-    const textColor = styles.color;
-    
-    // This is a simplified check - a real implementation would calculate actual contrast ratios
-    if (bgColor === textColor) {
-      issues.push({
-        type: 'low-contrast',
-        message: 'Insufficient color contrast',
-        severity: 'medium'
-      });
-    }
-  });
+  // Check for sufficient color contrast (simplified check) - SSR-safe
+  if (typeof window !== 'undefined') {
+    const buttons = element.querySelectorAll('button');
+    buttons.forEach(button => {
+      const styles = window.getComputedStyle(button);
+      const bgColor = styles.backgroundColor;
+      const textColor = styles.color;
+      
+      // This is a simplified check - a real implementation would calculate actual contrast ratios
+      if (bgColor === textColor) {
+        issues.push({
+          type: 'low-contrast',
+          message: 'Insufficient color contrast',
+          severity: 'medium'
+        });
+      }
+    });
+  }
 
   const score = Math.max(0, 100 - (issues.length * 10));
   return { score, issues };

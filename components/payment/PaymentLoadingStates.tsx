@@ -529,7 +529,9 @@ export function PaymentError({
 
 // Network status component
 export function NetworkStatus() {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isOnline, setIsOnline] = useState(() => 
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
   const theme = useTheme();
 
   useEffect(() => {

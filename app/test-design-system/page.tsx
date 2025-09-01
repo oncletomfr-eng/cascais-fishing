@@ -9,7 +9,7 @@ import React, { useState } from 'react'
 import { 
   useDesignSystem, 
   useThemeSwitcher,
-  EnhancedButton as Button
+  Button
 } from '@/lib/design-system'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
