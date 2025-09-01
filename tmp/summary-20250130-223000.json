@@ -1,4 +1,0 @@
-{
-  "summary": "Найдена точная причина OAuth ошибки 'invalid_client': GOOGLE_CLIENT_ID отсутствует в Vercel Environment Variables. Значение: 268443624329-0tningcfnejjev0fngg1uh9pct123hpp.apps.googleusercontent.com. React компонент SmartRecommendations работает на live сайте, но OAuth аутентификация требует настройки переменных окружения в Vercel.",
-  "current_status": "React Frontend полностью исправлен ✅. Определена точная причина OAuth проблем - нужно добавить GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, DATABASE_URL и NEXTAUTH_URL в Vercel Environment Variables для исправления 'client_id=undefined' ошибки."
-}

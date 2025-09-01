@@ -12,13 +12,38 @@ export async function GET() {
     // Проверка подключения к базе данных
     let dbStatus = 'unknown';
     let dbLatency = 0;
+    let dbError = '';
+    let dbDetails = {};
+    
     try {
       const dbStartTime = Date.now();
       await prisma.$queryRaw`SELECT 1`;
       dbLatency = Date.now() - dbStartTime;
       dbStatus = 'connected';
+      
+      // Дополнительная проверка - проверим что таблицы существуют
+      const tableCount = await prisma.$queryRaw`
+        SELECT COUNT(*) as count 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public'
+      `;
+      
+      dbDetails = {
+        latency: `${dbLatency}ms`,
+        tablesCount: Number((tableCount as any)[0]?.count || 0),
+        connectionUrl: process.env.DATABASE_URL ? 
+          process.env.DATABASE_URL.replace(/:[^:@]*@/, ':***@') : 'not set'
+      };
+      
     } catch (error) {
       dbStatus = 'error';
+      dbError = error instanceof Error ? error.message : String(error);
+      dbDetails = {
+        error: dbError,
+        connectionUrl: process.env.DATABASE_URL ? 
+          process.env.DATABASE_URL.replace(/:[^:@]*@/, ':***@') : 'not set',
+        suggestion: 'Check DATABASE_URL and network connectivity'
+      };
       console.error('Database health check failed:', error);
     }
     
@@ -57,7 +82,7 @@ export async function GET() {
       services: {
         database: {
           status: dbStatus,
-          latency: `${dbLatency}ms`
+          ...dbDetails
         },
         configuration: {
           status: configValidation.isValid ? 'valid' : 'invalid',
