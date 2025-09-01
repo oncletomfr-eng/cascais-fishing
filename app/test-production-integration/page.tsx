@@ -136,59 +136,58 @@ function TestProductionIntegrationPage() {
       });
     }
 
-    // Test 2: WebSocket Connection (Production Check)
+    // Test 2: WebSocket Connection 
     try {
-      // Check if we're in production and WebSocket is expected to be disabled
-      const isProduction = window.location.hostname.includes('cascaisfishing.com');
+      // Try to connect to WebSocket in both dev and production
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${wsProtocol}//${window.location.host}/api/group-trips/ws`;
       
-      if (isProduction) {
-        // In production, WebSocket is intentionally disabled for stability
-        results.push({
-          name: 'WebSocket Connection',
-          status: 'warning',
-          message: 'WebSocket отключен в production для стабильности (это нормально)',
-          details: { 
-            reason: 'next-ws disabled in production build',
-            status: 'intentionally_disabled'
+      const wsTest = new WebSocket(wsUrl);
+      let wsResolved = false;
+
+      // Test WebSocket connection
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          if (!wsResolved) {
+            wsTest.close();
+            reject(new Error('WebSocket connection timeout after 5 seconds'));
           }
-        });
-      } else {
-        // In development, try to connect
-        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${wsProtocol}//${window.location.host}/api/group-trips/ws`;
-        
-        await new Promise((resolve, reject) => {
-          const ws = new WebSocket(wsUrl);
-          const timeout = setTimeout(() => {
-            ws.close();
-            reject(new Error('WebSocket connection timeout'));
-          }, 5000);
+        }, 5000);
 
-          ws.onopen = () => {
-            clearTimeout(timeout);
-            ws.close();
-            resolve(true);
-          };
+        wsTest.onopen = () => {
+          wsResolved = true;
+          clearTimeout(timeout);
+          results.push({
+            name: 'WebSocket Connection',
+            status: 'success',
+            message: 'WebSocket подключение установлено успешно',
+            details: { url: wsUrl, status: 'connected' }
+          });
+          wsTest.close();
+          resolve(true);
+        };
 
-          ws.onerror = () => {
-            clearTimeout(timeout);
-            reject(new Error('WebSocket connection failed'));
-          };
-        });
-
+        wsTest.onerror = (error) => {
+          wsResolved = true;
+          clearTimeout(timeout);
+          results.push({
+            name: 'WebSocket Connection',
+            status: 'error',
+            message: 'WebSocket подключение не удалось',
+            details: { url: wsUrl, error: error.toString() }
+          });
+          reject(error);
+        };
+      });
+    } catch (error) {
+      if (!results.some(r => r.name === 'WebSocket Connection')) {
         results.push({
           name: 'WebSocket Connection',
-          status: 'success',
-          message: 'WebSocket соединение успешно установлено (development)',
-          details: { url: wsUrl }
+          status: 'error', 
+          message: 'Ошибка подключения WebSocket',
+          details: { error: error instanceof Error ? error.message : String(error) }
         });
       }
-    } catch (error) {
-      results.push({
-        name: 'WebSocket Connection',
-        status: 'error',
-        message: `WebSocket ошибка: ${(error as Error).message}`
-      });
     }
 
     // Test 3: Stream Chat Configuration
@@ -197,7 +196,8 @@ function TestProductionIntegrationPage() {
       const isValidKey = hasApiKey && 
         process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY !== 'demo-key' && 
         process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY !== 'demo-key-please-configure' &&
-        process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY?.length > 10;
+        process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY !== undefined &&
+        process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY.length > 10;
       
       if (isValidKey) {
         // Test actual Stream Chat connectivity
