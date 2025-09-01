@@ -164,18 +164,49 @@ function TestProductionIntegrationPage() {
     // Test 3: Stream Chat Configuration
     try {
       const hasApiKey = !!process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY;
+      const isValidKey = hasApiKey && 
+        process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY !== 'demo-key' && 
+        process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY !== 'demo-key-please-configure' &&
+        process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY?.length > 10;
       
-      if (hasApiKey) {
-        results.push({
-          name: 'Stream Chat Config',
-          status: 'success',
-          message: 'Stream Chat API ключ настроен'
-        });
+      if (isValidKey) {
+        // Test actual Stream Chat connectivity
+        try {
+          const testResponse = await fetch('/api/chat/test-connection');
+          if (testResponse.ok) {
+            const testData = await testResponse.json();
+            results.push({
+              name: 'Stream Chat Config',
+              status: 'success',
+              message: 'Stream Chat API ключ настроен и работает',
+              details: testData
+            });
+          } else {
+            results.push({
+              name: 'Stream Chat Config',
+              status: 'warning',
+              message: 'API ключ настроен, но соединение недоступно',
+              details: { keyConfigured: true, connectionFailed: true }
+            });
+          }
+        } catch (testError) {
+          results.push({
+            name: 'Stream Chat Config',
+            status: 'warning',
+            message: 'API ключ настроен, но тест соединения не прошел',
+            details: { keyConfigured: true, testError: (testError as Error).message }
+          });
+        }
       } else {
         results.push({
           name: 'Stream Chat Config',
           status: 'warning',
-          message: 'Stream Chat API ключ не настроен (необходимо для production)'
+          message: 'Stream Chat не настроен (чат функции недоступны в production)',
+          details: {
+            hasKey: hasApiKey,
+            keyLength: process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY?.length || 0,
+            recommendation: 'Настройте реальный Stream Chat API key для полной функциональности чата'
+          }
         });
       }
     } catch (error) {
