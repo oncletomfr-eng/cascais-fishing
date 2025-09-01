@@ -574,7 +574,7 @@ function CustomMessageInput({
         source: 'captain' as const
       },
       catch_photo: {
-        imageUrl: '/placeholder-fish.jpg',
+        imageUrl: '/atlantic-fish-catch.png',
         fishSpecies: 'Дорада',
         fishSize: 35,
         fishWeight: 1.2,

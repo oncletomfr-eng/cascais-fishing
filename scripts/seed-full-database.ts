@@ -11,7 +11,7 @@ import { faker } from '@faker-js/faker';
 const prisma = new PrismaClient();
 
 // Устанавливаем locale для португальских данных
-faker.setLocale('pt_BR'); // Португальский для Cascais
+faker.locale = 'pt_BR'; // Португальский для Cascais
 
 async function main() {
   console.log('🎣 Starting full database seeding...');

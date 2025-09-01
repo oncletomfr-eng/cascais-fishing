@@ -1,6 +1,0 @@
-# Google OAuth Configuration - ⚠️ ПОДДЕЛЬНЫЕ КЛЮЧИ! ЗАМЕНИТЕ НА НАСТОЯЩИЕ
-# 1. Откройте https://console.developers.google.com/
-# 2. Создайте OAuth 2.0 Client ID  
-# 3. Скопируйте настоящие ключи сюда вместо поддельных
-GOOGLE_CLIENT_ID="268443624329-abc123def456.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="GOCSPX-1234567890abcdefghijklmnop"
