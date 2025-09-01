@@ -7,24 +7,26 @@ export default auth((req) => {
   const isOnAdminPage = nextUrl.pathname.startsWith('/admin')
   const isOnLoginPage = nextUrl.pathname === '/admin/login'
 
-  console.log('Middleware - path:', nextUrl.pathname, 'isLoggedIn:', isLoggedIn)
+  console.log('🔍 Middleware Debug:', {
+    path: nextUrl.pathname,
+    isLoggedIn,
+    user: req.auth?.user ? 'EXISTS' : 'NULL',
+    userEmail: req.auth?.user?.email,
+    userRole: req.auth?.user?.role
+  })
 
-  if (isOnAdminPage) {
-    if (isOnLoginPage) {
-      // Redirect authenticated users away from login page
-      if (isLoggedIn) {
-        console.log('Authenticated user on login page, redirecting to /admin')
-        return NextResponse.redirect(new URL('/admin', nextUrl))
-      }
-      // Allow unauthenticated users to access login page
-      return NextResponse.next()
-    }
-    
-    // Require authentication for other admin pages
+  if (isOnAdminPage && !isOnLoginPage) {
+    // Only check authentication for non-login admin pages
     if (!isLoggedIn) {
-      console.log('Unauthenticated user on admin page, redirecting to login')
+      console.log('❌ Unauthenticated user on admin page, redirecting to login')
       return NextResponse.redirect(new URL('/admin/login', nextUrl))
     }
+    console.log('✅ Authenticated user accessing admin page')
+  }
+
+  if (isOnLoginPage && isLoggedIn) {
+    console.log('✅ Authenticated user on login page, redirecting to /admin')
+    return NextResponse.redirect(new URL('/admin', nextUrl))
   }
 
   return NextResponse.next()
@@ -32,8 +34,8 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    '/admin/:path*',
-    // Optionally protect API routes
-    '/api/admin/:path*'
+    // Temporarily disabled for auth debugging
+    // '/admin/:path*',
+    // '/api/admin/:path*'
   ]
 }

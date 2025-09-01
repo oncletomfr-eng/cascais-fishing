@@ -23,7 +23,7 @@ export default async function AdminLoginServerAction({
     console.log('🔐 Server action authenticate called with password:', password)
     
     try {
-      console.log('📡 Attempting signIn with redirectTo...')
+      console.log('📡 Attempting signIn with standard NextAuth redirect...')
       await signIn("credentials", {
         password,
         redirectTo: "/admin",
