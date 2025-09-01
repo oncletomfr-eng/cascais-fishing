@@ -14,11 +14,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import { 
   BarChart3, Users, TrendingUp, Eye, Settings,
-  Sparkles, Trophy, Target, RefreshCw, Star
+  Sparkles, Trophy, Target, RefreshCw, Star, Clock
 } from 'lucide-react'
 import ProfileStatisticsOverview from '@/components/analytics/ProfileStatisticsOverview'
 import BookingPerformanceAnalytics from '@/components/analytics/BookingPerformanceAnalytics'
 import ReviewAnalytics from '@/components/analytics/ReviewAnalytics'
+import ActivityTimeline from '@/components/analytics/ActivityTimeline'
 import { ProfileAnalyticsDashboard } from '@/components/profiles/ProfileAnalyticsDashboard'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
@@ -30,6 +31,9 @@ interface DemoSettings {
   showBookingProjections: boolean
   includeSentiment: boolean
   includeImpact: boolean
+  includeHeatmap: boolean
+  includePatterns: boolean
+  activityPeriod: 'week' | 'month' | 'quarter' | 'year' | 'all'
   userId?: string
 }
 
@@ -42,6 +46,9 @@ export default function AnalyticsDashboardTestPage() {
     showBookingProjections: true,
     includeSentiment: true,
     includeImpact: true,
+    includeHeatmap: true,
+    includePatterns: true,
+    activityPeriod: 'month',
     userId: session?.user?.id
   })
 
@@ -82,6 +89,12 @@ export default function AnalyticsDashboardTestPage() {
       color: "text-green-600"
     },
     {
+      title: "Activity Timeline Visualization",
+      description: "Interactive activity timeline with user journey milestones, engagement patterns, activity heatmaps, and exportable reports",
+      status: "✅ Task 13.4 Complete",
+      color: "text-green-600"
+    },
+    {
       title: "Performance Indicators",
       description: "Smart categorization of performance levels (Excellent, Good, Average, Needs Attention)",
       status: "✅ Implemented",
@@ -111,7 +124,7 @@ export default function AnalyticsDashboardTestPage() {
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               Comprehensive analytics suite with profile statistics, booking performance analysis, 
-              review sentiment analysis, quality scoring, improvement insights, and predictive analytics.
+              review sentiment analysis, activity timeline visualization, quality scoring, improvement insights, and predictive analytics.
             </p>
           </motion.div>
         </div>
@@ -124,9 +137,9 @@ export default function AnalyticsDashboardTestPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           {[
-            { label: 'Analytics Components', value: '3', icon: BarChart3, color: 'text-blue-600' },
-            { label: 'Chart Types', value: '12+', icon: Target, color: 'text-green-600' },
-            { label: 'Analytics Features', value: '20+', icon: TrendingUp, color: 'text-purple-600' },
+            { label: 'Analytics Components', value: '4', icon: BarChart3, color: 'text-blue-600' },
+            { label: 'Chart Types', value: '15+', icon: Target, color: 'text-green-600' },
+            { label: 'Analytics Features', value: '25+', icon: TrendingUp, color: 'text-purple-600' },
             { label: 'Insight Categories', value: '7', icon: Trophy, color: 'text-yellow-600' }
           ].map((stat, index) => {
             const Icon = stat.icon
@@ -144,7 +157,7 @@ export default function AnalyticsDashboardTestPage() {
 
         {/* Main content */}
         <Tabs defaultValue="enhanced" className="space-y-6">
-          <TabsList className="grid w-full max-w-5xl mx-auto grid-cols-6">
+          <TabsList className="grid w-full max-w-6xl mx-auto grid-cols-7">
             <TabsTrigger value="enhanced" className="flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
               Profile
@@ -156,6 +169,10 @@ export default function AnalyticsDashboardTestPage() {
             <TabsTrigger value="review" className="flex items-center gap-2">
               <Star className="w-4 h-4" />
               Review
+            </TabsTrigger>
+            <TabsTrigger value="activity" className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              Activity
             </TabsTrigger>
             <TabsTrigger value="original" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
@@ -331,6 +348,65 @@ export default function AnalyticsDashboardTestPage() {
                 period="month"
                 includeSentiment={demoSettings.includeSentiment}
                 includeImpact={demoSettings.includeImpact}
+                autoRefresh={demoSettings.autoRefresh}
+              />
+            </motion.div>
+          </TabsContent>
+
+          {/* Activity Timeline Tab */}
+          <TabsContent value="activity">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Activity Timeline Visualization</h2>
+                <p className="text-muted-foreground mb-4">
+                  Task 13.4 implementation with interactive activity timeline showing user journey, milestones, 
+                  engagement patterns, and activity intensity heatmaps.
+                </p>
+                
+                {/* Settings toggles */}
+                <div className="flex flex-wrap gap-4 p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="activityHeatmap"
+                      checked={demoSettings.includeHeatmap}
+                      onCheckedChange={(checked) => updateSetting('includeHeatmap', checked)}
+                    />
+                    <label htmlFor="activityHeatmap" className="text-sm font-medium">
+                      Activity Heatmap
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="activityPatterns"
+                      checked={demoSettings.includePatterns}
+                      onCheckedChange={(checked) => updateSetting('includePatterns', checked)}
+                    />
+                    <label htmlFor="activityPatterns" className="text-sm font-medium">
+                      Activity Patterns
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="activityAutoRefresh"
+                      checked={demoSettings.autoRefresh}
+                      onCheckedChange={(checked) => updateSetting('autoRefresh', checked)}
+                    />
+                    <label htmlFor="activityAutoRefresh" className="text-sm font-medium">
+                      Auto Refresh (1min)
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <ActivityTimeline 
+                userId={demoSettings.userId}
+                period={demoSettings.activityPeriod}
+                includeHeatmap={demoSettings.includeHeatmap}
+                includePatterns={demoSettings.includePatterns}
                 autoRefresh={demoSettings.autoRefresh}
               />
             </motion.div>
