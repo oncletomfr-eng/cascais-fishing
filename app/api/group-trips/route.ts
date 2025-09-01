@@ -22,8 +22,12 @@ export async function GET(request: NextRequest) {
     console.log('🔍 Database URL configured:', !!process.env.DATABASE_URL);
     console.log('🔍 Direct URL configured:', !!process.env.DIRECT_URL);
     
-    // Real database connection - check and create tables if needed
+    // Real database connection - simplified approach for debugging
     try {
+      console.log('🔍 Testing database connection...');
+      await prisma.$queryRaw`SELECT 1 as test`;
+      console.log('✅ Database connection working');
+      
       console.log('🔍 Checking if group_trips table exists...');
       const tableCheck = await prisma.$queryRaw`
         SELECT table_name 
@@ -35,6 +39,7 @@ export async function GET(request: NextRequest) {
       console.log('🔍 Table check result:', tableCheck);
       
       if (!Array.isArray(tableCheck) || tableCheck.length === 0) {
+        console.log('🔨 Table does not exist - creating schema...');
         // Create ENUM types safely using Prisma template literals (following documentation)
         console.log('🔨 Creating ENUM types safely...');
         try {
@@ -276,9 +281,11 @@ export async function GET(request: NextRequest) {
         `;
         
         console.log('✅ Tables, ENUM types, and realistic data created successfully');
+      } else {
+        console.log('✅ group_trips table already exists, skipping creation');
       }
       
-      console.log('✅ group_trips table exists, proceeding with real query...');
+      console.log('✅ Database ready, proceeding with real query...');
     } catch (tableError) {
       console.error('❌ Error with table setup:', tableError);
       throw tableError;
