@@ -13,10 +13,11 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Trophy, Users, TrendingUp, Target, 
-  Sparkles, Crown, Award, Medal, Zap
+  Sparkles, Crown, Award, Medal, Zap, Star
 } from 'lucide-react'
 import AchievementGrid from '@/components/achievements/AchievementGrid'
 import ProgressDemo from '@/components/achievements/ProgressDemo'
+import CelebrationDemo from '@/components/achievements/CelebrationDemo'
 import { useAchievements, getAchievementIcon } from '@/lib/hooks/useAchievements'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
@@ -416,7 +417,7 @@ export default function TestAchievementSystemPage() {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="grid" className="space-y-6">
-        <TabsList className="grid w-full max-w-xl mx-auto grid-cols-4">
+        <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-5">
           <TabsTrigger value="grid" className="gap-2">
             <Trophy className="w-4 h-4" />
             Сетка
@@ -428,6 +429,10 @@ export default function TestAchievementSystemPage() {
           <TabsTrigger value="progress" className="gap-2">
             <Zap className="w-4 h-4" />
             Прогресс
+          </TabsTrigger>
+          <TabsTrigger value="celebration" className="gap-2">
+            <Star className="w-4 h-4" />
+            Празднование
           </TabsTrigger>
           <TabsTrigger value="info" className="gap-2">
             <Sparkles className="w-4 h-4" />
@@ -481,6 +486,17 @@ export default function TestAchievementSystemPage() {
             transition={{ duration: 0.5 }}
           >
             <ProgressDemo />
+          </motion.div>
+        </TabsContent>
+
+        {/* Celebration Tab - Achievement Celebration Effects Demo */}
+        <TabsContent value="celebration" className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <CelebrationDemo />
           </motion.div>
         </TabsContent>
 
