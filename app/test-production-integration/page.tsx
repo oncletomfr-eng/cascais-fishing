@@ -84,25 +84,55 @@ function TestProductionIntegrationPage() {
     setIsRunningTests(true);
     const results: TestResult[] = [];
 
-    // Test 1: API Endpoints
+    // Test 1: API Endpoints (with cache bypass)
     try {
-      const response = await fetch('/api/group-trips');
+      const timestamp = Date.now();
+      const response = await fetch(`/api/group-trips?limit=3&_cache=${timestamp}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      });
+      
+      console.log('🔍 Group Trips API Response Status:', response.status);
+      
+      const responseText = await response.text();
+      console.log('🔍 Group Trips API Response:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
+      }
+      
       if (response.ok) {
-        const data = await response.json();
-        results.push({
-          name: 'Group Trips API',
-          status: 'success',
-          message: `API работает. Загружено ${data.data?.trips?.length || 0} поездок`,
-          details: data
-        });
+        if (data.success) {
+          results.push({
+            name: 'Group Trips API',
+            status: 'success',
+            message: `API работает. Загружено ${data.data?.trips?.length || 0} поездок${data.warning ? ' (с предупреждением)' : ''}`,
+            details: data
+          });
+        } else {
+          results.push({
+            name: 'Group Trips API',
+            status: 'warning',
+            message: data.warning || data.error || 'API работает но с предупреждениями',
+            details: data
+          });
+        }
       } else {
-        throw new Error(`HTTP ${response.status}`);
+        throw new Error(`HTTP ${response.status}: ${data.error || responseText}`);
       }
     } catch (error) {
+      console.error('❌ Group Trips API Test Error:', error);
       results.push({
         name: 'Group Trips API',
         status: 'error',
-        message: `Ошибка API: ${(error as Error).message}`
+        message: `Ошибка API: ${(error as Error).message}`,
+        details: { error: error instanceof Error ? error.message : String(error) }
       });
     }
 
@@ -172,21 +202,28 @@ function TestProductionIntegrationPage() {
       if (isValidKey) {
         // Test actual Stream Chat connectivity
         try {
-          const testResponse = await fetch('/api/chat/test-connection');
-          if (testResponse.ok) {
-            const testData = await testResponse.json();
+          const testResponse = await fetch(`/api/chat/test-connection?_cache=${Date.now()}`, {
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate'
+            }
+          });
+          
+          const testData = await testResponse.json();
+          
+          if (testResponse.ok && testData.success) {
             results.push({
               name: 'Stream Chat Config',
               status: 'success',
-              message: 'Stream Chat API ключ настроен и работает',
+              message: `Stream Chat настроен и работает (${testData.keyType})`,
               details: testData
             });
           } else {
             results.push({
               name: 'Stream Chat Config',
               status: 'warning',
-              message: 'API ключ настроен, но соединение недоступно',
-              details: { keyConfigured: true, connectionFailed: true }
+              message: testData.error || 'API ключ настроен, но соединение недоступно',
+              details: testData
             });
           }
         } catch (testError) {
