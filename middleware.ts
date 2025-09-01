@@ -15,27 +15,39 @@ export default auth((req) => {
     userRole: req.auth?.user?.role
   })
 
-  if (isOnAdminPage && !isOnLoginPage) {
-    // Only check authentication for non-login admin pages
+  // Skip middleware for API routes (including NextAuth API routes)
+  if (nextUrl.pathname.startsWith('/api/')) {
+    console.log('🚀 Skipping middleware for API route')
+    return NextResponse.next()
+  }
+
+  // Allow access to login page for unauthenticated users
+  if (isOnLoginPage) {
+    if (isLoggedIn) {
+      console.log('✅ Authenticated user on login page, redirecting to /admin')
+      return NextResponse.redirect(new URL('/admin', nextUrl))
+    }
+    console.log('🔓 Allowing unauthenticated access to login page')
+    return NextResponse.next()
+  }
+
+  // Protect all other admin pages
+  if (isOnAdminPage) {
     if (!isLoggedIn) {
       console.log('❌ Unauthenticated user on admin page, redirecting to login')
       return NextResponse.redirect(new URL('/admin/login', nextUrl))
     }
     console.log('✅ Authenticated user accessing admin page')
+    return NextResponse.next()
   }
 
-  if (isOnLoginPage && isLoggedIn) {
-    console.log('✅ Authenticated user on login page, redirecting to /admin')
-    return NextResponse.redirect(new URL('/admin', nextUrl))
-  }
-
+  // Allow all other pages
   return NextResponse.next()
 })
 
 export const config = {
   matcher: [
-    // Temporarily disabled - investigating infinite redirect
-    // '/admin/:path*',
-    // '/api/admin/:path*'
+    '/admin/:path*',
+    // Note: API routes are filtered out in middleware logic, not matcher
   ]
 }
