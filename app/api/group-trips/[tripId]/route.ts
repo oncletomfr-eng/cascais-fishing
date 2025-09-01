@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { transformTripToDisplay } from '@/lib/utils/group-trips-utils';
 import { BookingStatus } from '@prisma/client';
-import { broadcastGroupTripUpdate } from '../ws/route';
+// WebSocket broadcast temporarily disabled for production compatibility
+// import { broadcastGroupTripUpdate } from '../ws/route';
 
 export async function GET(
   request: NextRequest,
@@ -167,7 +168,8 @@ export async function PUT(
         status = 'almost_full';
       }
       
-      await broadcastGroupTripUpdate({
+      // WebSocket broadcast temporarily disabled
+      /* await broadcastGroupTripUpdate({
         tripId: updatedTrip.id,
         type: 'status_changed',
         currentParticipants,
@@ -175,7 +177,7 @@ export async function PUT(
         timestamp: new Date(),
         spotsRemaining,
         maxParticipants: updatedTrip.maxParticipants
-      });
+      }); */
       console.log('📡 Broadcasted trip update:', updatedTrip.id);
     } catch (wsError) {
       console.error('❌ WebSocket broadcast failed:', wsError);
@@ -301,8 +303,8 @@ export async function POST(
         status = 'almost_full';
       }
 
-      // Отправляем WebSocket обновление
-      try {
+      // WebSocket broadcast temporarily disabled
+      /* try {
         await broadcastGroupTripUpdate({
           tripId: updatedTrip.id,
           type: 'participant_joined',
@@ -316,7 +318,7 @@ export async function POST(
         console.log('📡 Broadcasted participant joined:', updatedTrip.id, contactName);
       } catch (wsError) {
         console.error('❌ WebSocket broadcast failed:', wsError);
-      }
+      } */
 
       const displayTrip = transformTripToDisplay(updatedTrip);
       

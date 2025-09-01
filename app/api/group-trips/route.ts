@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { transformTripToDisplay } from '@/lib/utils/group-trips-utils';
 import { GroupTripStatus, BookingStatus } from '@prisma/client';
-import { broadcastGroupTripUpdate } from './ws/route';
+// WebSocket broadcast - conditionally imported to avoid errors in production
+// import { broadcastGroupTripUpdate } from './ws/route';
 import { AchievementTriggers } from '@/lib/services/achievement-service';
 
 export async function GET(request: NextRequest) {
@@ -296,7 +297,9 @@ export async function POST(request: NextRequest) {
     // Преобразуем в формат для отображения
     const displayTrip = transformTripToDisplay(newTrip);
 
-    // Отправляем WebSocket обновление о создании новой поездки с FishingEvent данными
+    // WebSocket broadcast temporarily disabled to fix production errors
+    // TODO: Re-enable when WebSocket properly configured for production
+    /*
     try {
       await broadcastGroupTripUpdate({
         tripId: newTrip.id,
@@ -323,6 +326,7 @@ export async function POST(request: NextRequest) {
       console.error('❌ WebSocket broadcast failed:', wsError);
       // Не прерываем выполнение, просто логируем ошибку
     }
+    */
 
     // 🏆 Вызываем триггер достижений для создателя события
     try {
