@@ -254,6 +254,69 @@ export const COMPONENT_SIZES = {
   }
 } as const
 
+// Payment system components
+export { default as PaymentMethodSelector } from '../../components/payment/PaymentMethodSelector';
+export type { PaymentMethodType, PaymentMethod } from '../../components/payment/PaymentMethodSelector';
+
+export { default as PriceDisplay } from '../../components/payment/PriceDisplay';
+export type { 
+  PriceBreakdown, 
+  TaxRate, 
+  ProcessingFee 
+} from '../../components/payment/PriceDisplay';
+
+export { 
+  default as PaymentValidation,
+  ValidatedField,
+  VALIDATION_RULES,
+  useFieldValidation 
+} from '../../components/payment/PaymentValidation';
+export type { 
+  ValidationStatus,
+  ValidationRule,
+  FieldValidationState,
+  ValidatedFieldProps
+} from '../../components/payment/PaymentValidation';
+
+export { 
+  default as PaymentLoadingStates,
+  PaymentError,
+  NetworkStatus 
+} from '../../components/payment/PaymentLoadingStates';
+export type { PaymentState } from '../../components/payment/PaymentLoadingStates';
+
+export {
+  StripeProvider,
+  PaymentElement,
+  useStripe,
+  useElements,
+  useStripeState,
+  usePaymentConfirmation,
+  createPaymentIntent
+} from '../../components/payment/StripeIntegration';
+export type {
+  PaymentElementProps,
+  PaymentIntentOptions,
+  ConfirmPaymentOptions
+} from '../../components/payment/StripeIntegration';
+
+export {
+  AccessibilityProvider,
+  AccessibilityControls,
+  AccessibleFormField,
+  VoiceAnnouncer,
+  FocusTrap,
+  AccessibleScreenReaderOnly,
+  useAccessibility,
+  checkWCAGCompliance
+} from '../../components/payment/PaymentAccessibility';
+export type {
+  AccessibilitySettings,
+  AccessibilityContextValue,
+  FocusTrapProps,
+  AccessibleFormFieldProps
+} from '../../components/payment/PaymentAccessibility';
+
 // Export everything for easy access
 export * from './types'
 export * from './themes' 
