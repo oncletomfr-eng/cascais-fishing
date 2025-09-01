@@ -17,6 +17,7 @@ import {
   Sparkles, Trophy, Target, RefreshCw
 } from 'lucide-react'
 import ProfileStatisticsOverview from '@/components/analytics/ProfileStatisticsOverview'
+import BookingPerformanceAnalytics from '@/components/analytics/BookingPerformanceAnalytics'
 import { ProfileAnalyticsDashboard } from '@/components/profiles/ProfileAnalyticsDashboard'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
@@ -25,6 +26,7 @@ interface DemoSettings {
   showComparisons: boolean
   showPredictions: boolean
   autoRefresh: boolean
+  showBookingProjections: boolean
   userId?: string
 }
 
@@ -34,6 +36,7 @@ export default function AnalyticsDashboardTestPage() {
     showComparisons: true,
     showPredictions: false,
     autoRefresh: false,
+    showBookingProjections: true,
     userId: session?.user?.id
   })
 
@@ -62,9 +65,9 @@ export default function AnalyticsDashboardTestPage() {
       color: "text-green-600"
     },
     {
-      title: "Responsive Grid Layout",
-      description: "Adaptive card grid that responds to screen size with smooth animations and proper spacing",
-      status: "✅ Implemented", 
+      title: "Booking Performance Analytics",
+      description: "Comprehensive booking funnel analysis with conversion rates, cancellation patterns, and seasonal trends",
+      status: "✅ Task 13.2 Complete",
       color: "text-green-600"
     },
     {
@@ -96,8 +99,8 @@ export default function AnalyticsDashboardTestPage() {
               Analytics Dashboard Demo
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Enhanced profile statistics with comprehensive analytics, performance indicators, 
-              platform comparisons, and real-time data visualization.
+              Comprehensive analytics suite with profile statistics, booking performance analysis, 
+              conversion funnels, cancellation patterns, and predictive insights.
             </p>
           </motion.div>
         </div>
@@ -110,10 +113,10 @@ export default function AnalyticsDashboardTestPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           {[
-            { label: 'Statistics Cards', value: '8+', icon: BarChart3, color: 'text-blue-600' },
-            { label: 'Visual Indicators', value: '12+', icon: Target, color: 'text-green-600' },
-            { label: 'Comparisons', value: '3', icon: TrendingUp, color: 'text-purple-600' },
-            { label: 'Performance Levels', value: '4', icon: Trophy, color: 'text-yellow-600' }
+            { label: 'Analytics Components', value: '2', icon: BarChart3, color: 'text-blue-600' },
+            { label: 'Chart Types', value: '8+', icon: Target, color: 'text-green-600' },
+            { label: 'Conversion Metrics', value: '6', icon: TrendingUp, color: 'text-purple-600' },
+            { label: 'Performance Insights', value: '4', icon: Trophy, color: 'text-yellow-600' }
           ].map((stat, index) => {
             const Icon = stat.icon
             return (
@@ -130,10 +133,14 @@ export default function AnalyticsDashboardTestPage() {
 
         {/* Main content */}
         <Tabs defaultValue="enhanced" className="space-y-6">
-          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4">
+          <TabsList className="grid w-full max-w-4xl mx-auto grid-cols-5">
             <TabsTrigger value="enhanced" className="flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
-              Enhanced
+              Profile
+            </TabsTrigger>
+            <TabsTrigger value="booking" className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Booking
             </TabsTrigger>
             <TabsTrigger value="original" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
@@ -202,6 +209,54 @@ export default function AnalyticsDashboardTestPage() {
                 userId={demoSettings.userId}
                 showComparisons={demoSettings.showComparisons}
                 showPredictions={demoSettings.showPredictions}
+                autoRefresh={demoSettings.autoRefresh}
+              />
+            </motion.div>
+          </TabsContent>
+
+          {/* Booking Performance Tab */}
+          <TabsContent value="booking">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Booking Performance Analytics</h2>
+                <p className="text-muted-foreground mb-4">
+                  Task 13.2 implementation with comprehensive booking funnel analysis, conversion rates, 
+                  cancellation patterns, and seasonal trends.
+                </p>
+                
+                {/* Settings toggles */}
+                <div className="flex flex-wrap gap-4 p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="bookingProjections"
+                      checked={demoSettings.showBookingProjections}
+                      onCheckedChange={(checked) => updateSetting('showBookingProjections', checked)}
+                    />
+                    <label htmlFor="bookingProjections" className="text-sm font-medium">
+                      Show Projections
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="bookingAutoRefresh"
+                      checked={demoSettings.autoRefresh}
+                      onCheckedChange={(checked) => updateSetting('autoRefresh', checked)}
+                    />
+                    <label htmlFor="bookingAutoRefresh" className="text-sm font-medium">
+                      Auto Refresh (1min)
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <BookingPerformanceAnalytics 
+                userId={demoSettings.userId}
+                period="month"
+                showProjections={demoSettings.showBookingProjections}
                 autoRefresh={demoSettings.autoRefresh}
               />
             </motion.div>
@@ -363,6 +418,19 @@ export default function AnalyticsDashboardTestPage() {
                           onCheckedChange={(checked) => updateSetting('autoRefresh', checked)}
                         />
                       </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <label className="text-sm font-medium">Booking Projections</label>
+                          <p className="text-xs text-muted-foreground">
+                            Show AI-powered booking forecasts and trends
+                          </p>
+                        </div>
+                        <Switch 
+                          checked={demoSettings.showBookingProjections}
+                          onCheckedChange={(checked) => updateSetting('showBookingProjections', checked)}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -391,15 +459,23 @@ export default function AnalyticsDashboardTestPage() {
                   </div>
 
                   <div>
-                    <h4 className="font-medium mb-4">🚀 Task 13.1 Status</h4>
-                    <div className="space-y-2">
+                    <h4 className="font-medium mb-4">🚀 Analytics Dashboard Status</h4>
+                    <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm">Profile Statistics Overview - ✅ Complete</span>
+                        <span className="text-sm">Task 13.1: Profile Statistics Overview - ✅ Complete</span>
                       </div>
                       <p className="text-xs text-muted-foreground ml-4">
-                        All requirements implemented: comprehensive statistics, performance indicators,
-                        platform comparisons, and responsive layout.
+                        Comprehensive statistics, performance indicators, platform comparisons, and responsive layout.
+                      </p>
+                      
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm">Task 13.2: Booking Performance Analytics - ✅ Complete</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground ml-4">
+                        Booking funnel analysis, conversion rates, cancellation patterns, seasonal trends, 
+                        value analytics, and predictive insights.
                       </p>
                     </div>
                   </div>
