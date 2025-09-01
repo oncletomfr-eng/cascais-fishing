@@ -34,7 +34,8 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    '/admin/:path*',
-    '/api/admin/:path*'
+    // Temporarily disabled - investigating infinite redirect
+    // '/admin/:path*',
+    // '/api/admin/:path*'
   ]
 }

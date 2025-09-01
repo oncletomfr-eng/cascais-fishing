@@ -24,12 +24,25 @@ export default async function AdminLoginServerAction({
     console.log('🔐 Server action authenticate called with email:', email, 'password:', password)
     
     try {
-      console.log('📡 Attempting signIn with standard NextAuth redirect...')
-      await signIn("credentials", {
+      console.log('📡 Attempting signIn without redirect first...')
+      const result = await signIn("credentials", {
         email,
         password,
-        redirectTo: "/admin",
+        redirect: false, // Don't auto redirect
       })
+      
+      console.log('🔍 SignIn result:', result)
+      
+      if (result && !result.error) {
+        console.log('✅ Authentication successful, manually redirecting...')
+        redirect('/admin')
+      } else if (result?.error) {
+        console.log('❌ Authentication failed:', result.error)
+        redirect(`/admin/login?error=${result.error}`)
+      } else {
+        console.log('❓ Unexpected result, trying direct redirect...')
+        redirect('/admin')
+      }
     } catch (error: any) {
       console.log('❌ Authentication error:', error)
       console.log('🔍 Error type:', error?.type)
