@@ -18,14 +18,19 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
     
+    console.log('🔍 Starting Group Trips API request with params:', { status, timeSlot, limit, offset });
+    
     // Temporary fix: Check if group_trips table exists first
     try {
+      console.log('🔍 Checking if group_trips table exists...');
       const tableCheck = await prisma.$queryRaw`
         SELECT table_name 
         FROM information_schema.tables 
         WHERE table_schema = 'public' 
         AND table_name = 'group_trips'
       `;
+      
+      console.log('🔍 Table check result:', tableCheck);
       
       if (!Array.isArray(tableCheck) || tableCheck.length === 0) {
         console.warn('⚠️ group_trips table does not exist, returning empty data');
@@ -43,8 +48,11 @@ export async function GET(request: NextRequest) {
           warning: 'Database not fully initialized - group_trips table missing'
         });
       }
+      
+      console.log('✅ group_trips table exists, proceeding with query...');
     } catch (tableCheckError) {
       console.error('❌ Error checking table existence:', tableCheckError);
+      console.error('❌ Continuing with normal flow despite table check error');
       // Continue with normal flow - maybe table exists but query failed
     }
     
@@ -133,7 +141,11 @@ export async function GET(request: NextRequest) {
     // Проверяем есть ли параметр включения отмененных бронирований для тестирования
     const includeCancelled = searchParams.get('includeCancelled') === 'true';
     
+    console.log('🔍 Built where clause:', JSON.stringify(whereClause, null, 2));
+    console.log('🔍 Include cancelled:', includeCancelled);
+    
     // Получаем поездки из базы данных с полными данными FishingEvent
+    console.log('🔍 Executing groupTrip.findMany query...');
     const trips = await prisma.groupTrip.findMany({
       where: whereClause,
       include: {
@@ -171,7 +183,11 @@ export async function GET(request: NextRequest) {
       skip: offset
     });
 
+    console.log('✅ Query completed successfully. Retrieved trips count:', trips.length);
+    console.log('🔍 First trip sample:', trips.length > 0 ? JSON.stringify(trips[0], null, 2) : 'No trips found');
+
     // Фильтруем поездки с доступными местами
+    console.log('🔍 Filtering trips with available spots...');
     const availableTrips = trips.filter(trip => {
       const currentParticipants = trip.bookings.reduce(
         (total, booking) => total + booking.participants,
@@ -180,13 +196,30 @@ export async function GET(request: NextRequest) {
       return currentParticipants < trip.maxParticipants;
     });
 
+    console.log('✅ Filtered to available trips count:', availableTrips.length);
+
     // Преобразуем в формат для отображения
-    const displayTrips = availableTrips.map(trip => transformTripToDisplay(trip));
+    console.log('🔍 Transforming trips to display format...');
+    const displayTrips = availableTrips.map((trip, index) => {
+      console.log(`🔍 Transforming trip ${index + 1}/${availableTrips.length}: ${trip.id}`);
+      try {
+        return transformTripToDisplay(trip);
+      } catch (transformError) {
+        console.error('❌ Error transforming trip:', trip.id, transformError);
+        throw transformError;
+      }
+    });
+
+    console.log('✅ Trip transformation completed successfully');
 
     // Получаем общее количество для пагинации
+    console.log('🔍 Getting total count for pagination...');
     const totalCount = await prisma.groupTrip.count({
       where: whereClause
     });
+    
+    console.log('✅ Total count obtained:', totalCount);
+    console.log('🔍 Preparing final response...');
 
     return NextResponse.json({
       success: true,
@@ -202,10 +235,22 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error fetching group trips:', error);
+    console.error('❌ Error fetching group trips:', error);
+    console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack');
+    console.error('❌ Error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      name: error instanceof Error ? error.name : 'Unknown',
+      cause: error instanceof Error ? error.cause : undefined
+    });
+    
     return NextResponse.json({
       success: false,
-      error: 'Failed to fetch group trips'
+      error: 'Failed to fetch group trips',
+      details: process.env.NODE_ENV === 'development' ? {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      } : undefined,
+      timestamp: new Date().toISOString()
     }, { status: 500 });
   }
 }
