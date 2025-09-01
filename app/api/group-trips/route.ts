@@ -35,54 +35,108 @@ export async function GET(request: NextRequest) {
       console.log('🔍 Table check result:', tableCheck);
       
       if (!Array.isArray(tableCheck) || tableCheck.length === 0) {
-        // Create ENUM types first (ignore if already exist)
-        console.log('🔨 Creating ENUM types...');
+        // Create ENUM types safely using Prisma template literals (following documentation)
+        console.log('🔨 Creating ENUM types safely...');
         try {
-          await prisma.$executeRaw`CREATE TYPE "TimeSlot" AS ENUM ('MORNING_9AM', 'AFTERNOON_2PM');`;
-        } catch (e) { console.log('TimeSlot enum already exists'); }
-        
+          await prisma.$executeRaw`
+            DO $$ BEGIN
+              CREATE TYPE "TimeSlot" AS ENUM ('MORNING_9AM', 'AFTERNOON_2PM');
+            EXCEPTION
+              WHEN duplicate_object THEN null;
+            END $$;
+          `;
+          console.log('✅ TimeSlot enum created/exists');
+        } catch (e: any) {
+          console.log('⚠️ TimeSlot enum error:', e.message);
+        }
+
         try {
-          await prisma.$executeRaw`CREATE TYPE "GroupTripStatus" AS ENUM ('FORMING', 'CONFIRMED', 'CANCELLED', 'COMPLETED');`;
-        } catch (e) { console.log('GroupTripStatus enum already exists'); }
-        
+          await prisma.$executeRaw`
+            DO $$ BEGIN
+              CREATE TYPE "GroupTripStatus" AS ENUM ('FORMING', 'CONFIRMED', 'CANCELLED', 'COMPLETED');
+            EXCEPTION
+              WHEN duplicate_object THEN null;
+            END $$;
+          `;
+          console.log('✅ GroupTripStatus enum created/exists');
+        } catch (e: any) {
+          console.log('⚠️ GroupTripStatus enum error:', e.message);
+        }
+
         try {
-          await prisma.$executeRaw`CREATE TYPE "ParticipantApprovalMode" AS ENUM ('AUTO', 'MANUAL', 'SKILL_BASED');`;
-        } catch (e) { console.log('ParticipantApprovalMode enum already exists'); }
-        
+          await prisma.$executeRaw`
+            DO $$ BEGIN
+              CREATE TYPE "ParticipantApprovalMode" AS ENUM ('AUTO', 'MANUAL', 'SKILL_BASED');
+            EXCEPTION
+              WHEN duplicate_object THEN null;
+            END $$;
+          `;
+          console.log('✅ ParticipantApprovalMode enum created/exists');
+        } catch (e: any) {
+          console.log('⚠️ ParticipantApprovalMode enum error:', e.message);
+        }
+
         try {
-          await prisma.$executeRaw`CREATE TYPE "EquipmentType" AS ENUM ('PROVIDED', 'BYOB', 'MIXED');`;
-        } catch (e) { console.log('EquipmentType enum already exists'); }
-        
+          await prisma.$executeRaw`
+            DO $$ BEGIN
+              CREATE TYPE "EquipmentType" AS ENUM ('PROVIDED', 'BYOB', 'MIXED');
+            EXCEPTION
+              WHEN duplicate_object THEN null;
+            END $$;
+          `;
+          console.log('✅ EquipmentType enum created/exists');
+        } catch (e: any) {
+          console.log('⚠️ EquipmentType enum error:', e.message);
+        }
+
         try {
-          await prisma.$executeRaw`CREATE TYPE "FishingEventType" AS ENUM ('COMMERCIAL', 'SPORT', 'CHARTER', 'TOURNAMENT', 'EDUCATIONAL');`;
-        } catch (e) { console.log('FishingEventType enum already exists'); }
-        
+          await prisma.$executeRaw`
+            DO $$ BEGIN
+              CREATE TYPE "FishingEventType" AS ENUM ('COMMERCIAL', 'SPORT', 'CHARTER', 'TOURNAMENT', 'EDUCATIONAL');
+            EXCEPTION
+              WHEN duplicate_object THEN null;
+            END $$;
+          `;
+          console.log('✅ FishingEventType enum created/exists');
+        } catch (e: any) {
+          console.log('⚠️ FishingEventType enum error:', e.message);
+        }
+
         try {
-          await prisma.$executeRaw`CREATE TYPE "BookingStatus" AS ENUM ('PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED', 'REFUNDED');`;
-        } catch (e) { console.log('BookingStatus enum already exists'); }
+          await prisma.$executeRaw`
+            DO $$ BEGIN
+              CREATE TYPE "BookingStatus" AS ENUM ('PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED', 'REFUNDED');
+            EXCEPTION
+              WHEN duplicate_object THEN null;
+            END $$;
+          `;
+          console.log('✅ BookingStatus enum created/exists');
+        } catch (e: any) {
+          console.log('⚠️ BookingStatus enum error:', e.message);
+        }
         
         console.log('🔨 Creating group_trips table...');
         await prisma.$executeRaw`
-          CREATE TABLE "group_trips" (
+          CREATE TABLE IF NOT EXISTS "group_trips" (
             "id" TEXT NOT NULL PRIMARY KEY,
             "date" TIMESTAMP(3) NOT NULL,
-            "timeSlot" "TimeSlot" NOT NULL DEFAULT 'MORNING_9AM',
+            "timeSlot" "TimeSlot" NOT NULL DEFAULT 'MORNING_9AM'::"TimeSlot",
             "maxParticipants" INTEGER NOT NULL DEFAULT 8,
             "minRequired" INTEGER NOT NULL DEFAULT 6,
             "pricePerPerson" DECIMAL(10,2) NOT NULL DEFAULT 95.00,
-            "status" "GroupTripStatus" NOT NULL DEFAULT 'FORMING',
+            "status" "GroupTripStatus" NOT NULL DEFAULT 'FORMING'::"GroupTripStatus",
             "description" TEXT,
             "meetingPoint" TEXT,
             "specialNotes" TEXT,
             "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
             "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
             "captainId" TEXT,
-            "approvalMode" "ParticipantApprovalMode" NOT NULL DEFAULT 'MANUAL',
+            "approvalMode" "ParticipantApprovalMode" NOT NULL DEFAULT 'MANUAL'::"ParticipantApprovalMode",
             "departureLocation" TEXT,
             "difficultyRating" INTEGER NOT NULL DEFAULT 3,
-            "equipment" "EquipmentType" NOT NULL DEFAULT 'PROVIDED',
+            "equipment" "EquipmentType" NOT NULL DEFAULT 'PROVIDED'::"EquipmentType",
             "estimatedFishCatch" INTEGER,
-            "eventType" "FishingEventType" NOT NULL DEFAULT 'COMMERCIAL'
+            "eventType" "FishingEventType" NOT NULL DEFAULT 'COMMERCIAL'::"FishingEventType"
           );
         `;
         
@@ -94,100 +148,134 @@ export async function GET(request: NextRequest) {
             "userId" TEXT NOT NULL,
             "groupTripId" TEXT,
             "participants" INTEGER NOT NULL DEFAULT 1,
-            "status" "BookingStatus" NOT NULL DEFAULT 'CONFIRMED',
+            "status" "BookingStatus" NOT NULL DEFAULT 'CONFIRMED'::"BookingStatus",
             "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
             "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY ("groupTripId") REFERENCES "group_trips"("id")
+            CONSTRAINT "bookings_groupTripId_fkey" FOREIGN KEY ("groupTripId") REFERENCES "group_trips"("id")
           );
         `;
         
-        // Create real sample data
+        // Create real sample data using safe parameter insertion
         console.log('🔨 Creating real trip data...');
+        
+        // Generate unique IDs for trips
+        const now = new Date();
+        const trip1Id = `real-trip-${Math.floor(now.getTime() / 1000)}`;
+        const trip2Id = `real-trip-${Math.floor(now.getTime() / 1000) + 1}`;  
+        const trip3Id = `real-trip-${Math.floor(now.getTime() / 1000) + 2}`;
+        
+        const trip1Date = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000); // +2 days
+        const trip2Date = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000); // +5 days  
+        const trip3Date = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // +7 days
+        
         await prisma.$executeRaw`
           INSERT INTO "group_trips" (
             "id", "date", "timeSlot", "maxParticipants", "minRequired", 
             "pricePerPerson", "status", "description", "meetingPoint",
             "departureLocation", "difficultyRating", "equipment", "eventType"
-          ) VALUES 
-          (
-            'real-trip-' || EXTRACT(EPOCH FROM NOW())::TEXT,
-            NOW() + INTERVAL '2 days',
-            'MORNING_9AM'::TimeSlot,
+          ) VALUES (
+            ${trip1Id},
+            ${trip1Date},
+            'MORNING_9AM'::"TimeSlot",
             8,
             6,
             95.00,
-            'FORMING'::GroupTripStatus,
+            'FORMING'::"GroupTripStatus",
             'Морская рыбалка на морского окуня у берегов Кашкайша - профессиональный гид, все снасти включены',
             'Cascais Marina, Dock A',
             'Cascais Marina',
             4,
-            'PROVIDED'::EquipmentType,
-            'COMMERCIAL'::FishingEventType
-          ),
-          (
-            'real-trip-' || (EXTRACT(EPOCH FROM NOW()) + 1)::TEXT,
-            NOW() + INTERVAL '5 days',
-            'AFTERNOON_2PM'::TimeSlot,
+            'PROVIDED'::"EquipmentType",
+            'COMMERCIAL'::"FishingEventType"
+          ) ON CONFLICT (id) DO NOTHING;
+        `;
+        
+        await prisma.$executeRaw`
+          INSERT INTO "group_trips" (
+            "id", "date", "timeSlot", "maxParticipants", "minRequired", 
+            "pricePerPerson", "status", "description", "meetingPoint",
+            "departureLocation", "difficultyRating", "equipment", "eventType"
+          ) VALUES (
+            ${trip2Id},
+            ${trip2Date}, 
+            'AFTERNOON_2PM'::"TimeSlot",
             6,
             4,
             85.00,
-            'FORMING'::GroupTripStatus,
+            'FORMING'::"GroupTripStatus",
             'Рыбалка на дораду и морского леща в заливе Кашкайш - отличное место для начинающих',
             'Estoril Marina, Pontoon B',
             'Estoril Marina',
             2,
-            'PROVIDED'::EquipmentType,
-            'COMMERCIAL'::FishingEventType
-          ),
-          (
-            'real-trip-' || (EXTRACT(EPOCH FROM NOW()) + 2)::TEXT,
-            NOW() + INTERVAL '7 days',
-            'MORNING_9AM'::TimeSlot,
+            'PROVIDED'::"EquipmentType",
+            'COMMERCIAL'::"FishingEventType"
+          ) ON CONFLICT (id) DO NOTHING;
+        `;
+        
+        await prisma.$executeRaw`
+          INSERT INTO "group_trips" (
+            "id", "date", "timeSlot", "maxParticipants", "minRequired", 
+            "pricePerPerson", "status", "description", "meetingPoint",
+            "departureLocation", "difficultyRating", "equipment", "eventType"
+          ) VALUES (
+            ${trip3Id},
+            ${trip3Date},
+            'MORNING_9AM'::"TimeSlot",
             10,
             8,
             110.00,
-            'FORMING'::GroupTripStatus,
+            'FORMING'::"GroupTripStatus",
             'Глубоководная рыбалка на тунца и марлина - для опытных рыболовов',
-            'Cascais Marina, Dock C',
+            'Cascais Marina, Dock C', 
             'Cascais Deep Waters',
             5,
-            'PROVIDED'::EquipmentType,
-            'SPORT'::FishingEventType
-          );
+            'PROVIDED'::"EquipmentType",
+            'SPORT'::"FishingEventType"
+          ) ON CONFLICT (id) DO NOTHING;
         `;
         
         // Create some realistic bookings for the trips
         console.log('🔨 Creating realistic booking data...');
+        
+        // Create bookings for first trip
         await prisma.$executeRaw`
           INSERT INTO "bookings" (
             "id", "userId", "groupTripId", "participants", "status"
-          ) SELECT 
-            'booking-' || trip_id || '-' || booking_num,
-            'user-' || booking_num,
-            trip_id,
-            CASE booking_num 
-              WHEN 1 THEN 2
-              WHEN 2 THEN 1  
-              WHEN 3 THEN 3
-              ELSE 1
-            END,
-            'CONFIRMED'::BookingStatus
-          FROM (
-            SELECT 
-              "id" as trip_id,
-              generate_series(1, 
-                CASE 
-                  WHEN "maxParticipants" >= 8 THEN 3
-                  WHEN "maxParticipants" >= 6 THEN 2  
-                  ELSE 1
-                END
-              ) as booking_num
-            FROM "group_trips" 
-            LIMIT 2
-          ) bookings_data;
+          ) VALUES (
+            ${`booking-${trip1Id}-1`},
+            'user-001',
+            ${trip1Id},
+            2,
+            'CONFIRMED'::"BookingStatus"
+          ) ON CONFLICT (id) DO NOTHING;
         `;
         
-        console.log('✅ Tables and realistic data created successfully');
+        await prisma.$executeRaw`
+          INSERT INTO "bookings" (
+            "id", "userId", "groupTripId", "participants", "status"
+          ) VALUES (
+            ${`booking-${trip1Id}-2`},
+            'user-002',
+            ${trip1Id},
+            1,
+            'CONFIRMED'::"BookingStatus"
+          ) ON CONFLICT (id) DO NOTHING;
+        `;
+        
+        // Create bookings for second trip
+        await prisma.$executeRaw`
+          INSERT INTO "bookings" (
+            "id", "userId", "groupTripId", "participants", "status"
+          ) VALUES (
+            ${`booking-${trip2Id}-1`},
+            'user-003',
+            ${trip2Id},
+            2,
+            'CONFIRMED'::"BookingStatus"
+          ) ON CONFLICT (id) DO NOTHING;
+        `;
+        
+        console.log('✅ Tables, ENUM types, and realistic data created successfully');
       }
       
       console.log('✅ group_trips table exists, proceeding with real query...');
