@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Production Environment Variables for WebSocket and API URLs
+  env: {
+    NEXT_PUBLIC_WS_URL_PRODUCTION: 'wss://www.cascaisfishing.com/api/group-trips/ws',
+    NEXT_PUBLIC_API_URL_PRODUCTION: 'https://www.cascaisfishing.com',
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
