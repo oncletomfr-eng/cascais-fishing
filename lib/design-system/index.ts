@@ -57,6 +57,26 @@ export {
 
 // Enhanced components
 export { EnhancedButton as Button } from '../../components/design-system/EnhancedButton'
+export { 
+  EnhancedDataGrid, 
+  StatusChip, 
+  EnhancedToolbar 
+} from '../../components/design-system/EnhancedDataGrid'
+
+// DataGrid hooks and utilities
+export {
+  useServerDataSource,
+  useClientData,
+  createApiFetcher,
+  createMockFetcher
+} from './dataGridHooks'
+export type {
+  DataFetcher,
+  ServerResponse,
+  ServerError,
+  UseServerDataSourceOptions,
+  UseClientDataOptions
+} from './dataGridHooks'
 
 // Design system utilities and constants
 export const DESIGN_SYSTEM_VERSION = '1.0.0'
