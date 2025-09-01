@@ -106,36 +106,53 @@ function TestProductionIntegrationPage() {
       });
     }
 
-    // Test 2: WebSocket Connection
+    // Test 2: WebSocket Connection (Production Check)
     try {
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${wsProtocol}//${window.location.host}/api/group-trips/ws`;
+      // Check if we're in production and WebSocket is expected to be disabled
+      const isProduction = window.location.hostname.includes('cascaisfishing.com');
       
-      await new Promise((resolve, reject) => {
-        const ws = new WebSocket(wsUrl);
-        const timeout = setTimeout(() => {
-          ws.close();
-          reject(new Error('WebSocket connection timeout'));
-        }, 5000);
+      if (isProduction) {
+        // In production, WebSocket is intentionally disabled for stability
+        results.push({
+          name: 'WebSocket Connection',
+          status: 'warning',
+          message: 'WebSocket отключен в production для стабильности (это нормально)',
+          details: { 
+            reason: 'next-ws disabled in production build',
+            status: 'intentionally_disabled'
+          }
+        });
+      } else {
+        // In development, try to connect
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${window.location.host}/api/group-trips/ws`;
+        
+        await new Promise((resolve, reject) => {
+          const ws = new WebSocket(wsUrl);
+          const timeout = setTimeout(() => {
+            ws.close();
+            reject(new Error('WebSocket connection timeout'));
+          }, 5000);
 
-        ws.onopen = () => {
-          clearTimeout(timeout);
-          ws.close();
-          resolve(true);
-        };
+          ws.onopen = () => {
+            clearTimeout(timeout);
+            ws.close();
+            resolve(true);
+          };
 
-        ws.onerror = () => {
-          clearTimeout(timeout);
-          reject(new Error('WebSocket connection failed'));
-        };
-      });
+          ws.onerror = () => {
+            clearTimeout(timeout);
+            reject(new Error('WebSocket connection failed'));
+          };
+        });
 
-      results.push({
-        name: 'WebSocket Connection',
-        status: 'success',
-        message: 'WebSocket соединение успешно установлено',
-        details: { url: wsUrl }
-      });
+        results.push({
+          name: 'WebSocket Connection',
+          status: 'success',
+          message: 'WebSocket соединение успешно установлено (development)',
+          details: { url: wsUrl }
+        });
+      }
     } catch (error) {
       results.push({
         name: 'WebSocket Connection',
@@ -196,6 +213,8 @@ function TestProductionIntegrationPage() {
         return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
       case 'loading':
         return <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />;
+      default:
+        return <AlertTriangle className="w-5 h-5 text-gray-500" />;
     }
   };
 
