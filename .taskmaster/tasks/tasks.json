@@ -1,0 +1,726 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Design System Architecture Setup",
+        "description": "Establish comprehensive design system based on Instructure UI patterns with theme provider, color tokens, typography, spacing, and component variants",
+        "status": "done",
+        "priority": "high",
+        "phase": "Foundation",
+        "estimatedHours": 40,
+        "dependencies": [],
+        "assignee": "Frontend Lead",
+        "dueDate": "2025-09-05",
+        "tags": [
+          "design-system",
+          "foundation",
+          "architecture"
+        ],
+        "details": "Set up theme provider with all design tokens. Configure color system supporting light/dark modes. Implement typography scale with accessibility features. Create spacing system with consistent measurements. Define component variants for all UI elements. Follow Instructure UI patterns for theming with generateComponentTheme() functions."
+      },
+      {
+        "id": 2,
+        "title": "MUI X DataGrid Integration",
+        "description": "Configure MUI X DataGrid for data-heavy components with server-side pagination, sorting, filtering, and export functionality",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Foundation",
+        "estimatedHours": 32,
+        "dependencies": [
+          "1"
+        ],
+        "assignee": "Senior Developer",
+        "dueDate": "2025-09-08",
+        "tags": [
+          "mui-x",
+          "datagrid",
+          "data-visualization"
+        ],
+        "details": "Implement server-side pagination. Configure multi-column sorting. Set up advanced filtering with custom operators. Add CSV/Excel export functionality. Optimize performance for large datasets. Use DataGridPro for advanced features and integrate with existing API endpoints."
+      },
+      {
+        "id": 3,
+        "title": "Basic Payment UI Components",
+        "description": "Create foundational payment interface components including payment method selection, price display, form validation, and state management",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Foundation",
+        "estimatedHours": 35,
+        "dependencies": [
+          "1"
+        ],
+        "assignee": "Frontend Lead",
+        "dueDate": "2025-09-10",
+        "tags": [
+          "payments",
+          "ui-components",
+          "validation"
+        ],
+        "details": "Build payment method selection cards styled and functional. Create price display with tax calculation. Implement real-time form validation. Add loading states and error handling. Ensure accessibility compliant form controls. Prepare for Stripe Elements integration ensuring PCI compliance readiness."
+      },
+      {
+        "id": 4,
+        "title": "Advanced Fishing Event Filters",
+        "description": "Implement comprehensive filtering system with species selection, technique filtering, event categorization, difficulty sliders, and weather toggles",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Foundation",
+        "estimatedHours": 45,
+        "dependencies": [
+          "1",
+          "2"
+        ],
+        "assignee": "Senior Developer",
+        "dueDate": "2025-09-12",
+        "tags": [
+          "filters",
+          "fishing-events",
+          "ux"
+        ],
+        "details": "Create multi-select species dropdown. Implement tag-based technique selection. Add event type categorization. Build difficulty and price range sliders. Add weather dependency toggles. Create active filter count indicator. Implement filter state persistence. Build on existing AdvancedFishingFilters component (592 lines) and enhance UX."
+      },
+      {
+        "id": 5,
+        "title": "Stripe Checkout Flow Integration",
+        "description": "Complete payment processing integration with Stripe Payment Elements, payment intent handling, webhook processing, and payment method saving",
+        "status": "pending",
+        "priority": "critical",
+        "phase": "Payment System",
+        "estimatedHours": 55,
+        "dependencies": [
+          "3"
+        ],
+        "assignee": "Frontend Lead",
+        "dueDate": "2025-09-17",
+        "tags": [
+          "stripe",
+          "payments",
+          "integration"
+        ],
+        "details": "Fully integrate Stripe Payment Elements. Implement payment intent creation and confirmation. Set up webhook handling for status updates. Add payment method saving functionality. Create error handling for failed payments. Verify PCI DSS compliance. Use existing /api/payments and /api/create-checkout-session endpoints.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Stripe SDK Configuration & Setup",
+            "description": "Install and configure Stripe SDK with proper environment setup and security measures",
+            "details": "Install Stripe React SDK and server-side packages. Configure API keys for different environments. Set up webhook endpoints for payment events. Implement CSP headers for security. Configure Stripe publishable keys. Add environment variable validation.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 5
+          },
+          {
+            "id": 2,
+            "title": "Payment Elements Integration",
+            "description": "Integrate Stripe Payment Elements with custom styling and validation",
+            "details": "Implement Payment Elements component with brand styling. Add real-time validation and error handling. Support multiple payment methods (cards, bank transfers, digital wallets). Implement payment method selection UI. Add loading states and animations. Ensure mobile responsiveness.",
+            "status": "pending",
+            "dependencies": [
+              "[\"5.1\"]"
+            ],
+            "parentTaskId": 5
+          },
+          {
+            "id": 3,
+            "title": "Payment Intent Management",
+            "description": "Implement payment intent creation, confirmation, and status tracking throughout the payment flow",
+            "details": "Create payment intents for different service types. Implement payment confirmation flow. Handle 3D Secure authentication. Add payment status tracking. Implement retry logic for failed payments. Include payment cancellation handling.",
+            "status": "pending",
+            "dependencies": [
+              "[\"5.2\"]"
+            ],
+            "parentTaskId": 5
+          },
+          {
+            "id": 4,
+            "title": "Webhook Processing System",
+            "description": "Implement secure webhook handling for payment status updates and real-time notifications",
+            "details": "Set up webhook signature verification. Handle payment status updates from Stripe. Implement webhook retry logic. Add database updates for payment status changes. Include notification sending for payment events. Build webhook testing and debugging tools.",
+            "status": "pending",
+            "dependencies": [
+              "[\"5.1\"]"
+            ],
+            "parentTaskId": 5
+          },
+          {
+            "id": 5,
+            "title": "Payment Method Storage & Management",
+            "description": "Implement secure payment method saving and management for returning customers",
+            "details": "Create customer records in Stripe. Implement payment method saving during checkout. Build payment method management UI. Add default payment method selection. Include payment method deletion. Implement PCI compliant card display.",
+            "status": "pending",
+            "dependencies": [
+              "[\"5.3\"",
+              "\"5.4\"]"
+            ],
+            "parentTaskId": 5
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Payment Dashboard Core",
+        "description": "Build comprehensive payment management interface with revenue overview, KPI cards, earnings trends, and commission breakdowns",
+        "status": "pending",
+        "priority": "critical",
+        "phase": "Payment System",
+        "estimatedHours": 60,
+        "dependencies": [
+          "2",
+          "5"
+        ],
+        "assignee": "Frontend Lead",
+        "dueDate": "2025-09-22",
+        "tags": [
+          "dashboard",
+          "analytics",
+          "payments"
+        ],
+        "details": "Create revenue overview with animated KPI cards. Build monthly earnings trend charts. Implement commission breakdown visualization. Add real-time data updates. Ensure responsive design for mobile. Include export functionality for reports. Use Recharts for visualizations and connect to existing payment analytics API.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Revenue Overview KPI Cards",
+            "description": "Create animated KPI cards showing total revenue, monthly earnings, commission rates, and growth metrics",
+            "details": "Build responsive KPI card components. Implement real-time data updates. Add percentage change indicators with colors. Include period comparison (month-over-month, year-over-year). Add loading states and error handling. Implement count-up animations for numbers.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 6
+          },
+          {
+            "id": 2,
+            "title": "Earnings Trend Visualizations",
+            "description": "Implement interactive charts for monthly/weekly earnings trends using Recharts library",
+            "details": "Create line charts for earnings over time. Add bar charts for monthly comparisons. Implement area charts for revenue streams. Include interactive tooltips and zoom functionality. Add date range picker for custom periods. Ensure responsive design for mobile.",
+            "status": "pending",
+            "dependencies": [
+              "[\"6.1\"]"
+            ],
+            "parentTaskId": 6
+          },
+          {
+            "id": 3,
+            "title": "Commission Breakdown Analysis",
+            "description": "Create detailed commission analysis with breakdowns by service type, captain tier, and time periods",
+            "details": "Build pie charts for commission distribution. Show commission by service type (tours, courses, advertising). Display captain tier impact on commissions. Add commission trend analysis. Include commission calculation transparency. Show payout schedule and history.",
+            "status": "pending",
+            "dependencies": [
+              "[\"6.1\"]"
+            ],
+            "parentTaskId": 6
+          },
+          {
+            "id": 4,
+            "title": "Data Export & Reporting System",
+            "description": "Implement comprehensive data export functionality for payments, earnings, and tax reporting",
+            "details": "Add CSV export for all payment data. Create PDF reports for tax purposes. Implement Excel export with formatted sheets. Add scheduled report generation. Include custom date range exports. Build email delivery for automated reports.",
+            "status": "pending",
+            "dependencies": [
+              "[\"6.2\"",
+              "\"6.3\"]"
+            ],
+            "parentTaskId": 6
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Transaction Management System",
+        "description": "Implement comprehensive transaction tracking with search, filters, detailed views, pagination, and export capabilities",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Payment System",
+        "estimatedHours": 40,
+        "dependencies": [
+          "2",
+          "6"
+        ],
+        "assignee": "Senior Developer",
+        "dueDate": "2025-09-24",
+        "tags": [
+          "transactions",
+          "data-management",
+          "search"
+        ],
+        "details": "Build transaction list with server-side pagination. Implement advanced filtering by type, status, date. Create transaction detail modal with full info. Add search functionality across transaction data. Include bulk operations for transaction management. Add CSV/Excel export functionality. Leverage MUI X DataGrid advanced features."
+      },
+      {
+        "id": 8,
+        "title": "Commission Tracking & Reporting",
+        "description": "Build commission calculation system with rate display, history tracking, payout scheduling, and tax reporting preparation",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Payment System",
+        "estimatedHours": 35,
+        "dependencies": [
+          "6",
+          "7"
+        ],
+        "assignee": "Senior Developer",
+        "dueDate": "2025-09-26",
+        "tags": [
+          "commissions",
+          "reporting",
+          "financials"
+        ],
+        "details": "Create dynamic commission rate display (15-20%). Build commission history with trend analysis. Implement payout schedule management interface. Add tax reporting data preparation. Include commission calculator tools. Integrate with captain subscription tiers using existing commission calculation logic from payment API."
+      },
+      {
+        "id": 9,
+        "title": "Achievement System Components",
+        "description": "Create achievement interface with category grids, progress tracking, badge unlock animations, and sharing functionality",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Gamification",
+        "estimatedHours": 50,
+        "dependencies": [
+          "1"
+        ],
+        "assignee": "Frontend Lead",
+        "dueDate": "2025-09-19",
+        "tags": [
+          "gamification",
+          "achievements",
+          "ux"
+        ],
+        "details": "Build achievement category grid (species, techniques, social, geography). Create visual progress indicators with animations. Add badge unlock celebration effects. Implement achievement sharing to social media. Build progress history timeline. Add recommendation system for next achievements. Build on existing Achievement and UserAchievement models.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Achievement Category Grid System",
+            "description": "Create organized achievement grid with categories for species, techniques, social, and geography achievements",
+            "details": "Build responsive grid layout for achievement categories. Create category cards with progress indicators. Implement filtering by category and status. Add search functionality for achievements. Include achievement difficulty indicators. Show completion percentages per category.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 9
+          },
+          {
+            "id": 2,
+            "title": "Progress Tracking & Animations",
+            "description": "Implement visual progress indicators with smooth animations for achievement progression",
+            "details": "Create circular progress bars for achievements. Add animated progress updates. Implement milestone markers. Build progress history visualization. Include estimated completion times. Add motivational messages based on progress.",
+            "status": "pending",
+            "dependencies": [
+              "[\"9.1\"]"
+            ],
+            "parentTaskId": 9
+          },
+          {
+            "id": 3,
+            "title": "Badge Unlock Celebration Effects",
+            "description": "Create engaging celebration animations and effects for achievement unlocks and badge earning",
+            "details": "Build confetti animation system for achievement unlocks. Create badge reveal animations with particle effects. Add sound effects for celebrations. Implement screen shake and glow effects. Build shareable celebration screens. Include achievement unlock notifications.",
+            "status": "pending",
+            "dependencies": [
+              "[\"9.2\"]"
+            ],
+            "parentTaskId": 9
+          },
+          {
+            "id": 4,
+            "title": "Achievement Recommendation System",
+            "description": "Implement intelligent recommendations for next achievable goals based on user progress and behavior",
+            "details": "Build algorithm for achievement recommendations. Show next achievable goals prominently. Include difficulty-based suggestions. Add personalized achievement paths. Implement achievement difficulty assessment. Include achievement tips and guides.",
+            "status": "pending",
+            "dependencies": [
+              "[\"9.2\"]"
+            ],
+            "parentTaskId": 9
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Badge System & Collection UI",
+        "description": "Implement badge management with collection display, rarity indicators, earning notifications, and social integration",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Gamification",
+        "estimatedHours": 35,
+        "dependencies": [
+          "9"
+        ],
+        "assignee": "Senior Developer",
+        "dueDate": "2025-09-24",
+        "tags": [
+          "badges",
+          "collection",
+          "notifications"
+        ],
+        "details": "Create badge collection grid with rarity indicators. Add special effects for rare badges. Implement real-time badge earning notifications. Add badge sharing functionality. Include badge statistics and analytics. Integrate with profile display. Connect to existing FisherBadge model and /api/badges endpoint."
+      },
+      {
+        "id": 11,
+        "title": "Progress Tracking & Leveling",
+        "description": "Build user progress visualization with level progression, experience points, streak tracking, and milestone celebrations",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Gamification",
+        "estimatedHours": 40,
+        "dependencies": [
+          "9",
+          "10"
+        ],
+        "assignee": "Frontend Lead",
+        "dueDate": "2025-09-26",
+        "tags": [
+          "progress",
+          "leveling",
+          "streaks"
+        ],
+        "details": "Create circular progress indicators for levels. Build experience point tracking with animations. Add streak counter with fire effects. Implement milestone celebration animations. Include progress comparison with friends. Add daily/weekly challenge integration. Use existing level and experiencePoints fields from FisherProfile."
+      },
+      {
+        "id": 12,
+        "title": "Leaderboard & Competition System",
+        "description": "Create competitive ranking interface with category-based leaderboards, seasonal competitions, and user comparisons",
+        "status": "pending",
+        "priority": "medium",
+        "phase": "Gamification",
+        "estimatedHours": 30,
+        "dependencies": [
+          "11"
+        ],
+        "assignee": "Senior Developer",
+        "dueDate": "2025-09-29",
+        "tags": [
+          "leaderboard",
+          "competition",
+          "ranking"
+        ],
+        "details": "Build category-based ranking tables. Add user position highlighting. Implement seasonal competition tracking. Create achievement comparison tools. Include privacy controls for rankings. Add reward distribution system. Implement with privacy considerations and ensure fair ranking algorithms."
+      },
+      {
+        "id": 13,
+        "title": "Analytics Dashboard Core",
+        "description": "Build comprehensive analytics interface with profile statistics, booking performance, rating analytics, and activity timelines",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Analytics",
+        "estimatedHours": 55,
+        "dependencies": [
+          "2"
+        ],
+        "assignee": "Frontend Lead",
+        "dueDate": "2025-09-22",
+        "tags": [
+          "analytics",
+          "dashboard",
+          "metrics"
+        ],
+        "details": "Create user profile statistics overview. Build booking performance KPI cards. Implement rating and review analytics charts. Add activity timeline visualization. Include comparison metrics with averages. Add drill-down capabilities for detailed analysis. Build on existing ProfileAnalyticsDashboard.tsx (407 lines).",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Profile Statistics Overview",
+            "description": "Create comprehensive user profile statistics with completion rates, activity metrics, and performance indicators",
+            "details": "Build user profile summary cards. Show completion rate trends over time. Display activity metrics (trips, bookings, reviews). Add performance indicators with visual progress bars. Include comparative analytics with platform averages. Implement responsive card grid layout.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 13
+          },
+          {
+            "id": 2,
+            "title": "Booking Performance Analytics",
+            "description": "Implement detailed booking analytics with conversion rates, cancellation patterns, and seasonal trends",
+            "details": "Create booking funnel analysis. Track conversion rates by source. Show cancellation patterns and reasons. Display seasonal booking trends. Add booking value analytics. Include time-to-book metrics. Build booking success rate visualization.",
+            "status": "pending",
+            "dependencies": [
+              "[\"13.1\"]"
+            ],
+            "parentTaskId": 13
+          },
+          {
+            "id": 3,
+            "title": "Rating & Review Analytics",
+            "description": "Build comprehensive review analytics with sentiment analysis, rating distributions, and improvement insights",
+            "details": "Create rating distribution charts. Show review sentiment analysis. Track rating trends over time. Display improvement suggestions based on feedback. Add response rate metrics. Include review quality scores. Build review impact analysis on bookings.",
+            "status": "pending",
+            "dependencies": [
+              "[\"13.1\"]"
+            ],
+            "parentTaskId": 13
+          },
+          {
+            "id": 4,
+            "title": "Activity Timeline Visualization",
+            "description": "Create interactive activity timeline showing user journey, milestones, and engagement patterns",
+            "details": "Build interactive timeline component. Show user journey milestones. Display engagement patterns over time. Add filtering by activity type. Include milestone celebrations. Show activity intensity heat maps. Add exportable timeline reports.",
+            "status": "pending",
+            "dependencies": [
+              "[\"13.2\"",
+              "\"13.3\"]"
+            ],
+            "parentTaskId": 13
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "title": "Interactive Chart Components",
+        "description": "Implement data visualization with line charts for trends, pie charts for breakdowns, bar charts for comparisons, and heat maps for patterns",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Analytics",
+        "estimatedHours": 45,
+        "dependencies": [
+          "13"
+        ],
+        "assignee": "Senior Developer",
+        "dueDate": "2025-09-26",
+        "tags": [
+          "charts",
+          "visualization",
+          "recharts"
+        ],
+        "details": "Create line charts for booking trends over time. Build pie charts for species/technique breakdowns. Implement bar charts for time slot preferences. Add heat maps for seasonal activity patterns. Include interactive tooltips and legends. Ensure responsive design for all chart types. Use Recharts library with accessibility support."
+      },
+      {
+        "id": 15,
+        "title": "Profile Statistics & Metrics",
+        "description": "Create detailed profile metrics with completion rates, reliability scoring, performance comparisons, and achievement progress",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Analytics",
+        "estimatedHours": 35,
+        "dependencies": [
+          "13",
+          "14"
+        ],
+        "assignee": "Senior Developer",
+        "dueDate": "2025-09-29",
+        "tags": [
+          "profile",
+          "statistics",
+          "metrics"
+        ],
+        "details": "Implement completion rate tracking with trends. Build reliability scoring with breakdown. Add performance comparison with peers. Create achievement progress visualization. Include recommendation system for improvements. Add historical data analysis. Connect to existing FisherProfile analytics."
+      },
+      {
+        "id": 16,
+        "title": "Captain Dashboard Interface",
+        "description": "Build specialized captain interface with participant approval management, revenue tracking, trip analytics, and weather integration",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Analytics",
+        "estimatedHours": 50,
+        "dependencies": [
+          "13",
+          "14",
+          "15"
+        ],
+        "assignee": "Frontend Lead",
+        "dueDate": "2025-10-03",
+        "tags": [
+          "captain",
+          "dashboard",
+          "management"
+        ],
+        "details": "Create participant approval queue with actions. Build revenue and commission tracking charts. Implement trip performance analytics dashboard. Add weather integration for trip planning. Include bulk approval operations. Add captain-specific insights and recommendations. Build on existing EnhancedCaptainDashboard.tsx component.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Participant Approval Management",
+            "description": "Build comprehensive participant approval system with queue management and bulk operations",
+            "details": "Create approval queue with participant details. Add bulk approval/rejection actions. Implement participant scoring system. Show participant history and ratings. Include approval status tracking. Add automated approval rules based on criteria.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 16
+          },
+          {
+            "id": 2,
+            "title": "Captain Revenue Tracking",
+            "description": "Implement comprehensive revenue and commission tracking specifically for captain earnings",
+            "details": "Build captain-specific revenue dashboard. Show commission breakdowns by service type. Track payout schedules and history. Display earning trends and projections. Include tax reporting features. Add performance-based commission visualization.",
+            "status": "pending",
+            "dependencies": [
+              "[\"16.1\"]"
+            ],
+            "parentTaskId": 16
+          },
+          {
+            "id": 3,
+            "title": "Trip Performance Analytics",
+            "description": "Create detailed analytics for trip success rates, participant satisfaction, and operational metrics",
+            "details": "Build trip success rate tracking. Show participant satisfaction metrics. Display booking conversion rates. Include weather impact analysis. Track trip completion rates. Add seasonal performance patterns. Show comparative analytics with other captains.",
+            "status": "pending",
+            "dependencies": [
+              "[\"16.2\"]"
+            ],
+            "parentTaskId": 16
+          },
+          {
+            "id": 4,
+            "title": "Weather Integration for Trip Planning",
+            "description": "Integrate weather data and forecasting tools to assist captains in trip planning and decision making",
+            "details": "Integrate weather API for real-time conditions. Show extended forecasts for trip planning. Add weather alerts for unsafe conditions. Include wind, wave, and visibility data. Build weather-based trip recommendations. Add historical weather impact analysis.",
+            "status": "pending",
+            "dependencies": [
+              "[\"16.1\"]"
+            ],
+            "parentTaskId": 16
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "title": "Multi-Phase Chat Core System",
+        "description": "Implement context-aware chat with preparation, active trip, and post-trip phases, including phase transitions and specialized interfaces",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Chat System",
+        "estimatedHours": 60,
+        "dependencies": [
+          "1"
+        ],
+        "assignee": "Frontend Lead",
+        "dueDate": "2025-09-26",
+        "tags": [
+          "chat",
+          "multi-phase",
+          "communication"
+        ],
+        "details": "Create three distinct chat phases (preparation, active, post-trip). Implement smooth phase transition handling. Build phase-specific UI and functionality. Add context preservation across phases. Include participant list with online status. Create phase-appropriate message templates. Build on existing MultiPhaseChatSystem.tsx (694 lines).",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Chat State Management Architecture",
+            "description": "Implement state management for three chat phases with context preservation",
+            "details": "Create Redux/Zustand store for chat phases (preparation, active, post-trip). Implement phase context switching. Define state interfaces for each phase. Handle state persistence across phase transitions.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 17
+          },
+          {
+            "id": 2,
+            "title": "Phase-Specific UI Components",
+            "description": "Create distinct UI components for preparation, active trip, and post-trip phases",
+            "details": "Build PreparationPhase component with trip planning features. Create ActiveTripPhase with real-time communication tools. Develop PostTripPhase with review and sharing functionality. Ensure responsive design for all phases.",
+            "status": "pending",
+            "dependencies": [
+              "[\"17.1\"]"
+            ],
+            "parentTaskId": 17
+          },
+          {
+            "id": 3,
+            "title": "Phase Transition Logic",
+            "description": "Implement smooth transitions between chat phases with automated triggers",
+            "details": "Create transition triggers based on trip status. Implement smooth UI transitions with animations. Handle data migration between phases. Add manual phase override for captains. Include phase history tracking.",
+            "status": "pending",
+            "dependencies": [
+              "[\"17.2\"]"
+            ],
+            "parentTaskId": 17
+          },
+          {
+            "id": 4,
+            "title": "Stream Chat SDK Integration",
+            "description": "Integrate Stream Chat SDK with multi-phase architecture and custom configurations",
+            "details": "Install and configure Stream Chat React SDK. Set up channel creation for different phases. Implement user authentication with Stream Chat. Configure channel permissions per phase. Add custom channel types for each phase.",
+            "status": "pending",
+            "dependencies": [
+              "[\"17.1\"]"
+            ],
+            "parentTaskId": 17
+          },
+          {
+            "id": 5,
+            "title": "Participant Management System",
+            "description": "Implement participant list, online status, and role-based permissions for chat",
+            "details": "Create participant list component with avatars. Show online/offline status indicators. Implement role-based permissions (captain, participant). Add participant join/leave notifications. Include typing indicators and message read status.",
+            "status": "pending",
+            "dependencies": [
+              "[\"17.4\"]"
+            ],
+            "parentTaskId": 17
+          },
+          {
+            "id": 6,
+            "title": "Chat System Testing & Performance",
+            "description": "Comprehensive testing of multi-phase chat functionality and performance optimization",
+            "details": "Create unit tests for phase transitions. Add integration tests for Stream Chat. Test real-time message delivery. Performance testing with multiple participants. Memory leak prevention. Error handling and recovery testing.",
+            "status": "pending",
+            "dependencies": [
+              "[\"17.3\"",
+              "\"17.5\"]"
+            ],
+            "parentTaskId": 17
+          }
+        ]
+      },
+      {
+        "id": 18,
+        "title": "Custom Message Types & Cards",
+        "description": "Create specialized message components for weather updates, catch photos, location sharing, fishing tips, and gear recommendations",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Chat System",
+        "estimatedHours": 45,
+        "dependencies": [
+          "17"
+        ],
+        "assignee": "Senior Developer",
+        "dueDate": "2025-10-01",
+        "tags": [
+          "messages",
+          "custom-components",
+          "cards"
+        ],
+        "details": "Build weather update cards with forecast data. Create catch photo sharing with species identification. Add location sharing with interactive maps. Implement fishing tip formatted messages. Build gear recommendation cards with links. Add rich media support for all message types. Extend Stream Chat with custom message renderers."
+      },
+      {
+        "id": 19,
+        "title": "Real-time Integration & SSE",
+        "description": "Connect chat system with existing SSE infrastructure for live message delivery, status indicators, and real-time events",
+        "status": "pending",
+        "priority": "high",
+        "phase": "Chat System",
+        "estimatedHours": 35,
+        "dependencies": [
+          "17",
+          "18"
+        ],
+        "assignee": "Senior Developer",
+        "dueDate": "2025-10-03",
+        "tags": [
+          "real-time",
+          "sse",
+          "integration"
+        ],
+        "details": "Implement live message delivery via SSE. Add online status indicators for participants. Create typing indicators functionality. Implement message read receipts. Add connection status monitoring. Include fallback for connection issues. Integrate with existing /api/group-trips/sse endpoint."
+      },
+      {
+        "id": 20,
+        "title": "Stream Chat Theming & Customization",
+        "description": "Customize Stream Chat appearance with brand styling, custom emojis, message threading, and file sharing capabilities",
+        "status": "pending",
+        "priority": "medium",
+        "phase": "Chat System",
+        "estimatedHours": 25,
+        "dependencies": [
+          "19"
+        ],
+        "assignee": "UI/UX Designer",
+        "dueDate": "2025-10-05",
+        "tags": [
+          "theming",
+          "customization",
+          "branding"
+        ],
+        "details": "Apply brand-consistent chat styling. Add custom emoji set for fishing terminology. Implement message threading support. Enable file and image sharing capabilities. Add custom reactions and badges. Ensure responsive chat design. Use Stream Chat theming system with accessibility considerations."
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "projectName": "Cascais Fishing Platform UI Integration",
+      "totalTasks": 35,
+      "createdAt": "2025-09-01T16:00:00Z",
+      "description": "Implementation plan for integrating hidden functionality into UI",
+      "estimatedDuration": "8 weeks (56 days)",
+      "budget": "€50,000",
+      "expectedROI": "€90k+/month revenue, 2160% ROI over 12 months",
+      "created": "2025-09-01T14:28:28.045Z",
+      "updated": "2025-09-01T14:44:20.446Z"
+    }
+  }
+}

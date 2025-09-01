@@ -5,9 +5,11 @@ import { Open_Sans } from "next/font/google"
 import { SessionProvider } from "@/components/providers/SessionProvider"
 import { ErrorProvider } from "@/components/providers/ErrorProvider"
 import QueryProvider from "@/components/providers/QueryProvider"
+import { EnhancedThemeProvider } from "@/components/design-system/EnhancedThemeProvider"
 import GlobalHeader from "@/components/layout/GlobalHeader"
 import GlobalWeatherAlerts from "@/components/weather/GlobalWeatherAlerts"
 import "./globals.css"
+import "../styles/design-system.css"
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -45,17 +47,22 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${montserrat.variable} ${openSans.variable} antialiased`}>
       <body>
-        <ErrorProvider>
-          <SessionProvider>
-            <QueryProvider>
-              <GlobalHeader />
-              <GlobalWeatherAlerts />
-              <main className="min-h-screen">
-                {children}
-              </main>
-            </QueryProvider>
-          </SessionProvider>
-        </ErrorProvider>
+        <EnhancedThemeProvider 
+          enableSystemTheme={true}
+          enableColorSchemePreference={true}
+        >
+          <ErrorProvider>
+            <SessionProvider>
+              <QueryProvider>
+                <GlobalHeader />
+                <GlobalWeatherAlerts />
+                <main className="min-h-screen">
+                  {children}
+                </main>
+              </QueryProvider>
+            </SessionProvider>
+          </ErrorProvider>
+        </EnhancedThemeProvider>
       </body>
     </html>
   )

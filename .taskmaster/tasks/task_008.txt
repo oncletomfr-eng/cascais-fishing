@@ -1,0 +1,11 @@
+# Task ID: 8
+# Title: Commission Tracking & Reporting
+# Status: pending
+# Dependencies: 6, 7
+# Priority: high
+# Description: Build commission calculation system with rate display, history tracking, payout scheduling, and tax reporting preparation
+# Details:
+Create dynamic commission rate display (15-20%). Build commission history with trend analysis. Implement payout schedule management interface. Add tax reporting data preparation. Include commission calculator tools. Integrate with captain subscription tiers using existing commission calculation logic from payment API.
+
+# Test Strategy:
+

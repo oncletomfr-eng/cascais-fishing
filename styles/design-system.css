@@ -1,0 +1,318 @@
+/**
+ * Design System CSS - Global styles following Instructure UI patterns
+ * Integrated with Tailwind CSS and enhanced theme variables
+ */
+
+/* Enhanced CSS Variables from Design System */
+:root {
+  /* Cascais Fishing Brand Colors - Light Theme */
+  --color-brand-ocean-blue: oklch(0.5 0.15 240);
+  --color-brand-sunset-orange: oklch(0.65 0.2 45);
+  --color-brand-deep-water: oklch(0.25 0 0);
+  --color-brand-sandy-beach: oklch(0.98 0.01 85);
+  --color-brand-sea-foam: oklch(0.6 0.15 160);
+  
+  /* Enhanced semantic color mapping */
+  --background: var(--color-ui-surfaceLight, oklch(1 0 0));
+  --foreground: var(--color-ui-textPrimary, oklch(0.25 0 0));
+  --card: var(--color-ui-surfaceLight, oklch(0.98 0.01 85));
+  --card-foreground: var(--color-ui-textPrimary, oklch(0.25 0 0));
+  --primary: var(--color-brand-ocean-blue);
+  --primary-foreground: var(--color-contrast-white1010, oklch(1 0 0));
+  --secondary: var(--color-brand-sunset-orange);
+  --secondary-foreground: var(--color-contrast-white1010, oklch(1 0 0));
+  --accent: var(--color-brand-sea-foam);
+  --accent-foreground: var(--color-contrast-white1010, oklch(1 0 0));
+  --destructive: var(--color-contrast-red4570, oklch(0.6 0.2 25));
+  --destructive-foreground: var(--color-contrast-white1010, oklch(1 0 0));
+  --border: var(--color-ui-borderLight, oklch(0.9 0.01 85));
+  --input: var(--color-ui-surfaceLight, oklch(0.95 0.01 85));
+  --ring: var(--color-brand-ocean-blue);
+  
+  /* Enhanced spacing system */
+  --spacing-component-button: var(--spacing-buttons, 0.75rem 1.5rem);
+  --spacing-component-card: var(--spacing-cards, 1.5rem);
+  --spacing-component-section: var(--spacing-sections, 3rem 0);
+  --spacing-component-container: var(--spacing-containers, 0 1rem);
+  
+  /* Typography enhancements */
+  --font-family-heading: var(--font-family-primary, var(--font-montserrat));
+  --font-family-body: var(--font-family-secondary, var(--font-open-sans));
+  --font-family-ui: var(--font-family-primary, var(--font-montserrat));
+  
+  /* Component-specific variables following Instructure UI patterns */
+  --button-border-radius: var(--border-radiusMedium, 0.5rem);
+  --button-min-height: 2.5rem;
+  --button-focus-ring: 0 0 0 2px var(--color-brand-ocean-blue);
+  
+  --card-border-radius: var(--border-radiusLarge, 0.75rem);
+  --card-shadow: var(--shadow-card);
+  --card-hover-shadow: var(--shadow-large);
+  
+  --input-border-radius: var(--border-radiusMedium, 0.5rem);
+  --input-focus-ring: 0 0 0 2px var(--color-brand-ocean-blue);
+  --input-error-ring: 0 0 0 2px var(--color-contrast-red4570);
+}
+
+/* Dark theme overrides */
+.dark {
+  --color-brand-ocean-blue: oklch(0.7 0.15 240);
+  --color-brand-sunset-orange: oklch(0.75 0.2 45);
+  --color-brand-deep-water: oklch(0.98 0.01 85);
+  --color-brand-sandy-beach: oklch(0.15 0 0);
+  --color-brand-sea-foam: oklch(0.7 0.15 160);
+  
+  --background: var(--color-ui-surfaceDark, oklch(0.145 0 0));
+  --foreground: var(--color-ui-textPrimary, oklch(0.985 0 0));
+  --card: var(--color-ui-surfaceLight, oklch(0.145 0 0));
+  --card-foreground: var(--color-ui-textPrimary, oklch(0.985 0 0));
+  --border: var(--color-ui-borderLight, oklch(0.334 0 0));
+  --input: var(--color-ui-surfaceLight, oklch(0.145 0 0));
+}
+
+/* Accessibility enhancements */
+.high-contrast {
+  --border: oklch(0 0 0);
+  --input: oklch(1 0 0);
+  --button-focus-ring: 0 0 0 3px var(--color-brand-ocean-blue);
+  --input-focus-ring: 0 0 0 3px var(--color-brand-ocean-blue);
+}
+
+.reduce-motion {
+  --duration-fast: 0s;
+  --duration-medium: 0s;
+  --duration-slow: 0s;
+}
+
+.focus-visible :focus-visible {
+  outline: 2px solid var(--color-brand-ocean-blue);
+  outline-offset: 2px;
+}
+
+/* Enhanced base styles */
+html {
+  font-family: var(--font-family-body);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color var(--duration-medium) var(--timing-ease),
+              color var(--duration-medium) var(--timing-ease);
+}
+
+/* Enhanced component base styles following Instructure UI patterns */
+
+/* Button enhancements */
+button,
+[role="button"] {
+  font-family: var(--font-family-ui);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--button-border-radius);
+  min-height: var(--button-min-height);
+  transition: all var(--duration-fast) var(--timing-ease);
+  cursor: pointer;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible {
+  box-shadow: var(--button-focus-ring);
+  outline: none;
+}
+
+button:disabled,
+[role="button"]:disabled {
+  opacity: var(--disabled-opacity, 0.5);
+  cursor: not-allowed;
+}
+
+/* Input enhancements */
+input,
+textarea,
+select {
+  font-family: var(--font-family-body);
+  border-radius: var(--input-border-radius);
+  transition: border-color var(--duration-fast) var(--timing-ease),
+              box-shadow var(--duration-fast) var(--timing-ease);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: var(--input-focus-ring);
+}
+
+input:invalid,
+textarea:invalid {
+  box-shadow: var(--input-error-ring);
+}
+
+/* Card enhancements */
+.card,
+[data-component="card"] {
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--card-shadow);
+  transition: box-shadow var(--duration-medium) var(--timing-ease);
+}
+
+.card:hover,
+[data-component="card"]:hover {
+  box-shadow: var(--card-hover-shadow);
+}
+
+/* Typography scale utilities */
+.text-display-1 {
+  font-size: var(--font-size-6xl);
+  font-weight: var(--font-weight-black);
+  line-height: var(--line-height-tight);
+  font-family: var(--font-family-heading);
+}
+
+.text-display-2 {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  font-family: var(--font-family-heading);
+}
+
+.text-heading-1 {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  font-family: var(--font-family-heading);
+}
+
+.text-heading-2 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+  font-family: var(--font-family-heading);
+}
+
+.text-heading-3 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+  font-family: var(--font-family-heading);
+}
+
+.text-heading-4 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  font-family: var(--font-family-heading);
+}
+
+.text-body-large {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+  font-family: var(--font-family-body);
+}
+
+.text-body {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  font-family: var(--font-family-body);
+}
+
+.text-body-small {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+  font-family: var(--font-family-body);
+}
+
+.text-caption {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+  font-family: var(--font-family-body);
+  color: var(--color-ui-textSecondary);
+}
+
+/* Utility classes for spacing */
+.space-component {
+  gap: var(--spacing-medium);
+}
+
+.space-section {
+  padding: var(--spacing-sections);
+}
+
+.space-container {
+  padding: var(--spacing-containers);
+}
+
+/* Brand color utilities */
+.text-ocean-blue {
+  color: var(--color-brand-ocean-blue);
+}
+
+.text-sunset-orange {
+  color: var(--color-brand-sunset-orange);
+}
+
+.text-sea-foam {
+  color: var(--color-brand-sea-foam);
+}
+
+.bg-ocean-blue {
+  background-color: var(--color-brand-ocean-blue);
+}
+
+.bg-sunset-orange {
+  background-color: var(--color-brand-sunset-orange);
+}
+
+.bg-sea-foam {
+  background-color: var(--color-brand-sea-foam);
+}
+
+/* Enhanced focus styles for accessibility */
+.focus-ring:focus-visible {
+  box-shadow: var(--button-focus-ring);
+  outline: none;
+}
+
+/* Animation utilities that respect reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-smooth {
+    transition: all var(--duration-medium) var(--timing-ease);
+  }
+  
+  .animate-fast {
+    transition: all var(--duration-fast) var(--timing-ease);
+  }
+  
+  .animate-slow {
+    transition: all var(--duration-slow) var(--timing-ease);
+  }
+}
+
+/* Print styles */
+@media print {
+  * {
+    box-shadow: none !important;
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* High contrast media query support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: oklch(0 0 0);
+    --input: oklch(1 0 0);
+  }
+}
+
+/* Reduced motion media query support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

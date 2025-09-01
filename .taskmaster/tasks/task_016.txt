@@ -1,0 +1,37 @@
+# Task ID: 16
+# Title: Captain Dashboard Interface
+# Status: pending
+# Dependencies: 13, 14, 15
+# Priority: high
+# Description: Build specialized captain interface with participant approval management, revenue tracking, trip analytics, and weather integration
+# Details:
+Create participant approval queue with actions. Build revenue and commission tracking charts. Implement trip performance analytics dashboard. Add weather integration for trip planning. Include bulk approval operations. Add captain-specific insights and recommendations. Build on existing EnhancedCaptainDashboard.tsx component.
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Participant Approval Management [pending]
+### Dependencies: None
+### Description: Build comprehensive participant approval system with queue management and bulk operations
+### Details:
+Create approval queue with participant details. Add bulk approval/rejection actions. Implement participant scoring system. Show participant history and ratings. Include approval status tracking. Add automated approval rules based on criteria.
+
+## 2. Captain Revenue Tracking [pending]
+### Dependencies: ["16.1"]
+### Description: Implement comprehensive revenue and commission tracking specifically for captain earnings
+### Details:
+Build captain-specific revenue dashboard. Show commission breakdowns by service type. Track payout schedules and history. Display earning trends and projections. Include tax reporting features. Add performance-based commission visualization.
+
+## 3. Trip Performance Analytics [pending]
+### Dependencies: ["16.2"]
+### Description: Create detailed analytics for trip success rates, participant satisfaction, and operational metrics
+### Details:
+Build trip success rate tracking. Show participant satisfaction metrics. Display booking conversion rates. Include weather impact analysis. Track trip completion rates. Add seasonal performance patterns. Show comparative analytics with other captains.
+
+## 4. Weather Integration for Trip Planning [pending]
+### Dependencies: ["16.1"]
+### Description: Integrate weather data and forecasting tools to assist captains in trip planning and decision making
+### Details:
+Integrate weather API for real-time conditions. Show extended forecasts for trip planning. Add weather alerts for unsafe conditions. Include wind, wave, and visibility data. Build weather-based trip recommendations. Add historical weather impact analysis.
+

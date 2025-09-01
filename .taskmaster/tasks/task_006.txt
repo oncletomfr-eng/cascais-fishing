@@ -1,0 +1,37 @@
+# Task ID: 6
+# Title: Payment Dashboard Core
+# Status: pending
+# Dependencies: 2, 5
+# Priority: critical
+# Description: Build comprehensive payment management interface with revenue overview, KPI cards, earnings trends, and commission breakdowns
+# Details:
+Create revenue overview with animated KPI cards. Build monthly earnings trend charts. Implement commission breakdown visualization. Add real-time data updates. Ensure responsive design for mobile. Include export functionality for reports. Use Recharts for visualizations and connect to existing payment analytics API.
+
+# Test Strategy:
+
+
+# Subtasks:
+## 1. Revenue Overview KPI Cards [pending]
+### Dependencies: None
+### Description: Create animated KPI cards showing total revenue, monthly earnings, commission rates, and growth metrics
+### Details:
+Build responsive KPI card components. Implement real-time data updates. Add percentage change indicators with colors. Include period comparison (month-over-month, year-over-year). Add loading states and error handling. Implement count-up animations for numbers.
+
+## 2. Earnings Trend Visualizations [pending]
+### Dependencies: ["6.1"]
+### Description: Implement interactive charts for monthly/weekly earnings trends using Recharts library
+### Details:
+Create line charts for earnings over time. Add bar charts for monthly comparisons. Implement area charts for revenue streams. Include interactive tooltips and zoom functionality. Add date range picker for custom periods. Ensure responsive design for mobile.
+
+## 3. Commission Breakdown Analysis [pending]
+### Dependencies: ["6.1"]
+### Description: Create detailed commission analysis with breakdowns by service type, captain tier, and time periods
+### Details:
+Build pie charts for commission distribution. Show commission by service type (tours, courses, advertising). Display captain tier impact on commissions. Add commission trend analysis. Include commission calculation transparency. Show payout schedule and history.
+
+## 4. Data Export & Reporting System [pending]
+### Dependencies: ["6.2", "6.3"]
+### Description: Implement comprehensive data export functionality for payments, earnings, and tax reporting
+### Details:
+Add CSV export for all payment data. Create PDF reports for tax purposes. Implement Excel export with formatted sheets. Add scheduled report generation. Include custom date range exports. Build email delivery for automated reports.
+
