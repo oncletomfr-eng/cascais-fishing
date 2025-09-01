@@ -7,23 +7,23 @@ const globalForPrisma = global as unknown as {
 // Production-ready Supabase connection URLs
 const getProductionDatabaseUrl = () => {
   if (process.env.NODE_ENV === 'production') {
-    // Use Transaction pooler for serverless functions (preferred)
-    return "postgresql://postgres.spblkbrkxmknfjugoueo:sdbSV_232sdsfbdKSK@aws-0-eu-west-3.pooler.supabase.com:6543/postgres"
+    // Use Transaction pooler for serverless functions with pgbouncer=true to disable prepared statements
+    return "postgresql://postgres.spblkbrkxmknfjugoueo:sdbSV_232sdsfbdKSK@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true"
   }
   return process.env.DATABASE_URL
 }
 
-const prismaConfig = process.env.NODE_ENV === 'production' 
-  ? {
-      datasources: {
-        db: {
-          url: getProductionDatabaseUrl()
+export const prisma = globalForPrisma.prisma || 
+  (process.env.NODE_ENV === 'production' 
+    ? new PrismaClient({
+        datasources: {
+          db: {
+            url: getProductionDatabaseUrl()
+          }
         }
-      }
-    }
-  : {}
-
-export const prisma = globalForPrisma.prisma || new PrismaClient(prismaConfig)
+      })
+    : new PrismaClient()
+  )
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
