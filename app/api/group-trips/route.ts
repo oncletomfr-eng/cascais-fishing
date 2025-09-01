@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { transformTripToDisplay } from '@/lib/utils/group-trips-utils';
 import { GroupTripStatus, BookingStatus } from '@prisma/client';
 // WebSocket broadcast - conditionally imported to avoid errors in production
-import { broadcastGroupTripUpdate } from './ws/route';
+import { broadcastGroupTripUpdateSSE } from './sse/route';
 import { AchievementTriggers } from '@/lib/services/achievement-service';
 
 export async function GET(request: NextRequest) {
@@ -607,9 +607,9 @@ export async function POST(request: NextRequest) {
     // Преобразуем в формат для отображения
     const displayTrip = transformTripToDisplay(newTrip);
 
-    // WebSocket broadcast for real-time notifications
+    // Server-Sent Events broadcast for real-time notifications (Vercel compatible)
     try {
-      await broadcastGroupTripUpdate({
+      await broadcastGroupTripUpdateSSE({
         tripId: newTrip.id,
         type: 'status_changed',
         currentParticipants: 0,
@@ -629,9 +629,9 @@ export async function POST(request: NextRequest) {
         difficultyRating: newTrip.difficultyRating,
         pricePerPerson: Number(newTrip.pricePerPerson)
       });
-      console.log('📡 Broadcasted new trip creation with FishingEvent data:', newTrip.id);
-    } catch (wsError) {
-      console.error('❌ WebSocket broadcast failed:', wsError);
+      console.log('📡 Broadcasted new trip creation with FishingEvent data via SSE:', newTrip.id);
+    } catch (sseError) {
+      console.error('❌ SSE broadcast failed:', sseError);
       // Не прерываем выполнение, просто логируем ошибку
     }
 

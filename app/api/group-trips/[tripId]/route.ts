@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { transformTripToDisplay } from '@/lib/utils/group-trips-utils';
 import { BookingStatus } from '@prisma/client';
-import { broadcastGroupTripUpdate } from '../ws/route';
+import { broadcastGroupTripUpdateSSE } from '../sse/route';
 
 export async function GET(
   request: NextRequest,
@@ -167,8 +167,8 @@ export async function PUT(
         status = 'almost_full';
       }
       
-      // WebSocket broadcast temporarily disabled
-      /* await broadcastGroupTripUpdate({
+      // Server-Sent Events broadcast for real-time notifications (Vercel compatible)
+      await broadcastGroupTripUpdateSSE({
         tripId: updatedTrip.id,
         type: 'status_changed',
         currentParticipants,
@@ -176,10 +176,10 @@ export async function PUT(
         timestamp: new Date(),
         spotsRemaining,
         maxParticipants: updatedTrip.maxParticipants
-      }); */
-      console.log('📡 Broadcasted trip update:', updatedTrip.id);
-    } catch (wsError) {
-      console.error('❌ WebSocket broadcast failed:', wsError);
+      });
+      console.log('📡 Broadcasted trip update via SSE:', updatedTrip.id);
+    } catch (sseError) {
+      console.error('❌ SSE broadcast failed:', sseError);
     }
 
     return NextResponse.json({
@@ -302,9 +302,9 @@ export async function POST(
         status = 'almost_full';
       }
 
-      // WebSocket broadcast temporarily disabled
-      /* try {
-        await broadcastGroupTripUpdate({
+      // Server-Sent Events broadcast for real-time notifications (Vercel compatible)
+      try {
+        await broadcastGroupTripUpdateSSE({
           tripId: updatedTrip.id,
           type: 'participant_joined',
           currentParticipants: newCurrentParticipants,
@@ -314,10 +314,10 @@ export async function POST(
           maxParticipants: updatedTrip.maxParticipants,
           participantName: contactName
         });
-        console.log('📡 Broadcasted participant joined:', updatedTrip.id, contactName);
-      } catch (wsError) {
-        console.error('❌ WebSocket broadcast failed:', wsError);
-      } */
+        console.log('📡 Broadcasted participant joined via SSE:', updatedTrip.id, contactName);
+      } catch (sseError) {
+        console.error('❌ SSE broadcast failed:', sseError);
+      }
 
       const displayTrip = transformTripToDisplay(updatedTrip);
       

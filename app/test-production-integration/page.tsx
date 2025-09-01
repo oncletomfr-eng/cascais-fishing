@@ -136,56 +136,77 @@ function TestProductionIntegrationPage() {
       });
     }
 
-    // Test 2: WebSocket Connection 
+    // Test 2: SSE Real-time Connection (WebSocket Alternative)
     try {
-      // Try to connect to WebSocket in both dev and production
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${wsProtocol}//${window.location.host}/api/group-trips/ws`;
+      // Test Server-Sent Events connection (Vercel compatible)
+      const sseUrl = `/api/group-trips/sse`;
       
-      const wsTest = new WebSocket(wsUrl);
-      let wsResolved = false;
-
-      // Test WebSocket connection
       await new Promise((resolve, reject) => {
+        let eventSource: EventSource;
+        
         const timeout = setTimeout(() => {
-          if (!wsResolved) {
-            wsTest.close();
-            reject(new Error('WebSocket connection timeout after 5 seconds'));
+          if (eventSource) {
+            eventSource.close();
           }
+          reject(new Error('SSE connection timeout after 5 seconds'));
         }, 5000);
 
-        wsTest.onopen = () => {
-          wsResolved = true;
+        eventSource = new EventSource(sseUrl);
+        
+        eventSource.onopen = () => {
           clearTimeout(timeout);
+          eventSource.close();
           results.push({
-            name: 'WebSocket Connection',
+            name: 'Real-time Connection (SSE)',
             status: 'success',
-            message: 'WebSocket подключение установлено успешно',
-            details: { url: wsUrl, status: 'connected' }
+            message: 'Server-Sent Events подключение работает',
+            details: { url: sseUrl, type: 'SSE', compatible: 'Vercel serverless functions' }
           });
-          wsTest.close();
           resolve(true);
         };
 
-        wsTest.onerror = (error) => {
-          wsResolved = true;
+        eventSource.onerror = (error) => {
           clearTimeout(timeout);
+          eventSource.close();
           results.push({
-            name: 'WebSocket Connection',
+            name: 'Real-time Connection (SSE)', 
             status: 'error',
-            message: 'WebSocket подключение не удалось',
-            details: { url: wsUrl, error: error.toString() }
+            message: 'SSE подключение не удалось',
+            details: { url: sseUrl, error: error.toString() }
           });
           reject(error);
         };
+
+        // Test if we receive connection event
+        eventSource.addEventListener('connected', (event) => {
+          clearTimeout(timeout);
+          const data = JSON.parse(event.data);
+          results.push({
+            name: 'Real-time Connection (SSE)',
+            status: 'success',
+            message: 'SSE подключение и события работают корректно',
+            details: { 
+              url: sseUrl, 
+              clientId: data.clientId,
+              type: 'SSE',
+              compatible: 'Vercel serverless functions',
+              note: 'Заменяет WebSocket функциональность'
+            }
+          });
+          eventSource.close();
+          resolve(true);
+        });
       });
     } catch (error) {
-      if (!results.some(r => r.name === 'WebSocket Connection')) {
+      if (!results.some(r => r.name === 'Real-time Connection (SSE)')) {
         results.push({
-          name: 'WebSocket Connection',
+          name: 'Real-time Connection (SSE)',
           status: 'error', 
-          message: 'Ошибка подключения WebSocket',
-          details: { error: error instanceof Error ? error.message : String(error) }
+          message: 'Ошибка подключения SSE',
+          details: { 
+            error: error instanceof Error ? error.message : String(error),
+            note: 'SSE заменяет WebSocket для совместимости с Vercel'
+          }
         });
       }
     }
