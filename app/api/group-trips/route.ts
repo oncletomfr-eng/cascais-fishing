@@ -19,6 +19,8 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
     
     console.log('🔍 Starting Group Trips API request with params:', { status, timeSlot, limit, offset });
+    console.log('🔍 Database URL configured:', !!process.env.DATABASE_URL);
+    console.log('🔍 Direct URL configured:', !!process.env.DIRECT_URL);
     
     // Temporary fix: Check if group_trips table exists first
     try {
