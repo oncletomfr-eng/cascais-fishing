@@ -14,10 +14,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import { 
   BarChart3, Users, TrendingUp, Eye, Settings,
-  Sparkles, Trophy, Target, RefreshCw
+  Sparkles, Trophy, Target, RefreshCw, Star
 } from 'lucide-react'
 import ProfileStatisticsOverview from '@/components/analytics/ProfileStatisticsOverview'
 import BookingPerformanceAnalytics from '@/components/analytics/BookingPerformanceAnalytics'
+import ReviewAnalytics from '@/components/analytics/ReviewAnalytics'
 import { ProfileAnalyticsDashboard } from '@/components/profiles/ProfileAnalyticsDashboard'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
@@ -27,6 +28,8 @@ interface DemoSettings {
   showPredictions: boolean
   autoRefresh: boolean
   showBookingProjections: boolean
+  includeSentiment: boolean
+  includeImpact: boolean
   userId?: string
 }
 
@@ -37,6 +40,8 @@ export default function AnalyticsDashboardTestPage() {
     showPredictions: false,
     autoRefresh: false,
     showBookingProjections: true,
+    includeSentiment: true,
+    includeImpact: true,
     userId: session?.user?.id
   })
 
@@ -71,6 +76,12 @@ export default function AnalyticsDashboardTestPage() {
       color: "text-green-600"
     },
     {
+      title: "Review & Rating Analytics",
+      description: "Advanced sentiment analysis, rating distributions, quality scores, improvement insights, and impact analysis",
+      status: "✅ Task 13.3 Complete",
+      color: "text-green-600"
+    },
+    {
       title: "Performance Indicators",
       description: "Smart categorization of performance levels (Excellent, Good, Average, Needs Attention)",
       status: "✅ Implemented",
@@ -100,7 +111,7 @@ export default function AnalyticsDashboardTestPage() {
             </h1>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               Comprehensive analytics suite with profile statistics, booking performance analysis, 
-              conversion funnels, cancellation patterns, and predictive insights.
+              review sentiment analysis, quality scoring, improvement insights, and predictive analytics.
             </p>
           </motion.div>
         </div>
@@ -113,10 +124,10 @@ export default function AnalyticsDashboardTestPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           {[
-            { label: 'Analytics Components', value: '2', icon: BarChart3, color: 'text-blue-600' },
-            { label: 'Chart Types', value: '8+', icon: Target, color: 'text-green-600' },
-            { label: 'Conversion Metrics', value: '6', icon: TrendingUp, color: 'text-purple-600' },
-            { label: 'Performance Insights', value: '4', icon: Trophy, color: 'text-yellow-600' }
+            { label: 'Analytics Components', value: '3', icon: BarChart3, color: 'text-blue-600' },
+            { label: 'Chart Types', value: '12+', icon: Target, color: 'text-green-600' },
+            { label: 'Analytics Features', value: '20+', icon: TrendingUp, color: 'text-purple-600' },
+            { label: 'Insight Categories', value: '7', icon: Trophy, color: 'text-yellow-600' }
           ].map((stat, index) => {
             const Icon = stat.icon
             return (
@@ -133,7 +144,7 @@ export default function AnalyticsDashboardTestPage() {
 
         {/* Main content */}
         <Tabs defaultValue="enhanced" className="space-y-6">
-          <TabsList className="grid w-full max-w-4xl mx-auto grid-cols-5">
+          <TabsList className="grid w-full max-w-5xl mx-auto grid-cols-6">
             <TabsTrigger value="enhanced" className="flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
               Profile
@@ -141,6 +152,10 @@ export default function AnalyticsDashboardTestPage() {
             <TabsTrigger value="booking" className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               Booking
+            </TabsTrigger>
+            <TabsTrigger value="review" className="flex items-center gap-2">
+              <Star className="w-4 h-4" />
+              Review
             </TabsTrigger>
             <TabsTrigger value="original" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
@@ -257,6 +272,65 @@ export default function AnalyticsDashboardTestPage() {
                 userId={demoSettings.userId}
                 period="month"
                 showProjections={demoSettings.showBookingProjections}
+                autoRefresh={demoSettings.autoRefresh}
+              />
+            </motion.div>
+          </TabsContent>
+
+          {/* Review Analytics Tab */}
+          <TabsContent value="review">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Review & Rating Analytics</h2>
+                <p className="text-muted-foreground mb-4">
+                  Task 13.3 implementation with comprehensive review sentiment analysis, rating distributions, 
+                  quality scores, improvement insights, and impact on bookings.
+                </p>
+                
+                {/* Settings toggles */}
+                <div className="flex flex-wrap gap-4 p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="reviewSentiment"
+                      checked={demoSettings.includeSentiment}
+                      onCheckedChange={(checked) => updateSetting('includeSentiment', checked)}
+                    />
+                    <label htmlFor="reviewSentiment" className="text-sm font-medium">
+                      Sentiment Analysis
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="reviewImpact"
+                      checked={demoSettings.includeImpact}
+                      onCheckedChange={(checked) => updateSetting('includeImpact', checked)}
+                    />
+                    <label htmlFor="reviewImpact" className="text-sm font-medium">
+                      Impact Analysis
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="reviewAutoRefresh"
+                      checked={demoSettings.autoRefresh}
+                      onCheckedChange={(checked) => updateSetting('autoRefresh', checked)}
+                    />
+                    <label htmlFor="reviewAutoRefresh" className="text-sm font-medium">
+                      Auto Refresh (1min)
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <ReviewAnalytics 
+                userId={demoSettings.userId}
+                period="month"
+                includeSentiment={demoSettings.includeSentiment}
+                includeImpact={demoSettings.includeImpact}
                 autoRefresh={demoSettings.autoRefresh}
               />
             </motion.div>
@@ -431,6 +505,32 @@ export default function AnalyticsDashboardTestPage() {
                           onCheckedChange={(checked) => updateSetting('showBookingProjections', checked)}
                         />
                       </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <label className="text-sm font-medium">Sentiment Analysis</label>
+                          <p className="text-xs text-muted-foreground">
+                            Analyze review emotions and keywords
+                          </p>
+                        </div>
+                        <Switch 
+                          checked={demoSettings.includeSentiment}
+                          onCheckedChange={(checked) => updateSetting('includeSentiment', checked)}
+                        />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <label className="text-sm font-medium">Review Impact Analysis</label>
+                          <p className="text-xs text-muted-foreground">
+                            Analyze how reviews affect future bookings
+                          </p>
+                        </div>
+                        <Switch 
+                          checked={demoSettings.includeImpact}
+                          onCheckedChange={(checked) => updateSetting('includeImpact', checked)}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -476,6 +576,15 @@ export default function AnalyticsDashboardTestPage() {
                       <p className="text-xs text-muted-foreground ml-4">
                         Booking funnel analysis, conversion rates, cancellation patterns, seasonal trends, 
                         value analytics, and predictive insights.
+                      </p>
+                      
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm">Task 13.3: Review & Rating Analytics - ✅ Complete</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground ml-4">
+                        Sentiment analysis, rating distributions, quality scores, improvement insights,
+                        response metrics, and impact analysis on bookings.
                       </p>
                     </div>
                   </div>
