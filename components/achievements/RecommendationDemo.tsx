@@ -20,10 +20,11 @@ import {
 import AchievementRecommendations from './AchievementRecommendations'
 import {
   type UserProfile,
+  type AchievementCategory,
   type DifficultyLevel,
   updateUserProfile
 } from '@/lib/hooks/useAchievementRecommendations'
-import { useAchievements, type BadgeCategory } from '@/lib/hooks/useAchievements'
+import { useAchievements } from '@/lib/hooks/useAchievements'
 import { toast } from 'sonner'
 
 // Demo user profiles representing different player types
