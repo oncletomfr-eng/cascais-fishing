@@ -136,7 +136,7 @@ async function getBookingAnalytics(
           pricePerPerson: true,
           status: true,
           maxParticipants: true,
-          location: true,
+          departureLocation: true,
           createdAt: true
         }
       },
