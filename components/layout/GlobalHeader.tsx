@@ -32,6 +32,7 @@ const NAVIGATION_ITEMS = [
   { href: '/test-mobile-optimization', label: 'Тест мобильной версии' },
   { href: '/test-confetti', label: 'Тест конфетти' },
   { href: '/test-achievement-system', label: '🏆 Система достижений' },
+  { href: '/test-progress-tracking', label: '📈 Прогресс и уровни' },
   { href: '/test-production-integration', label: 'Тест интеграции' },
 ];
 

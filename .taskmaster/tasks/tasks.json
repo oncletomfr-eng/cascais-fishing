@@ -64,7 +64,7 @@
         "id": 4,
         "title": "Advanced Fishing Event Filters",
         "description": "Implement comprehensive filtering system with species selection, technique filtering, event categorization, difficulty sliders, and weather toggles",
-        "status": "in-progress",
+        "status": "done",
         "priority": "high",
         "phase": "Foundation",
         "estimatedHours": 45,
@@ -353,7 +353,7 @@
         "id": 11,
         "title": "Progress Tracking & Leveling",
         "description": "Build user progress visualization with level progression, experience points, streak tracking, and milestone celebrations",
-        "status": "pending",
+        "status": "in-progress",
         "priority": "high",
         "phase": "Gamification",
         "estimatedHours": 40,
@@ -721,7 +721,7 @@
       "budget": "€50,000",
       "expectedROI": "€90k+/month revenue, 2160% ROI over 12 months",
       "created": "2025-09-01T14:28:28.045Z",
-      "updated": "2025-09-02T20:55:52.189Z"
+      "updated": "2025-09-02T21:51:42.899Z"
     }
   }
 }
