@@ -6,7 +6,13 @@ import { Channel } from 'stream-chat'
  */
 
 // Фазы чата для рыболовного события
-export type ChatPhase = 'preparation' | 'live' | 'debrief'
+export enum ChatPhase {
+  PREPARATION = 'preparation',
+  DURING_TRIP = 'live',
+  POST_TRIP = 'debrief'
+}
+
+export type ChatPhaseString = 'preparation' | 'live' | 'debrief'
 
 // Тип чата на основе интерфейса из ТЗ
 export interface EventChat {
@@ -27,7 +33,7 @@ export interface EventChat {
 // Отдельный чат для каждой фазы
 export interface Chat {
   channelId: string
-  phase: ChatPhase
+  phase: ChatPhaseString
   channel: Channel | null
   isActive: boolean
   startDate?: Date
@@ -42,7 +48,7 @@ export interface Chat {
 
 // Конфигурация для каждой фазы чата
 export interface ChatPhaseConfig {
-  phase: ChatPhase
+  phase: ChatPhaseString
   title: string
   description: string
   icon: string
@@ -99,7 +105,7 @@ export interface CustomMessageData {
   type: CustomMessageType
   payload: WeatherUpdatePayload | CatchPhotoPayload | LocationSharePayload | FishingTipPayload | GearRecommendationPayload | RouteUpdatePayload | SafetyAlertPayload
   timestamp: Date
-  phase: ChatPhase
+  phase: ChatPhaseString
   tripId: string
   authorId: string
 }
@@ -266,7 +272,7 @@ export interface SafetyAlertPayload {
 }
 
 // Конфигурации фаз по умолчанию
-export const DEFAULT_PHASE_CONFIGS: Record<ChatPhase, ChatPhaseConfig> = {
+export const DEFAULT_PHASE_CONFIGS: Record<ChatPhaseString, ChatPhaseConfig> = {
   preparation: {
     phase: 'preparation',
     title: '🎣 Подготовка к поездке',
@@ -369,7 +375,7 @@ export const DEFAULT_PHASE_CONFIGS: Record<ChatPhase, ChatPhaseConfig> = {
 // События многофазного чата
 export interface MultiPhaseChatEvent {
   type: 'phase_changed' | 'message_sent' | 'feature_used' | 'auto_message_triggered'
-  phase: ChatPhase
+  phase: ChatPhaseString
   tripId: string
   userId?: string
   data?: any
@@ -378,7 +384,7 @@ export interface MultiPhaseChatEvent {
 
 // Статистика использования чата
 export interface ChatPhaseStats {
-  phase: ChatPhase
+  phase: ChatPhaseString
   messagesCount: number
   participantsCount: number
   customMessagesCount: Record<CustomMessageType, number>
@@ -390,17 +396,17 @@ export interface ChatPhaseStats {
 // Менеджер многофазного чата  
 export interface MultiPhaseChatManager {
   tripId: string
-  currentPhase: ChatPhase
-  phases: Record<ChatPhase, Chat>
+  currentPhase: ChatPhaseString
+  phases: Record<ChatPhaseString, Chat>
   features: EventChat['features']
   
   // Методы управления
-  switchPhase(phase: ChatPhase): Promise<void>
+  switchPhase(phase: ChatPhaseString): Promise<void>
   getCurrentChat(): Chat | null
   sendCustomMessage(type: CustomMessageType, payload: any): Promise<void>
-  getPhaseStats(phase: ChatPhase): ChatPhaseStats
+  getPhaseStats(phase: ChatPhaseString): ChatPhaseStats
   
   // События
-  onPhaseChange?: (phase: ChatPhase) => void
+  onPhaseChange?: (phase: ChatPhaseString) => void
   onCustomMessage?: (message: CustomMessageData) => void
 }

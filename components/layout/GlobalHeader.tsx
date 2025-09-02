@@ -34,6 +34,7 @@ const NAVIGATION_ITEMS = [
   { href: '/test-achievement-system', label: '🏆 Система достижений' },
   { href: '/test-progress-tracking', label: '📈 Прогресс и уровни' },
   { href: '/test-profile-statistics', label: '📊 Статистика профиля' },
+  { href: '/test-real-time-chat', label: '💬 Real-time чат' },
   { href: '/test-production-integration', label: 'Тест интеграции' },
 ];
 
