@@ -4,6 +4,7 @@
  */
 
 import { PrismaClient, UserRole, FishingExperience, FishingSpecialty, BadgeCategory, ApprovalStatus, GroupTripStatus, TimeSlot, SkillLevelRequired, SocialEventMode, EquipmentType, FishingEventType, AchievementRarity, AchievementType, PaymentStatus, BookingStatus, ParticipantApprovalMode } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -66,12 +67,14 @@ async function createUsers() {
   
   const users = [];
   
-  // Создание администратора
+  // Создание администратора с паролем
+  const adminPassword = await bcrypt.hash('qwerty123', 12);
   const admin = await prisma.user.create({
     data: {
       id: 'admin-1',
       name: 'Admin User',
       email: 'admin@cascaisfishing.com',
+      password: adminPassword,
       emailVerified: new Date(),
       image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face',
       role: UserRole.ADMIN,
@@ -87,11 +90,13 @@ async function createUsers() {
   ];
   
   for (let i = 0; i < captainData.length; i++) {
+    const captainPassword = await bcrypt.hash('password123', 12);
     const captain = await prisma.user.create({
       data: {
         id: `captain-${i + 1}`,
         name: captainData[i].name,
         email: captainData[i].email,
+        password: captainPassword,
         emailVerified: new Date(),
         image: captainData[i].image,
         role: UserRole.CAPTAIN,
@@ -112,11 +117,13 @@ async function createUsers() {
   ];
   
   for (let i = 0; i < participantData.length; i++) {
+    const participantPassword = await bcrypt.hash('password123', 12);
     const participant = await prisma.user.create({
       data: {
         id: `participant-${i + 1}`,
         name: participantData[i].name,
         email: participantData[i].email,
+        password: participantPassword,
         emailVerified: new Date(),
         image: participantData[i].image,
         role: UserRole.PARTICIPANT,
