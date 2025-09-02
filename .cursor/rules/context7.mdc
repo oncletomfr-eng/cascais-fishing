@@ -1,0 +1,36 @@
+---
+description: Before executing any task, study all necessary documentation and implement solutions with real-world testing and verification 
+globs: ["**/*"] 
+alwaysApply: true
+---
+Documentation Research and Real Implementation Rule
+Core Requirements
+
+Before proceeding with any individual task execution, you must:
+
+    Study Complete Documentation: Research and study all necessary documentation for the given topic on context7 or relevant sources
+    Full Implementation: Execute the task completely and comprehensively in reality
+    Real-World Verification: All actions must be performed in reality and verified in reality
+    Online Testing: Test the implementation and verify its correct operation online through browsermcp or appropriate testing tools
+
+Prohibited Actions
+
+    NO Speculation: Do not invent, imagine, or synthesize data
+    NO Simulation: Do not simulate or imitate functionality
+    NO Assumptions: Do not make assumptions about functionality without verification
+
+Reporting Standards
+
+You may only write a task completion report when you have:
+
+    Actually tested the implementation in reality
+    Verified the correct operation online through browsermcp
+    Confirmed all functionality works as expected
+
+Implementation Workflow
+
+    Documentation Phase: Thoroughly research all relevant documentation
+    Implementation Phase: Build/execute the complete solution
+    Testing Phase: Test all functionality in real conditions
+    Verification Phase: Confirm correct operation through online testing
+    Reporting Phase: Document verified results only

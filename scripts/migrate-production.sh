@@ -1,12 +1,23 @@
 #!/bin/bash
 
-echo "🚀 Deploying Prisma migrations to production database..."
+# Production Migration Script for Cascais Fishing
+# This script applies all pending migrations to production database
 
-# Use Vercel environment variables for production database connection
-vercel env pull .env.production
-source .env.production
+echo "🚀 Starting production database migration..."
 
-echo "📡 Running Prisma migrations on production database..."
+# Set production environment
+export NODE_ENV=production
+
+# Apply all migrations to production database
+echo "📦 Applying migrations..."
 npx prisma migrate deploy
 
-echo "✅ Migrations completed!"
+echo "🔄 Generating Prisma client..."
+npx prisma generate
+
+echo "🌱 Seeding database with initial data..."
+npx prisma db seed
+
+echo "✅ Production migration completed successfully!"
+echo "🔍 Database status:"
+npx prisma db status
