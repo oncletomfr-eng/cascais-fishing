@@ -64,7 +64,7 @@
         "id": 4,
         "title": "Advanced Fishing Event Filters",
         "description": "Implement comprehensive filtering system with species selection, technique filtering, event categorization, difficulty sliders, and weather toggles",
-        "status": "pending",
+        "status": "in-progress",
         "priority": "high",
         "phase": "Foundation",
         "estimatedHours": 45,
@@ -566,7 +566,7 @@
         "id": 17,
         "title": "Multi-Phase Chat Core System",
         "description": "Implement context-aware chat with preparation, active trip, and post-trip phases, including phase transitions and specialized interfaces",
-        "status": "in-progress",
+        "status": "done",
         "priority": "high",
         "phase": "Chat System",
         "estimatedHours": 60,
@@ -653,7 +653,7 @@
         "id": 18,
         "title": "Custom Message Types & Cards",
         "description": "Create specialized message components for weather updates, catch photos, location sharing, fishing tips, and gear recommendations",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "phase": "Chat System",
         "estimatedHours": 45,
@@ -721,7 +721,7 @@
       "budget": "€50,000",
       "expectedROI": "€90k+/month revenue, 2160% ROI over 12 months",
       "created": "2025-09-01T14:28:28.045Z",
-      "updated": "2025-09-02T08:39:25.692Z"
+      "updated": "2025-09-02T20:55:52.189Z"
     }
   }
 }

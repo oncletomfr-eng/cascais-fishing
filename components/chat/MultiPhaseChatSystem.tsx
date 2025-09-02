@@ -52,8 +52,16 @@ import {
   WeatherUpdatePayload,
   CatchPhotoPayload,
   LocationSharePayload,
-  FishingTipPayload
+  FishingTipPayload,
+  GearRecommendationPayload,
+  RouteUpdatePayload,
+  SafetyAlertPayload
 } from '@/lib/types/multi-phase-chat'
+import { 
+  StreamChatCustomMessage, 
+  sendCustomMessage, 
+  createCustomMessageData 
+} from './custom-messages/StreamChatCustomMessage'
 
 // Import Stream Chat styles
 import 'stream-chat-react/dist/css/v2/index.css'
@@ -514,9 +522,44 @@ function MultiPhaseChannelContent({
   // Получить канал для текущей фазы
   const channel = client.channel('messaging', channelId)
 
+  // Обработчики для кастомных сообщений
+  const handleImageClick = (imageUrl: string) => {
+    // Открыть изображение в модальном окне
+    window.open(imageUrl, '_blank')
+  }
+
+  const handleNavigateClick = (coordinates: { lat: number, lng: number }) => {
+    // Открыть координаты в картах
+    const url = `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`
+    window.open(url, '_blank')
+  }
+
+  const handlePurchaseClick = (link: string) => {
+    // Открыть ссылку на покупку
+    window.open(link, '_blank')
+  }
+
+  const handleEmergencyCall = (contact: { name: string, phone: string, type: string }) => {
+    // Инициировать экстренный вызов
+    if (confirm(`Вызвать ${contact.name} (${contact.type}): ${contact.phone}?`)) {
+      window.location.href = `tel:${contact.phone}`
+    }
+  }
+
+  // Кастомный компонент сообщения с обработчиками
+  const CustomMessage = (props: any) => (
+    <StreamChatCustomMessage
+      {...props}
+      onImageClick={handleImageClick}
+      onNavigateClick={handleNavigateClick}
+      onPurchaseClick={handlePurchaseClick}
+      onEmergencyCall={handleEmergencyCall}
+    />
+  )
+
   return (
     <div className="h-full flex flex-col">
-      <Channel channel={channel}>
+      <Channel channel={channel} Message={CustomMessage}>
         <Window>
           <CustomChannelHeader />
           <MessageList />
@@ -598,15 +641,37 @@ function CustomMessageInput({
         }
       },
       gear_recommendation: {
-        category: 'equipment' as const,
-        title: 'Рекомендация снастей',
-        description: 'Лучшие снасти для этих условий',
-        difficulty: 'beginner' as const,
+        category: 'rod' as const,
+        name: 'Спиннинг Daiwa Ninja X',
+        brand: 'Daiwa',
+        model: 'Ninja X 2.4m',
+        description: 'Отличный спиннинг для начинающих и опытных рыбаков. Легкий, чувствительный, с хорошим балансом.',
+        price: {
+          min: 120,
+          max: 150,
+          currency: 'EUR'
+        },
+        suitableFor: {
+          species: ['Окунь', 'Щука', 'Судак'],
+          techniques: ['Джиг', 'Воблер', 'Блесна'],
+          experienceLevel: ['beginner', 'intermediate']
+        },
+        pros: ['Легкий вес', 'Отличная чувствительность', 'Доступная цена'],
+        cons: ['Не подходит для крупной рыбы'],
         author: {
           id: 'current-user',
-          name: 'Капитан',
+          name: 'Капитан Иван',
           experienceLevel: 'captain' as const
-        }
+        },
+        rating: 4.8,
+        verified: true,
+        purchaseLinks: [
+          {
+            name: 'Рыболовный магазин',
+            url: 'https://example.com/rod',
+            price: 135
+          }
+        ]
       },
       route_update: {
         coordinates: { lat: 38.7167, lng: -9.4167 },

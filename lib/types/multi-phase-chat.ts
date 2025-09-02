@@ -97,7 +97,7 @@ export type CustomMessageType =
 // Структура кастомного сообщения
 export interface CustomMessageData {
   type: CustomMessageType
-  payload: WeatherUpdatePayload | CatchPhotoPayload | LocationSharePayload | FishingTipPayload
+  payload: WeatherUpdatePayload | CatchPhotoPayload | LocationSharePayload | FishingTipPayload | GearRecommendationPayload | RouteUpdatePayload | SafetyAlertPayload
   timestamp: Date
   phase: ChatPhase
   tripId: string
@@ -167,6 +167,102 @@ export interface FishingTipPayload {
   }
   rating?: number
   verified?: boolean
+}
+
+export interface GearRecommendationPayload {
+  category: 'rod' | 'reel' | 'line' | 'hooks' | 'bait' | 'lures' | 'accessories' | 'safety'
+  name: string
+  brand?: string
+  model?: string
+  description: string
+  price?: {
+    min: number
+    max: number
+    currency: string
+  }
+  images?: string[]
+  specifications?: Record<string, string>
+  pros?: string[]
+  cons?: string[]
+  suitableFor: {
+    species?: string[]
+    techniques?: string[]
+    conditions?: string[]
+    experienceLevel?: ('beginner' | 'intermediate' | 'advanced')[]
+  }
+  purchaseLinks?: {
+    name: string
+    url: string
+    price?: number
+  }[]
+  author: {
+    id: string
+    name: string
+    experienceLevel: 'novice' | 'experienced' | 'expert' | 'captain'
+  }
+  rating?: number
+  verified?: boolean
+}
+
+export interface RouteUpdatePayload {
+  routeId: string
+  routeName: string
+  waypoints: {
+    lat: number
+    lng: number
+    name?: string
+    description?: string
+    estimatedArrivalTime?: Date
+  }[]
+  totalDistance?: number
+  estimatedDuration?: number
+  weatherConditions?: {
+    current: WeatherUpdatePayload
+    forecast: WeatherUpdatePayload[]
+  }
+  safetyNotes?: string[]
+  alternativeRoutes?: {
+    name: string
+    description: string
+    waypoints: { lat: number, lng: number }[]
+  }[]
+  author: {
+    id: string
+    name: string
+    role: 'captain' | 'navigator' | 'participant'
+  }
+  lastUpdated: Date
+}
+
+export interface SafetyAlertPayload {
+  alertLevel: 'info' | 'warning' | 'danger' | 'emergency'
+  alertType: 'weather' | 'equipment' | 'medical' | 'navigation' | 'wildlife' | 'general'
+  title: string
+  description: string
+  location?: {
+    lat: number
+    lng: number
+    radius?: number
+    description?: string
+  }
+  actionRequired?: string[]
+  expiresAt?: Date
+  relatedRoutes?: string[]
+  emergencyContacts?: {
+    name: string
+    phone: string
+    type: 'coast_guard' | 'medical' | 'harbor_master' | 'emergency'
+  }[]
+  author: {
+    id: string
+    name: string
+    role: 'captain' | 'coast_guard' | 'weather_service' | 'participant'
+  }
+  timestamp: Date
+  acknowledged?: {
+    userId: string
+    timestamp: Date
+  }[]
 }
 
 // Конфигурации фаз по умолчанию
