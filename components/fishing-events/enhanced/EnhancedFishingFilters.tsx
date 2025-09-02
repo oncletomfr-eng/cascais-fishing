@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { 
   Filter, 
   RefreshCcw,
   Settings,
   X,
-  TrendingUp
+  TrendingUp,
+  Trash2
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -216,6 +217,38 @@ export function EnhancedFishingFilters({
 }: EnhancedFishingFiltersProps) {
   const [activeTab, setActiveTab] = useState<'basic' | 'advanced' | 'weather'>('basic')
 
+  // 💾 Сохранение состояния фильтров
+  useEffect(() => {
+    try {
+      const filterStateKey = 'fishing-event-filters'
+      localStorage.setItem(filterStateKey, JSON.stringify({
+        ...filters,
+        // Исключаем dateRange из сохранения для избежания проблем с сериализацией Date
+        dateRange: undefined
+      }))
+    } catch (error) {
+      console.warn('Failed to save filter state:', error)
+    }
+  }, [filters])
+
+  // 💾 Загрузка сохраненного состояния при монтировании
+  useEffect(() => {
+    try {
+      const filterStateKey = 'fishing-event-filters'
+      const savedFilters = localStorage.getItem(filterStateKey)
+      if (savedFilters) {
+        const parsedFilters = JSON.parse(savedFilters)
+        // Объединяем сохраненные фильтры с текущими (приоритет у сохраненных)
+        onFiltersChange({
+          ...filters,
+          ...parsedFilters
+        })
+      }
+    } catch (error) {
+      console.warn('Failed to load filter state:', error)
+    }
+  }, []) // Выполняется только при монтировании
+
   // Подсчет активных фильтров
   const activeFiltersCount = useMemo(() => {
     let count = 0
@@ -238,6 +271,18 @@ export function EnhancedFishingFilters({
   const updateFilters = useCallback((newFilters: Partial<ExtendedTripFilters>) => {
     onFiltersChange({ ...filters, ...newFilters })
   }, [filters, onFiltersChange])
+
+  // 💾 Очистка сохраненного состояния
+  const clearSavedState = useCallback(() => {
+    try {
+      const filterStateKey = 'fishing-event-filters'
+      localStorage.removeItem(filterStateKey)
+      // Также сбрасываем текущие фильтры
+      onResetFilters()
+    } catch (error) {
+      console.warn('Failed to clear saved filter state:', error)
+    }
+  }, [onResetFilters])
 
   // Удаление конкретного фильтра
   const removeFilter = useCallback((key: string) => {
@@ -280,15 +325,27 @@ export function EnhancedFishingFilters({
               )}
             </AnimatePresence>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onResetFilters}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <RefreshCcw className="h-4 w-4 mr-1" />
-            Reset
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onResetFilters}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCcw className="h-4 w-4 mr-1" />
+              Reset
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearSavedState}
+              className="text-muted-foreground hover:text-destructive"
+              title="Clear saved filter preferences"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Clear Saved
+            </Button>
+          </div>
         </div>
         <CardDescription>
           Advanced filtering system for fishing events with enhanced UX and detailed options.
