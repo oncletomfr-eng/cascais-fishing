@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="23" failures="22" errors="0" time="81.467">
+  <testsuite name="PhaseTransitionManager" errors="0" failures="22" skipped="0" timestamp="2025-09-02T08:29:53" time="0.882" tests="23">
+    <testcase classname="PhaseTransitionManager Basic Phase Transitions should initialize with default state" name="PhaseTransitionManager Basic Phase Transitions should initialize with default state" time="0.002">
+      <failure>TypeError: manager.getCurrentState is not a function
+    at Object.getCurrentState (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:35:29)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Basic Phase Transitions should transition from preparation to live phase" name="PhaseTransitionManager Basic Phase Transitions should transition from preparation to live phase" time="0.002">
+      <failure>TypeError: manager.transitionTo is not a function
+    at Object.transitionTo (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:47:36)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Basic Phase Transitions should transition from live to debrief phase" name="PhaseTransitionManager Basic Phase Transitions should transition from live to debrief phase" time="0.004">
+      <failure>TypeError: manager.transitionTo is not a function
+    at Object.transitionTo (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:59:21)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Basic Phase Transitions should prevent invalid transitions" name="PhaseTransitionManager Basic Phase Transitions should prevent invalid transitions" time="0.004">
+      <failure>TypeError: manager.transitionTo is not a function
+    at Object.transitionTo (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:72:36)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Transition Rules and Validation should validate transition rules" name="PhaseTransitionManager Transition Rules and Validation should validate transition rules" time="0.007">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: undefined
+    at Object.toBe (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:86:41)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Transition Rules and Validation should respect custom validation rules" name="PhaseTransitionManager Transition Rules and Validation should respect custom validation rules" time="0.001">
+      <failure>TypeError: manager.setValidationRule is not a function
+    at Object.setValidationRule (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:92:15)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Transition Rules and Validation should check dependencies before transition" name="PhaseTransitionManager Transition Rules and Validation should check dependencies before transition" time="0.001">
+      <failure>TypeError: manager.setDependencyCheck is not a function
+    at Object.setDependencyCheck (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:104:15)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Event System should emit transition events in correct order" name="PhaseTransitionManager Event System should emit transition events in correct order" time="0.001">
+      <failure>TypeError: manager.transitionTo is not a function
+    at Object.transitionTo (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:123:21)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Event System should emit error events on failed transitions" name="PhaseTransitionManager Event System should emit error events on failed transitions" time="0.001">
+      <failure>TypeError: manager.transitionTo is not a function
+    at Object.transitionTo (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:135:21)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Event System should handle event listener cleanup" name="PhaseTransitionManager Event System should handle event listener cleanup" time="0.002">
+    </testcase>
+    <testcase classname="PhaseTransitionManager State Management should maintain transition history" name="PhaseTransitionManager State Management should maintain transition history" time="0">
+      <failure>TypeError: manager.transitionTo is not a function
+    at Object.transitionTo (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:154:21)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager State Management should track transition timing" name="PhaseTransitionManager State Management should track transition timing" time="0.001">
+      <failure>TypeError: manager.transitionTo is not a function
+    at Object.transitionTo (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:168:21)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager State Management should handle concurrent transitions" name="PhaseTransitionManager State Management should handle concurrent transitions" time="0">
+      <failure>TypeError: manager.transitionTo is not a function
+    at Object.transitionTo (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:181:32)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Auto-Transition Features should support time-based auto transitions" name="PhaseTransitionManager Auto-Transition Features should support time-based auto transitions" time="0.003">
+      <failure>TypeError: Cannot assign to read only property &apos;performance&apos; of object &apos;[object Window]&apos;
+    at hijackMethod (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/@sinonjs+fake-timers@13.0.5/node_modules/@sinonjs/fake-timers/src/fake-timers-src.js:1029:32)
+    at Object.install (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/@sinonjs+fake-timers@13.0.5/node_modules/@sinonjs/fake-timers/src/fake-timers-src.js:1885:17)
+    at FakeTimers.useFakeTimers (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/@jest+fake-timers@30.1.2/node_modules/@jest/fake-timers/build/index.js:605:36)
+    at Object.useFakeTimers (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runtime@30.1.2/node_modules/jest-runtime/build/index.js:1693:38)
+    at Object.useFakeTimers (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:194:12)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusHook (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:975:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:940:5)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Auto-Transition Features should cancel auto transitions when manually transitioning" name="PhaseTransitionManager Auto-Transition Features should cancel auto transitions when manually transitioning" time="0.001">
+      <failure>TypeError: Can&apos;t install fake timers twice on the same global object.
+    at Object.install (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/@sinonjs+fake-timers@13.0.5/node_modules/@sinonjs/fake-timers/src/fake-timers-src.js:1767:19)
+    at FakeTimers.useFakeTimers (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/@jest+fake-timers@30.1.2/node_modules/@jest/fake-timers/build/index.js:605:36)
+    at Object.useFakeTimers (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runtime@30.1.2/node_modules/jest-runtime/build/index.js:1693:38)
+    at Object.useFakeTimers (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:194:12)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusHook (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:975:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:940:5)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Data Migration Integration should migrate data during transitions" name="PhaseTransitionManager Data Migration Integration should migrate data during transitions" time="0.001">
+      <failure>TypeError: manager.getMigrationService is not a function
+    at Object.getMigrationService (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:242:44)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Data Migration Integration should handle migration failures" name="PhaseTransitionManager Data Migration Integration should handle migration failures" time="0">
+      <failure>TypeError: manager.getMigrationService is not a function
+    at Object.getMigrationService (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:254:44)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Performance and Resource Management should complete transitions within reasonable time" name="PhaseTransitionManager Performance and Resource Management should complete transitions within reasonable time" time="0.001">
+      <failure>TypeError: manager.transitionTo is not a function
+    at Object.transitionTo (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:270:21)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Performance and Resource Management should clean up resources on destroy" name="PhaseTransitionManager Performance and Resource Management should clean up resources on destroy" time="0.001">
+      <failure>TypeError: manager.getCurrentState is not a function
+    at Object.getCurrentState (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:284:22)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Performance and Resource Management should handle memory efficiently with large history" name="PhaseTransitionManager Performance and Resource Management should handle memory efficiently with large history" time="0.001">
+      <failure>TypeError: manager.transitionTo is not a function
+    at Object.transitionTo (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:290:23)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Error Handling and Recovery should recover from failed transitions" name="PhaseTransitionManager Error Handling and Recovery should recover from failed transitions" time="0.002">
+      <failure>TypeError: manager.setValidationRule is not a function
+    at Object.setValidationRule (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:303:15)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Error Handling and Recovery should handle async validation errors" name="PhaseTransitionManager Error Handling and Recovery should handle async validation errors" time="0.001">
+      <failure>TypeError: manager.setDependencyCheck is not a function
+    at Object.setDependencyCheck (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:315:15)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+    <testcase classname="PhaseTransitionManager Error Handling and Recovery should maintain state consistency after errors" name="PhaseTransitionManager Error Handling and Recovery should maintain state consistency after errors" time="0.002">
+      <failure>TypeError: manager.getCurrentState is not a function
+    at Object.getCurrentState (/Users/vitavitalij/Documents/cascais-fishing/lib/transition/__tests__/PhaseTransitionManager.test.ts:327:36)
+    at Promise.finally.completed (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1556:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1496:10)
+    at _callCircusTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1006:40)
+    at _runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:946:3)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:829:11)
+    at run (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/jestAdapterInit.js:1917:21)
+    at jestAdapter (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-circus@30.1.2_babel-plugin-macros@3.1.0/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:275:16)
+    at runTest (/Users/vitavitalij/Documents/cascais-fishing/node_modules/.pnpm/jest-runner@30.1.2/node_modules/jest-runner/build/index.js:343:7)</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

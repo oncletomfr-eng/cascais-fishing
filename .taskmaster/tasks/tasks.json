@@ -629,7 +629,7 @@
             "title": "Participant Management System",
             "description": "Implement participant list, online status, and role-based permissions for chat",
             "details": "Create participant list component with avatars. Show online/offline status indicators. Implement role-based permissions (captain, participant). Add participant join/leave notifications. Include typing indicators and message read status.",
-            "status": "in-progress",
+            "status": "done",
             "dependencies": [
               "[\"17.4\"]"
             ],
@@ -640,7 +640,7 @@
             "title": "Chat System Testing & Performance",
             "description": "Comprehensive testing of multi-phase chat functionality and performance optimization",
             "details": "Create unit tests for phase transitions. Add integration tests for Stream Chat. Test real-time message delivery. Performance testing with multiple participants. Memory leak prevention. Error handling and recovery testing.",
-            "status": "pending",
+            "status": "in-progress",
             "dependencies": [
               "[\"17.3\"",
               "\"17.5\"]"
@@ -721,7 +721,7 @@
       "budget": "€50,000",
       "expectedROI": "€90k+/month revenue, 2160% ROI over 12 months",
       "created": "2025-09-01T14:28:28.045Z",
-      "updated": "2025-09-02T07:44:23.399Z"
+      "updated": "2025-09-02T08:08:46.747Z"
     }
   }
 }
