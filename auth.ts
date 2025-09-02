@@ -48,7 +48,7 @@ export const {
 
         try {
           // Make request to our authentication API
-          const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/verify-credentials`, {
+          const response = await fetch(`${process.env.AUTH_URL || 'http://localhost:3000'}/api/auth/verify-credentials`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -80,14 +80,14 @@ export const {
 
     // GitHub OAuth
     GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID ?? "",
-      clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
+      clientId: process.env.AUTH_GITHUB_ID ?? "",
+      clientSecret: process.env.AUTH_GITHUB_SECRET ?? "",
     }),
 
     // Google OAuth  
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      clientId: process.env.AUTH_GOOGLE_ID ?? "",
+      clientSecret: process.env.AUTH_GOOGLE_SECRET ?? "",
     }),
   ],
   callbacks: {
