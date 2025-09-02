@@ -123,11 +123,13 @@ export default function GlobalHeader({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => signIn('google')}
+                asChild
                 className="hidden md:flex"
               >
-                <LogIn className="mr-2 h-4 w-4" />
-                Войти
+                <Link href="/auth/signin">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Войти
+                </Link>
               </Button>
             )}
 
@@ -212,14 +214,16 @@ export default function GlobalHeader({
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          signIn('google');
-                          setIsMobileMenuOpen(false);
-                        }}
+                        asChild
                         className="w-full"
                       >
-                        <LogIn className="mr-2 h-4 w-4" />
-                        Войти через Google
+                        <Link 
+                          href="/auth/signin"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <LogIn className="mr-2 h-4 w-4" />
+                          Войти
+                        </Link>
                       </Button>
                     )}
                   </div>

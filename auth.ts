@@ -1,72 +1,124 @@
 /**
- * Basic Auth Module - Placeholder for authentication functionality
- * This module provides basic authentication utilities for the Cascais Fishing platform
+ * NextAuth v5 Configuration for Cascais Fishing Platform
+ * Production-ready authentication with multiple providers
  */
 
-export interface User {
-  id: string;
-  name?: string | null;
-  email?: string | null;
-  image?: string | null;
-}
+import NextAuth from "next-auth"
+import { PrismaAdapter } from "@auth/prisma-adapter"
+import { prisma } from "@/lib/prisma"
+import CredentialsProvider from "next-auth/providers/credentials"
+import GitHubProvider from "next-auth/providers/github"
+import GoogleProvider from "next-auth/providers/google"
 
-export interface Session {
-  user?: User;
-  expires: string;
-}
-
-/**
- * Mock authentication function
- * In a real implementation, this would handle actual authentication logic
- */
-export async function auth(): Promise<Session | null> {
-  // Mock session for development
-  return {
-    user: {
-      id: 'demo-user',
-      name: 'Demo User',
-      email: 'demo@cascaisfishing.com',
-      image: null
-    },
-    expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours from now
-  };
-}
-
-/**
- * Mock sign in function
- * In a real implementation, this would handle sign in logic
- */
-export async function signIn(provider?: string, options?: any): Promise<void> {
-  console.log('Mock signIn called with provider:', provider, 'options:', options);
-  // In a real app, this would redirect to authentication provider
-}
-
-/**
- * Mock sign out function
- */
-export async function signOut(): Promise<void> {
-  console.log('Mock signOut called');
-  // In a real app, this would handle sign out logic
-}
-
-/**
- * NextAuth handlers
- * Mock handlers for development
- */
-export const handlers = {
-  GET: async (request: Request) => {
-    return new Response(JSON.stringify({ message: 'Mock GET handler' }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+// Configure authentication
+export const {
+  handlers,
+  auth,
+  signIn,
+  signOut,
+} = NextAuth({
+  adapter: PrismaAdapter(prisma),
+  session: {
+    strategy: "jwt",
   },
-  POST: async (request: Request) => {
-    return new Response(JSON.stringify({ message: 'Mock POST handler' }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-};
+  pages: {
+    signIn: "/auth/signin",
+    signUp: "/auth/signup",
+    error: "/auth/error",
+  },
+  providers: [
+    // Email/Password authentication
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { 
+          label: "Email", 
+          type: "email", 
+          placeholder: "your@email.com" 
+        },
+        password: { 
+          label: "Password", 
+          type: "password" 
+        }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null
+        }
 
-// Re-export common auth utilities
-export { auth as default };
+        try {
+          // Make request to our authentication API
+          const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/verify-credentials`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+          })
+
+          if (!response.ok) {
+            return null
+          }
+
+          const user = await response.json()
+          
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            image: user.image,
+          }
+        } catch (error) {
+          console.error("Authentication error:", error)
+          return null
+        }
+      }
+    }),
+
+    // GitHub OAuth
+    GitHubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID ?? "",
+      clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
+    }),
+
+    // Google OAuth  
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+    }),
+  ],
+  callbacks: {
+    async jwt({ token, user, account }) {
+      if (user) {
+        token.id = user.id
+        token.role = user.role || "user"
+      }
+      return token
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string
+        session.user.role = token.role as string
+      }
+      return session
+    },
+    async signIn({ user, account, profile }) {
+      // Allow sign in for all providers
+      return true
+    },
+  },
+  events: {
+    async signIn({ user, account, profile }) {
+      console.log(`User ${user.email} signed in with ${account?.provider}`)
+    },
+    async signOut({ token }) {
+      console.log(`User signed out: ${token?.email}`)
+    },
+  },
+})
+
+// Export types for better TypeScript support
+export type { Session, User } from "next-auth"
