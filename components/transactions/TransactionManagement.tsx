@@ -76,6 +76,8 @@ import { format } from 'date-fns';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { TransactionFiltersPanel, TransactionFilters, FilterPreset } from './TransactionFiltersPanel';
+import { GlobalSearchBar, SearchQuery, SearchSuggestion } from './GlobalSearchBar';
+import { useGlobalSearch } from '@/hooks/useGlobalSearch';
 
 // Types for transaction data
 export interface Transaction {
@@ -185,6 +187,21 @@ export function TransactionManagement({
   });
   const [filterPresets, setFilterPresets] = useState<FilterPreset[]>([]);
 
+  // Global search state
+  const globalSearch = useGlobalSearch({
+    onSearchExecute: (query: SearchQuery, searchText: string) => {
+      // Apply search to the data fetching
+      setSearchQuery(searchText);
+      setPaginationModel(prev => ({ ...prev, page: 0 })); // Reset to first page
+      
+      // Add result count to search history after fetching
+      // This will be updated when we get the actual results
+    },
+    onSearchClear: () => {
+      setSearchQuery('');
+    }
+  });
+
   // Row count for server-side pagination
   const [rowCount, setRowCount] = useState(0);
   
@@ -283,12 +300,20 @@ export function TransactionManagement({
     } finally {
       setLoading(false);
     }
-  }, [session?.user, paginationModel, sortModel, searchQuery, statusFilter, typeFilter, advancedFilters]);
+  }, [session?.user, paginationModel, sortModel, searchQuery, statusFilter, typeFilter, advancedFilters, globalSearch.searchValue]);
 
   // Effect to fetch data when dependencies change
   useEffect(() => {
     fetchTransactions();
   }, [fetchTransactions]);
+
+  // Update search history with result count after fetching
+  useEffect(() => {
+    if (globalSearch.searchValue && rowCount > 0) {
+      // Update the most recent search in history with result count
+      globalSearch.addToHistory(globalSearch.searchValue, rowCount);
+    }
+  }, [rowCount, globalSearch.searchValue, globalSearch.addToHistory]);
 
   // Handle row selection
   const handleRowSelectionChange = useCallback((newSelection: GridRowSelectionModel) => {
@@ -559,6 +584,143 @@ export function TransactionManagement({
     // TODO: Delete from backend/localStorage
   }, []);
 
+  // Handle global search suggestion selection
+  const handleSearchSuggestionSelect = useCallback((suggestion: SearchSuggestion) => {
+    // Parse the suggestion and apply appropriate filters
+    if (suggestion.type === 'customer' && suggestion.metadata?.customerId) {
+      // Set customer filter
+      setAdvancedFilters(prev => ({
+        ...prev,
+        customerSearch: suggestion.metadata?.customerName || ''
+      }));
+    } else if (suggestion.type === 'transaction' && suggestion.metadata?.transactionId) {
+      // Set transaction ID search
+      setAdvancedFilters(prev => ({
+        ...prev,
+        transactionIdSearch: suggestion.metadata?.transactionId || ''
+      }));
+    } else if (suggestion.type === 'amount' && suggestion.metadata?.amount) {
+      // Set amount filter
+      const amount = suggestion.metadata?.amount || 0;
+      setAdvancedFilters(prev => ({
+        ...prev,
+        amountRange: {
+          min: amount / 100,
+          max: amount / 100
+        }
+      }));
+    }
+    
+    // Reset pagination
+    setPaginationModel(prev => ({ ...prev, page: 0 }));
+  }, []);
+
+  // Handle advanced search query parsing for filters
+  const handleAdvancedSearchQuery = useCallback((query: SearchQuery) => {
+    if (!query.operator || !query.field || !query.value) return;
+
+    const newFilters = { ...advancedFilters };
+    
+    switch (query.field) {
+      case 'customer':
+        newFilters.customerSearch = query.value;
+        break;
+      case 'amount':
+        // Parse amount operators like >100, <50, =75
+        const amountMatch = query.value.match(/^([<>=]?)(\d+(?:\.\d+)?)$/);
+        if (amountMatch) {
+          const [, operator, amount] = amountMatch;
+          const numAmount = parseFloat(amount);
+          
+          switch (operator) {
+            case '>':
+              newFilters.amountRange = { min: numAmount, max: null };
+              break;
+            case '<':
+              newFilters.amountRange = { min: null, max: numAmount };
+              break;
+            case '=':
+            default:
+              newFilters.amountRange = { min: numAmount, max: numAmount };
+              break;
+          }
+        }
+        break;
+      case 'status':
+        if (!newFilters.status.includes(query.value)) {
+          newFilters.status = [query.value];
+        }
+        break;
+      case 'payment':
+        if (!newFilters.paymentMethod.includes(query.value)) {
+          newFilters.paymentMethod = [query.value];
+        }
+        break;
+      case 'date':
+        // Handle date queries like 2024-01-01, today, week, etc.
+        if (query.value === 'today') {
+          const today = new Date();
+          newFilters.dateRange = {
+            start: new Date(today.getFullYear(), today.getMonth(), today.getDate()),
+            end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59)
+          };
+        } else if (query.value === 'week') {
+          const today = new Date();
+          const startOfWeek = new Date(today);
+          startOfWeek.setDate(today.getDate() - today.getDay());
+          newFilters.dateRange = {
+            start: startOfWeek,
+            end: today
+          };
+        } else if (query.value === 'month') {
+          const today = new Date();
+          const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+          newFilters.dateRange = {
+            start: startOfMonth,
+            end: today
+          };
+        } else if (/^\d{4}(-\d{1,2}(-\d{1,2})?)?$/.test(query.value)) {
+          // Handle YYYY, YYYY-MM, or YYYY-MM-DD formats
+          const dateStr = query.value;
+          const startDate = new Date(dateStr);
+          let endDate = new Date(dateStr);
+          
+          if (dateStr.length === 4) { // YYYY
+            endDate = new Date(parseInt(dateStr) + 1, 0, 1);
+          } else if (dateStr.length === 7) { // YYYY-MM
+            const [year, month] = dateStr.split('-');
+            endDate = new Date(parseInt(year), parseInt(month), 1);
+          } else { // YYYY-MM-DD
+            endDate.setHours(23, 59, 59, 999);
+          }
+          
+          newFilters.dateRange = { start: startDate, end: endDate };
+        }
+        break;
+    }
+    
+    setAdvancedFilters(newFilters);
+  }, [advancedFilters]);
+
+  // Update global search to use advanced query parsing
+  const enhancedGlobalSearch = {
+    ...globalSearch,
+    executeSearch: useCallback((customQuery?: SearchQuery) => {
+      const query = customQuery || globalSearch.parseQuery(globalSearch.searchValue);
+      
+      if (globalSearch.isValidQuery(query.text)) {
+        // Handle advanced search operators
+        handleAdvancedSearchQuery(query);
+        
+        // Add to history with result count (will be updated when results come back)
+        globalSearch.addToHistory(query.text);
+        
+        // Execute the original search
+        globalSearch.executeSearch(query);
+      }
+    }, [globalSearch, handleAdvancedSearchQuery])
+  };
+
   // Custom toolbar component
   const CustomToolbar = () => (
     <Box sx={{ p: 2, pb: 0 }}>
@@ -573,23 +735,19 @@ export function TransactionManagement({
         </Stack>
 
         <Stack direction="row" spacing={2} alignItems="center">
-          {/* Search */}
-          <TextField
-            size="small"
-            placeholder="Search transactions..."
-            value={searchQuery}
-            onChange={(e) => handleSearch(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ width: 250 }}
-          />
+          {/* Global Search Bar */}
+          <Box sx={{ minWidth: 400, flexGrow: 1, maxWidth: 600 }}>
+            <GlobalSearchBar
+              value={globalSearch.searchValue}
+              onChange={globalSearch.setSearchValue}
+              onSearch={enhancedGlobalSearch.executeSearch}
+              onSuggestionSelect={handleSearchSuggestionSelect}
+              loading={globalSearch.isSearching}
+              placeholder="Search transactions... Try: customer:john, amount:>100, status:completed"
+            />
+          </Box>
 
-          {/* Status Filter */}
+          {/* Legacy Status Filter (kept for backward compatibility) */}
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Status</InputLabel>
             <Select

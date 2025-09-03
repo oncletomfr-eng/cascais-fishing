@@ -258,7 +258,7 @@
             "title": "Advanced Filtering System",
             "description": "Implement comprehensive filtering capabilities with multiple filter types, date ranges, and status selections",
             "details": "Build advanced filter panel with transaction type filters (payment, refund, dispute). Add status filters (completed, pending, failed, cancelled). Implement date range picker with presets (today, week, month, quarter, year). Include amount range filters (min/max). Add payment method filters (card, bank transfer, etc.). Create filter presets and saved filters. Implement filter state persistence and URL-based filter sharing.",
-            "status": "in-progress",
+            "status": "done",
             "dependencies": [
               "7.1"
             ],
@@ -269,7 +269,7 @@
             "title": "Global Search Functionality",
             "description": "Add powerful search capabilities across all transaction data with real-time suggestions and advanced search operators",
             "details": "Implement global search input with auto-complete and search suggestions. Add search across transaction ID, customer name/email, payment method details, description fields. Include search operators (exact match, contains, starts with, date ranges). Implement search history and saved searches. Add search result highlighting and pagination. Optimize search performance with proper indexing and debounced queries.",
-            "status": "pending",
+            "status": "in-progress",
             "dependencies": [
               "7.1"
             ],
@@ -790,7 +790,7 @@
       "budget": "€50,000",
       "expectedROI": "€90k+/month revenue, 2160% ROI over 12 months",
       "created": "2025-09-01T14:28:28.045Z",
-      "updated": "2025-09-03T20:44:13.853Z"
+      "updated": "2025-09-03T20:59:55.942Z"
     }
   }
 }
