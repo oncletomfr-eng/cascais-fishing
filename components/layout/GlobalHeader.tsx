@@ -35,6 +35,7 @@ const NAVIGATION_ITEMS = [
   { href: '/test-progress-tracking', label: '📈 Прогресс и уровни' },
   { href: '/test-profile-statistics', label: '📊 Статистика профиля' },
   { href: '/test-real-time-chat', label: '💬 Real-time чат' },
+  { href: '/test-captain-dashboard', label: '🚢 Captain Dashboard' },
   { href: '/test-production-integration', label: 'Тест интеграции' },
 ];
 
