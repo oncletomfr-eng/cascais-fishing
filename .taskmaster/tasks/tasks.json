@@ -203,7 +203,7 @@
             "title": "Commission Breakdown Analysis",
             "description": "Create detailed commission analysis with breakdowns by service type, captain tier, and time periods",
             "details": "Build pie charts for commission distribution. Show commission by service type (tours, courses, advertising). Display captain tier impact on commissions. Add commission trend analysis. Include commission calculation transparency. Show payout schedule and history.",
-            "status": "in-progress",
+            "status": "done",
             "dependencies": [
               "[\"6.1\"]"
             ],
@@ -214,7 +214,7 @@
             "title": "Data Export & Reporting System",
             "description": "Implement comprehensive data export functionality for payments, earnings, and tax reporting",
             "details": "Add CSV export for all payment data. Create PDF reports for tax purposes. Implement Excel export with formatted sheets. Add scheduled report generation. Include custom date range exports. Build email delivery for automated reports.",
-            "status": "pending",
+            "status": "in-progress",
             "dependencies": [
               "[\"6.2\"",
               "\"6.3\"]"
@@ -721,7 +721,7 @@
       "budget": "€50,000",
       "expectedROI": "€90k+/month revenue, 2160% ROI over 12 months",
       "created": "2025-09-01T14:28:28.045Z",
-      "updated": "2025-09-03T20:09:13.561Z"
+      "updated": "2025-09-03T20:16:57.723Z"
     }
   }
 }

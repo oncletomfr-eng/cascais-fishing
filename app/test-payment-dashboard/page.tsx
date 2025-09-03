@@ -26,9 +26,11 @@ import {
 import { PaymentKPICards } from '@/components/analytics/PaymentKPICards';
 import { EarningsTrendCharts } from '@/components/analytics/EarningsTrendCharts';
 import { CommissionBreakdownAnalysis } from '@/components/analytics/CommissionBreakdownAnalysis';
+import { DataExportReporting } from '@/components/analytics/DataExportReporting';
 import { usePaymentAnalytics, usePaymentKPIs } from '@/hooks/usePaymentAnalytics';
 import useEarningsAnalytics from '@/hooks/useEarningsAnalytics';
 import useCommissionAnalytics from '@/hooks/useCommissionAnalytics';
+import useDataExport from '@/hooks/useDataExport';
 import { useToast } from '@/hooks/use-toast';
 import {
   BarChart3,
@@ -113,6 +115,12 @@ export default function PaymentDashboardTestPage() {
     autoRefresh: autoRefreshEnabled,
     refreshInterval: 30000, // 30 seconds
     includePayouts: true,
+  });
+
+  // Data export hook for export and reporting functionality
+  const dataExport = useDataExport({
+    autoRefresh: autoRefreshEnabled,
+    refreshInterval: 60000, // 1 minute for export history
   });
 
   // Handle parameter changes
@@ -299,7 +307,7 @@ export default function PaymentDashboardTestPage() {
 
         {/* Main Dashboard Tabs */}
         <Tabs defaultValue="kpis" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 max-w-2xl mx-auto">
+          <TabsList className="grid w-full grid-cols-6 max-w-3xl mx-auto">
             <TabsTrigger value="kpis" className="flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
               KPI Cards
@@ -311,6 +319,10 @@ export default function PaymentDashboardTestPage() {
             <TabsTrigger value="breakdowns" className="flex items-center gap-2">
               <PieChart className="h-4 w-4" />
               Breakdowns
+            </TabsTrigger>
+            <TabsTrigger value="exports" className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Exports
             </TabsTrigger>
             <TabsTrigger value="mock" className="flex items-center gap-2">
               <TestTube className="h-4 w-4" />
@@ -549,6 +561,106 @@ export default function PaymentDashboardTestPage() {
                     <h4 className="font-medium mb-2 text-red-600">Error Details</h4>
                     <div className="text-sm p-3 bg-red-50 border border-red-200 rounded">
                       {commissionAnalytics.error}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Data Export & Reporting Tab */}
+          <TabsContent value="exports" className="space-y-6">
+            <DataExportReporting
+              onExport={dataExport.exportData}
+              scheduledReports={dataExport.scheduledReports}
+              exportHistory={dataExport.exportHistory}
+              onScheduleReport={dataExport.createScheduledReport}
+              onUpdateScheduledReport={dataExport.updateScheduledReport}
+              onDeleteScheduledReport={dataExport.deleteScheduledReport}
+              loading={dataExport.loading}
+            />
+
+            {/* Export System Status */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Export System Status</CardTitle>
+                <CardDescription>
+                  Current status and metrics of the data export system
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-4">
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">System Status</div>
+                    <Badge variant={dataExport.loading ? 'default' : 'secondary'}>
+                      {dataExport.loading ? 'Loading...' : 'Ready'}
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Scheduled Reports</div>
+                    <div className="text-sm text-muted-foreground">
+                      {dataExport.scheduledReports?.length || 0} active
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Export History</div>
+                    <div className="text-sm text-muted-foreground">
+                      {dataExport.exportHistory?.length || 0} exports
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Last Updated</div>
+                    <div className="text-sm text-muted-foreground">
+                      {dataExport.lastUpdated ? 
+                        dataExport.lastUpdated.toLocaleTimeString() : 
+                        'Never'
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                {dataExport.exportHistory && dataExport.exportHistory.length > 0 && (
+                  <div className="mt-4 p-4 bg-muted rounded-lg">
+                    <h4 className="font-medium mb-2">Export Summary</h4>
+                    <div className="grid gap-2 md:grid-cols-3 text-sm">
+                      <div>
+                        Completed: {dataExport.exportHistory.filter(exp => exp.status === 'completed').length}
+                      </div>
+                      <div>
+                        Processing: {dataExport.exportHistory.filter(exp => exp.status === 'processing').length}
+                      </div>
+                      <div>
+                        Failed: {dataExport.exportHistory.filter(exp => exp.status === 'failed').length}
+                      </div>
+                      <div>
+                        Total Size: {Math.round(
+                          dataExport.exportHistory.reduce((sum, exp) => sum + exp.fileSize, 0) / 1024
+                        )} KB
+                      </div>
+                      <div>
+                        Total Records: {dataExport.exportHistory.reduce((sum, exp) => sum + exp.recordCount, 0)}
+                      </div>
+                      <div>
+                        Active Reports: {dataExport.scheduledReports.filter(rep => rep.isActive).length}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {dataExport.error && (
+                  <div className="mt-4">
+                    <h4 className="font-medium mb-2 text-red-600">Error Details</h4>
+                    <div className="text-sm p-3 bg-red-50 border border-red-200 rounded">
+                      {dataExport.error}
+                    </div>
+                  </div>
+                )}
+
+                {dataExport.exportError && (
+                  <div className="mt-4">
+                    <h4 className="font-medium mb-2 text-red-600">Export Error</h4>
+                    <div className="text-sm p-3 bg-red-50 border border-red-200 rounded">
+                      {dataExport.exportError}
                     </div>
                   </div>
                 )}
