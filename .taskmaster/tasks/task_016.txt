@@ -1,6 +1,6 @@
 # Task ID: 16
 # Title: Captain Dashboard Interface
-# Status: pending
+# Status: done
 # Dependencies: 13, 14, 15
 # Priority: high
 # Description: Build specialized captain interface with participant approval management, revenue tracking, trip analytics, and weather integration
@@ -11,25 +11,25 @@ Create participant approval queue with actions. Build revenue and commission tra
 
 
 # Subtasks:
-## 1. Participant Approval Management [pending]
+## 1. Participant Approval Management [done]
 ### Dependencies: None
 ### Description: Build comprehensive participant approval system with queue management and bulk operations
 ### Details:
 Create approval queue with participant details. Add bulk approval/rejection actions. Implement participant scoring system. Show participant history and ratings. Include approval status tracking. Add automated approval rules based on criteria.
 
-## 2. Captain Revenue Tracking [pending]
+## 2. Captain Revenue Tracking [done]
 ### Dependencies: ["16.1"]
 ### Description: Implement comprehensive revenue and commission tracking specifically for captain earnings
 ### Details:
 Build captain-specific revenue dashboard. Show commission breakdowns by service type. Track payout schedules and history. Display earning trends and projections. Include tax reporting features. Add performance-based commission visualization.
 
-## 3. Trip Performance Analytics [pending]
+## 3. Trip Performance Analytics [done]
 ### Dependencies: ["16.2"]
 ### Description: Create detailed analytics for trip success rates, participant satisfaction, and operational metrics
 ### Details:
 Build trip success rate tracking. Show participant satisfaction metrics. Display booking conversion rates. Include weather impact analysis. Track trip completion rates. Add seasonal performance patterns. Show comparative analytics with other captains.
 
-## 4. Weather Integration for Trip Planning [pending]
+## 4. Weather Integration for Trip Planning [done]
 ### Dependencies: ["16.1"]
 ### Description: Integrate weather data and forecasting tools to assist captains in trip planning and decision making
 ### Details:

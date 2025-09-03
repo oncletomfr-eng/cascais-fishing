@@ -161,7 +161,7 @@
         "id": 6,
         "title": "Payment Dashboard Core",
         "description": "Build comprehensive payment management interface with revenue overview, KPI cards, earnings trends, and commission breakdowns",
-        "status": "in-progress",
+        "status": "done",
         "priority": "critical",
         "phase": "Payment System",
         "estimatedHours": 60,
@@ -214,7 +214,7 @@
             "title": "Data Export & Reporting System",
             "description": "Implement comprehensive data export functionality for payments, earnings, and tax reporting",
             "details": "Add CSV export for all payment data. Create PDF reports for tax purposes. Implement Excel export with formatted sheets. Add scheduled report generation. Include custom date range exports. Build email delivery for automated reports.",
-            "status": "in-progress",
+            "status": "done",
             "dependencies": [
               "[\"6.2\"",
               "\"6.3\"]"
@@ -227,7 +227,7 @@
         "id": 7,
         "title": "Transaction Management System",
         "description": "Implement comprehensive transaction tracking with search, filters, detailed views, pagination, and export capabilities",
-        "status": "pending",
+        "status": "in-progress",
         "priority": "high",
         "phase": "Payment System",
         "estimatedHours": 40,
@@ -242,7 +242,76 @@
           "data-management",
           "search"
         ],
-        "details": "Build transaction list with server-side pagination. Implement advanced filtering by type, status, date. Create transaction detail modal with full info. Add search functionality across transaction data. Include bulk operations for transaction management. Add CSV/Excel export functionality. Leverage MUI X DataGrid advanced features."
+        "details": "Build transaction list with server-side pagination. Implement advanced filtering by type, status, date. Create transaction detail modal with full info. Add search functionality across transaction data. Include bulk operations for transaction management. Add CSV/Excel export functionality. Leverage MUI X DataGrid advanced features.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Transaction List with MUI DataGrid",
+            "description": "Create the core transaction list component using MUI X DataGrid with server-side pagination, sorting, and basic data display",
+            "details": "Build responsive transaction table using MUI X DataGrid Pro. Implement server-side pagination with configurable page sizes (25/50/100/250 rows). Add sortable columns for date, amount, status, payment method, customer. Include loading states and error handling. Connect to payments API with proper data fetching. Add column visibility controls and responsive design for mobile.",
+            "status": "in-progress",
+            "dependencies": [],
+            "parentTaskId": 7
+          },
+          {
+            "id": 2,
+            "title": "Advanced Filtering System",
+            "description": "Implement comprehensive filtering capabilities with multiple filter types, date ranges, and status selections",
+            "details": "Build advanced filter panel with transaction type filters (payment, refund, dispute). Add status filters (completed, pending, failed, cancelled). Implement date range picker with presets (today, week, month, quarter, year). Include amount range filters (min/max). Add payment method filters (card, bank transfer, etc.). Create filter presets and saved filters. Implement filter state persistence and URL-based filter sharing.",
+            "status": "pending",
+            "dependencies": [
+              "7.1"
+            ],
+            "parentTaskId": 7
+          },
+          {
+            "id": 3,
+            "title": "Global Search Functionality",
+            "description": "Add powerful search capabilities across all transaction data with real-time suggestions and advanced search operators",
+            "details": "Implement global search input with auto-complete and search suggestions. Add search across transaction ID, customer name/email, payment method details, description fields. Include search operators (exact match, contains, starts with, date ranges). Implement search history and saved searches. Add search result highlighting and pagination. Optimize search performance with proper indexing and debounced queries.",
+            "status": "pending",
+            "dependencies": [
+              "7.1"
+            ],
+            "parentTaskId": 7
+          },
+          {
+            "id": 4,
+            "title": "Transaction Detail Modal",
+            "description": "Create comprehensive transaction detail view with full transaction information, timeline, and related actions",
+            "details": "Build detailed transaction modal with complete payment information, customer details, payment method info, timeline of events. Add transaction status history with timestamps. Include related transactions (refunds, disputes, etc.). Add action buttons for refund, dispute, notes, manual status updates. Implement print/PDF export for individual transactions. Include audit trail and admin notes section with edit capabilities.",
+            "status": "pending",
+            "dependencies": [
+              "7.1"
+            ],
+            "parentTaskId": 7
+          },
+          {
+            "id": 5,
+            "title": "Bulk Operations System",
+            "description": "Implement bulk operations for efficient management of multiple transactions with safety checks and progress tracking",
+            "details": "Add bulk selection functionality with select all/none, filtered selection, and manual row selection. Implement bulk actions: status updates, refunds processing, export selected, add notes, assign tags. Include bulk operation progress tracking with real-time updates. Add confirmation dialogs with impact preview and safety warnings. Implement bulk operation history and rollback capabilities where applicable. Add permissions and role-based access control for bulk operations.",
+            "status": "pending",
+            "dependencies": [
+              "7.1",
+              "7.2"
+            ],
+            "parentTaskId": 7
+          },
+          {
+            "id": 6,
+            "title": "Export Integration & Reporting",
+            "description": "Integrate transaction management with existing export system and add transaction-specific reporting features",
+            "details": "Connect transaction table to existing DataExportReporting system from Task 6.4. Add transaction-specific export options with filtered data export. Implement scheduled transaction reports with customizable templates. Add quick export buttons for visible data, selected rows, and filtered results. Include transaction summary reports with statistics and charts. Add export format optimization for transaction data (CSV for data analysis, PDF for statements, Excel for accounting).",
+            "status": "pending",
+            "dependencies": [
+              "7.1",
+              "7.2",
+              "7.5"
+            ],
+            "parentTaskId": 7
+          }
+        ]
       },
       {
         "id": 8,
@@ -721,7 +790,7 @@
       "budget": "€50,000",
       "expectedROI": "€90k+/month revenue, 2160% ROI over 12 months",
       "created": "2025-09-01T14:28:28.045Z",
-      "updated": "2025-09-03T20:16:57.723Z"
+      "updated": "2025-09-03T20:32:58.399Z"
     }
   }
 }
