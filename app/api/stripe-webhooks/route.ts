@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
 import { prisma } from '@/lib/prisma';
+import { webhookProcessor } from '@/lib/services/webhook-processor';
 import Stripe from 'stripe';
 
 /**
@@ -80,21 +81,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    // Process event using centralized handler (t3dotgg pattern)
-    await processEvent(event);
+    // Process event using enhanced webhook processor with retry logic
+    const result = await webhookProcessor.processEvent(event, signature, body);
     
-    // Log successful processing for monitoring
-    console.log(`✅ Successfully processed event: ${event.type} (${event.id})`);
-
-    // Return success response (Context7 standard)
-    return NextResponse.json({ 
-      received: true,
-      event_type: event.type,
-      event_id: event.id 
-    });
+    if (result.success) {
+      console.log(`✅ Webhook processed successfully: ${event.type} (${event.id})`);
+      return NextResponse.json({ 
+        received: true,
+        event_type: event.type,
+        event_id: event.id,
+        processed_at: new Date().toISOString()
+      });
+    } else {
+      console.error(`❌ Webhook processing failed: ${event.type} (${event.id})`, result.error);
+      return NextResponse.json(
+        { 
+          error: 'Webhook processing failed',
+          event_type: event.type,
+          event_id: event.id,
+          details: result.error 
+        },
+        { status: 500 }
+      );
+    }
 
   } catch (error) {
-    console.error('❌ Error processing webhook:', error);
+    console.error('❌ Unexpected webhook error:', error);
     
     // Log error details for debugging
     console.error('Event details:', {
@@ -104,7 +116,7 @@ export async function POST(request: NextRequest) {
     });
     
     return NextResponse.json(
-      { error: 'Webhook processing failed' },
+      { error: 'Webhook processing failed unexpectedly' },
       { status: 500 }
     );
   }

@@ -627,6 +627,9 @@ model Payment {
   updatedAt DateTime  @updatedAt
   paidAt    DateTime?
   
+  // Связь с диспутами
+  disputes  PaymentDispute[]
+  
   @@map("payments")
 }
 
@@ -643,6 +646,52 @@ enum PaymentStatus {
   FAILED
   CANCELED
   REFUNDED
+  REQUIRES_ACTION
+}
+
+// Webhook Event Logs для мониторинга и отладки
+model WebhookEventLog {
+  id            String   @id @default(cuid())
+  eventType     String   // Тип Stripe события
+  eventId       String   @unique // ID события от Stripe
+  status        WebhookStatus @default(RECEIVED)
+  attempts      Int      @default(0)
+  maxAttempts   Int      @default(3)
+  lastError     String?  // Последняя ошибка
+  processingTime Int?    // Время обработки в мс
+  metadata      Json?    // Дополнительные данные
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("webhook_event_logs")
+}
+
+enum WebhookStatus {
+  RECEIVED
+  PROCESSING
+  SUCCESS
+  FAILED
+  RETRYING
+}
+
+// Отслеживание диспутов по платежам
+model PaymentDispute {
+  id               String   @id @default(cuid())
+  stripeDisputeId  String   @unique
+  chargeId         String   // Stripe Charge ID
+  paymentId        String?  // Связь с нашим платежом
+  amount           Int      // Сумма диспута в центах
+  reason           String   // Причина диспута
+  status           String   // Статус диспута в Stripe
+  evidence         Json?    // Доказательства (если есть)
+  metadata         Json?    // Метаданные от Stripe
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Связь с платежом (если найден)
+  payment          Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  
+  @@map("payment_disputes")
 }
 
 // Сертификационные курсы онлайн
