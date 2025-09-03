@@ -25,8 +25,10 @@ import {
 } from '@/components/ui/select';
 import { PaymentKPICards } from '@/components/analytics/PaymentKPICards';
 import { EarningsTrendCharts } from '@/components/analytics/EarningsTrendCharts';
+import { CommissionBreakdownAnalysis } from '@/components/analytics/CommissionBreakdownAnalysis';
 import { usePaymentAnalytics, usePaymentKPIs } from '@/hooks/usePaymentAnalytics';
 import useEarningsAnalytics from '@/hooks/useEarningsAnalytics';
+import useCommissionAnalytics from '@/hooks/useCommissionAnalytics';
 import { useToast } from '@/hooks/use-toast';
 import {
   BarChart3,
@@ -100,6 +102,17 @@ export default function PaymentDashboardTestPage() {
     granularity: selectedGroupBy === 'day' ? 'daily' : selectedGroupBy === 'week' ? 'weekly' : 'monthly',
     autoRefresh: autoRefreshEnabled,
     refreshInterval: 30000, // 30 seconds
+  });
+
+  // Commission analytics hook for breakdown analysis
+  const commissionAnalytics = useCommissionAnalytics({
+    dateRange: {
+      start: new Date(Date.now() - (selectedPeriod === 'week' ? 7 : selectedPeriod === 'month' ? 30 : selectedPeriod === 'quarter' ? 90 : 365) * 24 * 60 * 60 * 1000),
+      end: new Date()
+    },
+    autoRefresh: autoRefreshEnabled,
+    refreshInterval: 30000, // 30 seconds
+    includePayouts: true,
   });
 
   // Handle parameter changes
@@ -312,7 +325,7 @@ export default function PaymentDashboardTestPage() {
           {/* KPI Cards Tab */}
           <TabsContent value="kpis" className="space-y-6">
             <PaymentKPICards
-              data={paymentAnalytics.overview}
+              data={paymentAnalytics.overview || undefined}
               loading={paymentAnalytics.loading}
               error={paymentAnalytics.error}
               period={selectedPeriod}
@@ -457,32 +470,86 @@ export default function PaymentDashboardTestPage() {
             </Card>
           </TabsContent>
 
-          {/* Breakdowns Tab - Placeholder */}
+          {/* Breakdowns Tab */}
           <TabsContent value="breakdowns" className="space-y-6">
+            <CommissionBreakdownAnalysis
+              data={commissionAnalytics.data}
+              loading={commissionAnalytics.loading}
+              error={commissionAnalytics.error}
+              onRefresh={() => {
+                commissionAnalytics.refresh();
+                handleRefresh();
+              }}
+              onDateRangeChange={(start, end) => {
+                commissionAnalytics.updateDateRange(start, end);
+              }}
+              onExport={(format, section) => {
+                toast({
+                  title: 'Export started',
+                  description: `Exporting ${section} as ${format}`,
+                });
+              }}
+            />
+
+            {/* Commission Data Status */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PieChart className="h-5 w-5" />
-                  Commission Breakdown Analysis
-                </CardTitle>
+                <CardTitle className="text-lg">Commission Data Status</CardTitle>
                 <CardDescription>
-                  Payment type and commission analysis visualization
+                  Current status and details of commission analytics
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Breakdown components will be implemented in subtask 6.3. Available data:
-                  </AlertDescription>
-                </Alert>
-                
-                {paymentAnalytics.breakdowns && (
+                <div className="grid gap-4 md:grid-cols-4">
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Loading State</div>
+                    <Badge variant={commissionAnalytics.loading ? 'default' : 'secondary'}>
+                      {commissionAnalytics.loading ? 'Loading...' : 'Ready'}
+                    </Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Service Types</div>
+                    <div className="text-sm text-muted-foreground">
+                      {commissionAnalytics.data?.serviceBreakdown?.length || 0} types
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Captain Tiers</div>
+                    <div className="text-sm text-muted-foreground">
+                      {commissionAnalytics.data?.tierBreakdown?.length || 0} tiers
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Last Updated</div>
+                    <div className="text-sm text-muted-foreground">
+                      {commissionAnalytics.lastUpdated ? 
+                        commissionAnalytics.lastUpdated.toLocaleTimeString() : 
+                        'Never'
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                {commissionAnalytics.data?.summary && (
                   <div className="mt-4 p-4 bg-muted rounded-lg">
-                    <h4 className="font-medium mb-2">Breakdown Data Preview</h4>
-                    <pre className="text-xs overflow-auto max-h-40">
-                      {JSON.stringify(paymentAnalytics.breakdowns, null, 2)}
-                    </pre>
+                    <h4 className="font-medium mb-2">Commission Summary</h4>
+                    <div className="grid gap-2 md:grid-cols-2 text-sm">
+                      <div>Total Commissions: €{(commissionAnalytics.data.summary.totalCommissions / 100).toFixed(2)}</div>
+                      <div>Total Payouts: €{(commissionAnalytics.data.summary.totalPayouts / 100).toFixed(2)}</div>
+                      <div>Average Rate: {commissionAnalytics.data.summary.averageCommissionRate}%</div>
+                      <div>Total Captains: {commissionAnalytics.data.summary.totalCaptains}</div>
+                      <div>Top Service: {commissionAnalytics.data.summary.topServiceType}</div>
+                      <div>Top Tier: {commissionAnalytics.data.summary.topTier}</div>
+                    </div>
+                  </div>
+                )}
+
+                {commissionAnalytics.error && (
+                  <div className="mt-4">
+                    <h4 className="font-medium mb-2 text-red-600">Error Details</h4>
+                    <div className="text-sm p-3 bg-red-50 border border-red-200 rounded">
+                      {commissionAnalytics.error}
+                    </div>
                   </div>
                 )}
               </CardContent>
