@@ -5,6 +5,66 @@ const nextConfig = {
     NEXT_PUBLIC_WS_URL_PRODUCTION: 'wss://www.cascaisfishing.com/api/group-trips/ws',
     NEXT_PUBLIC_API_URL_PRODUCTION: 'https://www.cascaisfishing.com',
   },
+  // Content Security Policy Headers for Stripe Integration
+  // Task 5.1: Implement CSP headers for security
+  async headers() {
+    return [
+      {
+        // Apply security headers to all routes
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              // Default sources
+              "default-src 'self'",
+              // Scripts: self, Stripe, and inline scripts (needed for Next.js)
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://hooks.stripe.com",
+              // Styles: self, inline styles, and Stripe
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              // Images: self, data, blob, and common image CDNs
+              "img-src 'self' data: blob: https://images.unsplash.com https://res.cloudinary.com https://avatars.githubusercontent.com",
+              // Fonts: self and Google Fonts
+              "font-src 'self' https://fonts.gstatic.com data:",
+              // Connections: self, Stripe APIs, and WebSocket connections
+              "connect-src 'self' https://api.stripe.com https://checkout.stripe.com wss:",
+              // Frames: Stripe checkout and payment pages
+              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com https://pay.stripe.com",
+              // Child sources for Stripe embedded components
+              "child-src 'self' https://js.stripe.com",
+              // Form actions: self and Stripe
+              "form-action 'self' https://checkout.stripe.com",
+              // Media: self
+              "media-src 'self'",
+              // Workers: self
+              "worker-src 'self' blob:",
+              // Manifest: self
+              "manifest-src 'self'",
+              // Base URI: self
+              "base-uri 'self'",
+            ].join('; ')
+          },
+          // Additional security headers
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(self), payment=(self)'
+          }
+        ]
+      }
+    ]
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },

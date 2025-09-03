@@ -1,43 +1,47 @@
 import Stripe from 'stripe';
+import { getStripeConfig, STRIPE_CONFIG, isStripeConfigured } from './stripe-config';
 
 // Stripe клиент для сервера - Production Ready Configuration
-// Based on Context7 Stripe Node.js documentation and best practices
+// Task 5.1: Enhanced with proper configuration validation and error handling
 
-// Проверяем наличие API ключа
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+// Validate Stripe configuration
+const stripeConfig = getStripeConfig();
 
-if (!stripeSecretKey) {
-  console.warn('⚠️ STRIPE_SECRET_KEY is not set in environment variables');
-  console.warn('💡 Using fallback test key for build process');
+// Don't throw during build time, only at runtime in production
+if (!stripeConfig && process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
+  throw new Error('❌ Stripe configuration is required in production');
 }
 
-export const stripe = new Stripe(
-  stripeSecretKey || 'sk_test_placeholder_for_build_only', 
-  {
-    // Pin specific API version for consistency (Context7 recommendation)
-    apiVersion: '2024-12-18.acacia',
-    
-    // Enable TypeScript support
-    typescript: true,
-    
-    // Production-ready settings
-    maxNetworkRetries: 3, // Automatic retries with exponential backoff
-    timeout: 10000, // 10 second timeout
-    
-    // App identification (Context7 best practice)
-    appInfo: {
-      name: 'Cascais Fishing Platform',
-      version: '1.0.0',
-      url: 'https://cascaisfishing.com',
-    },
-    
-    // Enable telemetry for better performance insights
-    telemetry: true,
-  }
-);
+// Use validated configuration or fallback for build
+const stripeSecretKey = stripeConfig?.STRIPE_SECRET_KEY || 'sk_test_placeholder_for_build_only';
 
-// Публичные константы
-export const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string;
+export const stripe = new Stripe(stripeSecretKey, {
+  // Use configuration constants for consistency
+  apiVersion: STRIPE_CONFIG.API_VERSION,
+  
+  // Enable TypeScript support
+  typescript: true,
+  
+  // Production-ready settings from config
+  maxNetworkRetries: STRIPE_CONFIG.MAX_NETWORK_RETRIES,
+  timeout: STRIPE_CONFIG.TIMEOUT,
+  
+  // App identification
+  appInfo: STRIPE_CONFIG.APP_INFO,
+  
+  // Enable telemetry for better performance insights
+  telemetry: true,
+});
+
+// Validated публичные константы
+export const STRIPE_PUBLISHABLE_KEY = stripeConfig?.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+export const STRIPE_WEBHOOK_SECRET = stripeConfig?.STRIPE_WEBHOOK_SECRET;
+
+// Configuration status helpers
+export { isStripeConfigured, getStripeConfig };
+
+// Re-export configuration utilities
+export * from './stripe-config';
 
 // Константы цен согласно ТЗ
 export const PRICING = {

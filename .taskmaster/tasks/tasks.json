@@ -85,7 +85,7 @@
         "id": 5,
         "title": "Stripe Checkout Flow Integration",
         "description": "Complete payment processing integration with Stripe Payment Elements, payment intent handling, webhook processing, and payment method saving",
-        "status": "pending",
+        "status": "in-progress",
         "priority": "critical",
         "phase": "Payment System",
         "estimatedHours": 55,
@@ -106,7 +106,7 @@
             "title": "Stripe SDK Configuration & Setup",
             "description": "Install and configure Stripe SDK with proper environment setup and security measures",
             "details": "Install Stripe React SDK and server-side packages. Configure API keys for different environments. Set up webhook endpoints for payment events. Implement CSP headers for security. Configure Stripe publishable keys. Add environment variable validation.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 5
           },
@@ -500,7 +500,7 @@
         "id": 16,
         "title": "Captain Dashboard Interface",
         "description": "Build specialized captain interface with participant approval management, revenue tracking, trip analytics, and weather integration",
-        "status": "in-progress",
+        "status": "done",
         "priority": "high",
         "phase": "Analytics",
         "estimatedHours": 50,
@@ -721,7 +721,7 @@
       "budget": "€50,000",
       "expectedROI": "€90k+/month revenue, 2160% ROI over 12 months",
       "created": "2025-09-01T14:28:28.045Z",
-      "updated": "2025-09-03T09:46:52.443Z"
+      "updated": "2025-09-03T10:35:47.427Z"
     }
   }
 }
