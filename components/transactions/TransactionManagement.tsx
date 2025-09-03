@@ -75,6 +75,7 @@ import {
 import { format } from 'date-fns';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
+import { TransactionFiltersPanel, TransactionFilters, FilterPreset } from './TransactionFiltersPanel';
 
 // Types for transaction data
 export interface Transaction {
@@ -171,6 +172,18 @@ export function TransactionManagement({
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  
+  // Advanced filters state
+  const [advancedFilters, setAdvancedFilters] = useState<TransactionFilters>({
+    status: [],
+    type: [],
+    paymentMethod: [],
+    dateRange: { start: null, end: null },
+    amountRange: { min: null, max: null },
+    customerSearch: '',
+    transactionIdSearch: ''
+  });
+  const [filterPresets, setFilterPresets] = useState<FilterPreset[]>([]);
 
   // Row count for server-side pagination
   const [rowCount, setRowCount] = useState(0);
@@ -194,9 +207,38 @@ export function TransactionManagement({
           sortField: sortModel[0].field,
           sortOrder: sortModel[0].sort || 'asc'
         }),
+        // Legacy search and filters (for backward compatibility)
         ...(searchQuery && { search: searchQuery }),
         ...(statusFilter !== 'all' && { status: statusFilter }),
-        ...(typeFilter !== 'all' && { type: typeFilter })
+        ...(typeFilter !== 'all' && { type: typeFilter }),
+        // Advanced filters
+        ...(advancedFilters.status.length > 0 && { 
+          advancedStatus: advancedFilters.status.join(',') 
+        }),
+        ...(advancedFilters.type.length > 0 && { 
+          advancedType: advancedFilters.type.join(',') 
+        }),
+        ...(advancedFilters.paymentMethod.length > 0 && { 
+          paymentMethod: advancedFilters.paymentMethod.join(',') 
+        }),
+        ...(advancedFilters.dateRange.start && { 
+          dateFrom: advancedFilters.dateRange.start.toISOString() 
+        }),
+        ...(advancedFilters.dateRange.end && { 
+          dateTo: advancedFilters.dateRange.end.toISOString() 
+        }),
+        ...(advancedFilters.amountRange.min !== null && { 
+          amountMin: advancedFilters.amountRange.min.toString() 
+        }),
+        ...(advancedFilters.amountRange.max !== null && { 
+          amountMax: advancedFilters.amountRange.max.toString() 
+        }),
+        ...(advancedFilters.customerSearch.trim() && { 
+          customerSearch: advancedFilters.customerSearch 
+        }),
+        ...(advancedFilters.transactionIdSearch.trim() && { 
+          transactionIdSearch: advancedFilters.transactionIdSearch 
+        })
       });
 
       const response = await fetch(`/api/transactions?${params}`, {
@@ -241,7 +283,7 @@ export function TransactionManagement({
     } finally {
       setLoading(false);
     }
-  }, [session?.user, paginationModel, sortModel, searchQuery, statusFilter, typeFilter]);
+  }, [session?.user, paginationModel, sortModel, searchQuery, statusFilter, typeFilter, advancedFilters]);
 
   // Effect to fetch data when dependencies change
   useEffect(() => {
@@ -488,6 +530,35 @@ export function TransactionManagement({
     }
   ], [handleViewTransaction, handleEditTransaction, handleRefundTransaction]);
 
+  // Handle advanced filters change
+  const handleAdvancedFiltersChange = useCallback((filters: TransactionFilters) => {
+    setAdvancedFilters(filters);
+    setPaginationModel(prev => ({ ...prev, page: 0 })); // Reset to first page
+  }, []);
+
+  // Handle filter preset save
+  const handleFilterPresetSave = useCallback((preset: Omit<FilterPreset, 'id' | 'createdAt' | 'userId'>) => {
+    const newPreset: FilterPreset = {
+      ...preset,
+      id: `preset_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`,
+      createdAt: new Date(),
+      userId: session?.user?.id || 'unknown'
+    };
+    setFilterPresets(prev => [...prev, newPreset]);
+    // TODO: Save to backend/localStorage
+  }, [session?.user?.id]);
+
+  // Handle filter preset load
+  const handleFilterPresetLoad = useCallback((preset: FilterPreset) => {
+    setAdvancedFilters(preset.filters);
+  }, []);
+
+  // Handle filter preset delete
+  const handleFilterPresetDelete = useCallback((presetId: string) => {
+    setFilterPresets(prev => prev.filter(p => p.id !== presetId));
+    // TODO: Delete from backend/localStorage
+  }, []);
+
   // Custom toolbar component
   const CustomToolbar = () => (
     <Box sx={{ p: 2, pb: 0 }}>
@@ -618,6 +689,20 @@ export function TransactionManagement({
       transition={{ duration: 0.5 }}
       className={className}
     >
+      {/* Advanced Filters Panel */}
+      <Box sx={{ mb: 3 }}>
+        <TransactionFiltersPanel
+          filters={advancedFilters}
+          onFiltersChange={handleAdvancedFiltersChange}
+          onPresetSave={handleFilterPresetSave}
+          onPresetLoad={handleFilterPresetLoad}
+          onPresetDelete={handleFilterPresetDelete}
+          presets={filterPresets}
+          loading={loading}
+        />
+      </Box>
+
+      {/* Transaction DataGrid */}
       <Card sx={{ height: 800 }}>
         <DataGridPro
           apiRef={apiRef}

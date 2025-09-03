@@ -249,7 +249,7 @@
             "title": "Transaction List with MUI DataGrid",
             "description": "Create the core transaction list component using MUI X DataGrid with server-side pagination, sorting, and basic data display",
             "details": "Build responsive transaction table using MUI X DataGrid Pro. Implement server-side pagination with configurable page sizes (25/50/100/250 rows). Add sortable columns for date, amount, status, payment method, customer. Include loading states and error handling. Connect to payments API with proper data fetching. Add column visibility controls and responsive design for mobile.",
-            "status": "in-progress",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 7
           },
@@ -258,7 +258,7 @@
             "title": "Advanced Filtering System",
             "description": "Implement comprehensive filtering capabilities with multiple filter types, date ranges, and status selections",
             "details": "Build advanced filter panel with transaction type filters (payment, refund, dispute). Add status filters (completed, pending, failed, cancelled). Implement date range picker with presets (today, week, month, quarter, year). Include amount range filters (min/max). Add payment method filters (card, bank transfer, etc.). Create filter presets and saved filters. Implement filter state persistence and URL-based filter sharing.",
-            "status": "pending",
+            "status": "in-progress",
             "dependencies": [
               "7.1"
             ],
@@ -790,7 +790,7 @@
       "budget": "€50,000",
       "expectedROI": "€90k+/month revenue, 2160% ROI over 12 months",
       "created": "2025-09-01T14:28:28.045Z",
-      "updated": "2025-09-03T20:32:58.399Z"
+      "updated": "2025-09-03T20:44:13.853Z"
     }
   }
 }

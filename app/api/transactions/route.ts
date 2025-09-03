@@ -18,14 +18,20 @@ const transactionsQuerySchema = z.object({
   pageSize: z.string().transform(str => parseInt(str, 10)).default('25'),
   sortField: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
+  // Legacy filters (for backward compatibility)
   search: z.string().optional(),
   status: z.enum(['pending', 'completed', 'failed', 'cancelled', 'processing', 'refunded']).optional(),
   type: z.enum(['payment', 'refund', 'dispute', 'transfer', 'fee']).optional(),
+  // Advanced filters
+  advancedStatus: z.string().optional(),
+  advancedType: z.string().optional(),
   paymentMethod: z.string().optional(),
   dateFrom: z.string().transform(str => new Date(str)).optional(),
   dateTo: z.string().transform(str => new Date(str)).optional(),
   amountMin: z.string().transform(str => parseFloat(str)).optional(),
   amountMax: z.string().transform(str => parseFloat(str)).optional(),
+  customerSearch: z.string().optional(),
+  transactionIdSearch: z.string().optional(),
   customerId: z.string().optional()
 });
 
@@ -39,7 +45,7 @@ function buildWhereClause(filters: any, userId: string) {
     }
   };
 
-  // Status filter
+  // Status filter (legacy - single status)
   if (filters.status) {
     const statusMap: Record<string, string[]> = {
       'pending': ['PENDING', 'REQUIRES_ACTION'],
@@ -53,6 +59,76 @@ function buildWhereClause(filters: any, userId: string) {
     if (statusMap[filters.status]) {
       where.status = { in: statusMap[filters.status] };
     }
+  }
+
+  // Advanced status filter (multiple statuses)
+  if (filters.advancedStatus) {
+    const statusList = filters.advancedStatus.split(',').map((s: string) => s.trim());
+    const statusMap: Record<string, string[]> = {
+      'pending': ['PENDING', 'REQUIRES_ACTION'],
+      'completed': ['COMPLETED', 'SUCCEEDED'],
+      'failed': ['FAILED'],
+      'cancelled': ['CANCELLED'],
+      'processing': ['PROCESSING'],
+      'refunded': ['REFUNDED']
+    };
+    
+    const dbStatuses: string[] = [];
+    statusList.forEach((status: string) => {
+      if (statusMap[status]) {
+        dbStatuses.push(...statusMap[status]);
+      }
+    });
+
+    if (dbStatuses.length > 0) {
+      where.status = { in: dbStatuses };
+    }
+  }
+
+  // Advanced type filter
+  if (filters.advancedType) {
+    const typeList = filters.advancedType.split(',').map((t: string) => t.trim());
+    // For now, we'll just filter by amount sign and description patterns
+    // This is simplified - you might want to add a proper type field to your schema
+    const orConditions: any[] = [];
+    
+    typeList.forEach((type: string) => {
+      switch (type) {
+        case 'payment':
+          orConditions.push({ amount: { gt: 0 } });
+          break;
+        case 'refund':
+          orConditions.push({ amount: { lt: 0 } });
+          break;
+        case 'dispute':
+          orConditions.push({ 
+            description: { contains: 'dispute', mode: 'insensitive' } 
+          });
+          break;
+        case 'fee':
+          orConditions.push({ 
+            description: { contains: 'fee', mode: 'insensitive' } 
+          });
+          break;
+        case 'transfer':
+          orConditions.push({ 
+            description: { contains: 'transfer', mode: 'insensitive' } 
+          });
+          break;
+      }
+    });
+
+    if (orConditions.length > 0) {
+      where.OR = orConditions;
+    }
+  }
+
+  // Payment method filter
+  if (filters.paymentMethod) {
+    const methodList = filters.paymentMethod.split(',').map((m: string) => m.trim());
+    // Filter by payment method type through the relation
+    where.paymentMethodId = { not: null }; // Ensure payment method exists
+    // Note: More complex filtering would require a join, for now we'll handle this in post-processing
   }
 
   // Date range filter
@@ -86,29 +162,57 @@ function buildWhereClause(filters: any, userId: string) {
 }
 
 // Helper function to build search clause
-function buildSearchClause(searchQuery: string) {
-  if (!searchQuery) return {};
+function buildSearchClause(searchQuery: string, customerSearch: string, transactionIdSearch: string) {
+  const conditions: any[] = [];
 
-  return {
-    OR: [
-      { id: { contains: searchQuery, mode: 'insensitive' } },
-      { stripePaymentIntentId: { contains: searchQuery, mode: 'insensitive' } },
-      { description: { contains: searchQuery, mode: 'insensitive' } },
-      // Search in booking information
-      { booking: { 
-        trip: {
-          title: { contains: searchQuery, mode: 'insensitive' }
-        }
-      }},
-      // Search in user information  
-      { user: {
+  // Legacy global search
+  if (searchQuery) {
+    conditions.push({
+      OR: [
+        { id: { contains: searchQuery, mode: 'insensitive' } },
+        { stripePaymentIntentId: { contains: searchQuery, mode: 'insensitive' } },
+        { description: { contains: searchQuery, mode: 'insensitive' } },
+        // Search in trip information
+        { trip: {
+          description: { contains: searchQuery, mode: 'insensitive' }
+        }},
+        // Search in user information  
+        { user: {
+          OR: [
+            { name: { contains: searchQuery, mode: 'insensitive' } },
+            { email: { contains: searchQuery, mode: 'insensitive' } }
+          ]
+        }}
+      ]
+    });
+  }
+
+  // Customer-specific search
+  if (customerSearch) {
+    conditions.push({
+      user: {
         OR: [
-          { name: { contains: searchQuery, mode: 'insensitive' } },
-          { email: { contains: searchQuery, mode: 'insensitive' } }
+          { name: { contains: customerSearch, mode: 'insensitive' } },
+          { email: { contains: customerSearch, mode: 'insensitive' } }
         ]
-      }}
-    ]
-  };
+      }
+    });
+  }
+
+  // Transaction ID-specific search
+  if (transactionIdSearch) {
+    conditions.push({
+      OR: [
+        { id: { contains: transactionIdSearch, mode: 'insensitive' } },
+        { stripePaymentIntentId: { contains: transactionIdSearch, mode: 'insensitive' } }
+      ]
+    });
+  }
+
+  if (conditions.length === 0) return {};
+  if (conditions.length === 1) return conditions[0];
+  
+  return { AND: conditions };
 }
 
 // Helper function to map database payment to transaction format
@@ -142,8 +246,8 @@ function mapPaymentToTransaction(payment: any): any {
     if (payment.paymentMethod) {
       return {
         type: payment.paymentMethod.type?.toLowerCase() || 'card',
-        last4: payment.paymentMethod.cardLast4 || payment.paymentMethod.last4,
-        brand: payment.paymentMethod.cardBrand || payment.paymentMethod.brand,
+        last4: payment.paymentMethod.cardLast4,
+        brand: payment.paymentMethod.cardBrand,
         details: payment.paymentMethod.cardBrand && payment.paymentMethod.cardLast4 
           ? `${payment.paymentMethod.cardBrand} ****${payment.paymentMethod.cardLast4}`
           : payment.paymentMethod.type || 'Payment Method'
@@ -190,7 +294,7 @@ function mapPaymentToTransaction(payment: any): any {
       name: payment.user?.name || payment.customerName || 'Unknown Customer',
       email: payment.user?.email || payment.customerEmail || 'N/A'
     },
-    description: payment.description || `Payment for ${payment.booking?.trip?.title || 'service'}`,
+    description: payment.description || `Payment for ${payment.trip?.description || 'trip service'}`,
     metadata: payment.metadata || {},
     refundable: payment.status === 'COMPLETED' || payment.status === 'SUCCEEDED',
     disputable: payment.status === 'COMPLETED' || payment.status === 'SUCCEEDED',
@@ -261,9 +365,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Add search conditions
-    const searchWhere = buildSearchClause(queryData.search || '');
+    const searchWhere = buildSearchClause(
+      queryData.search || '', 
+      queryData.customerSearch || '', 
+      queryData.transactionIdSearch || ''
+    );
     
-    const where = queryData.search 
+    const where = (queryData.search || queryData.customerSearch || queryData.transactionIdSearch)
       ? { ...baseWhere, ...searchWhere }
       : baseWhere;
 
@@ -304,31 +412,12 @@ export async function GET(request: NextRequest) {
               email: true
             }
           },
-          paymentMethod: {
-            select: {
-              type: true,
-              cardBrand: true,
-              cardLast4: true,
-              last4: true,
-              brand: true
-            }
-          },
-          booking: {
+          trip: {
             select: {
               id: true,
-              trip: {
-                select: {
-                  id: true,
-                  title: true,
-                  user: {
-                    select: {
-                      id: true,
-                      name: true,
-                      email: true
-                    }
-                  }
-                }
-              }
+              description: true,
+              date: true,
+              status: true
             }
           }
         }
