@@ -28,6 +28,7 @@ import { StyledPaymentElements, type PaymentFormData } from '@/components/paymen
 import { PaymentMethodSelector } from '@/components/payment/PaymentMethodSelector';
 import { PaymentLoading, PaymentSuccess, PaymentError, MobilePaymentHeader } from '@/components/payment/PaymentStateComponents';
 import { usePaymentFlow, usePaymentValidation, usePaymentAnalytics, type PaymentMethodType } from '@/hooks/usePaymentFlow';
+import { usePaymentIntentManagement } from '@/hooks/usePaymentIntentManagement';
 import { isStripeConfigured } from '@/lib/stripe-config';
 import { useSession } from 'next-auth/react';
 
@@ -111,10 +112,14 @@ export default function StripeElementsTestPage() {
       </div>
 
       <Tabs defaultValue="demo" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="demo">
             <CreditCard className="w-4 h-4 mr-2" />
             Payment Demo
+          </TabsTrigger>
+          <TabsTrigger value="management">
+            <ShieldCheck className="w-4 h-4 mr-2" />
+            Intent Management
           </TabsTrigger>
           <TabsTrigger value="config">
             <Settings className="w-4 h-4 mr-2" />
@@ -133,6 +138,15 @@ export default function StripeElementsTestPage() {
         {/* Payment Demo Tab */}
         <TabsContent value="demo" className="mt-6">
           <AdvancedPaymentDemo 
+            selectedAmount={selectedAmount} 
+            onAmountChange={setSelectedAmount}
+            amounts={amounts}
+          />
+        </TabsContent>
+
+        {/* Payment Intent Management Tab */}
+        <TabsContent value="management" className="mt-6">
+          <PaymentIntentManagementDemo 
             selectedAmount={selectedAmount} 
             onAmountChange={setSelectedAmount}
             amounts={amounts}
@@ -627,6 +641,329 @@ function AdvancedPaymentDemo({
                 </div>
               ))}
             </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Payment Intent Management Demo Component
+ * Task 5.3: Testing complete Payment Intent lifecycle
+ */
+function PaymentIntentManagementDemo({ 
+  selectedAmount, 
+  onAmountChange, 
+  amounts 
+}: {
+  selectedAmount: number;
+  onAmountChange: (amount: number) => void;
+  amounts: any[];
+}) {
+  const { data: session } = useSession();
+  const [testMode, setTestMode] = useState<'success' | 'fail' | '3ds' | 'normal'>('normal');
+  const [autoPolling, setAutoPolling] = useState(true);
+
+  const paymentManagement = usePaymentIntentManagement({
+    onSuccess: (paymentIntent) => {
+      console.log('✅ Payment Intent Management - Success:', paymentIntent);
+    },
+    onError: (error) => {
+      console.error('❌ Payment Intent Management - Error:', error);
+    },
+    onStatusChange: (status) => {
+      console.log('📊 Payment Intent Management - Status:', status);
+    },
+    onStepChange: (step) => {
+      console.log('🔄 Payment Intent Management - Step:', step);
+    },
+    autoPolling,
+    pollingInterval: 3000,
+  });
+
+  const handleCreatePaymentIntent = async () => {
+    if (!session?.user?.email) return;
+
+    const params = {
+      amount: selectedAmount,
+      currency: 'eur',
+      description: `Test Payment Intent Management - ${amounts.find(a => a.value === selectedAmount)?.description}`,
+      metadata: {
+        test_mode: testMode,
+        demo: 'payment_intent_management',
+        user_email: session.user.email,
+      },
+    };
+
+    await paymentManagement.createPaymentIntent(params);
+  };
+
+  const handleConfirmPayment = async () => {
+    await paymentManagement.confirmPaymentIntent({
+      returnUrl: `${window.location.origin}/payment/success`,
+    });
+  };
+
+  const handleCancelPayment = async () => {
+    await paymentManagement.cancelPayment({
+      reason: 'requested_by_customer',
+      cancellationReason: 'Testing cancellation functionality',
+    });
+  };
+
+  const handleRetryPayment = async () => {
+    await paymentManagement.retryPayment({
+      createNew: true, // Force new payment intent for testing
+    });
+  };
+
+  const handleRefreshStatus = async () => {
+    await paymentManagement.getPaymentStatus();
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <ShieldCheck className="mr-2 h-6 w-6 text-green-500" />
+            Payment Intent Management Demo
+          </CardTitle>
+          <CardDescription>
+            Test complete Payment Intent lifecycle: Create → Confirm → Track → Cancel/Retry
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Amount Selection */}
+          <div className="space-y-3">
+            <h4 className="font-medium">Test Amount</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {amounts.map((amount) => (
+                <Button
+                  key={amount.value}
+                  variant={selectedAmount === amount.value ? "default" : "outline"}
+                  onClick={() => onAmountChange(amount.value)}
+                  className="flex flex-col h-auto p-3"
+                  size="sm"
+                >
+                  <span className="font-semibold">{amount.label}</span>
+                  <span className="text-xs opacity-70">{amount.description}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Test Mode Selection */}
+          <div className="space-y-3">
+            <h4 className="font-medium">Test Scenarios</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {[
+                { value: 'normal', label: 'Normal', description: 'Regular payment flow' },
+                { value: 'success', label: 'Force Success', description: 'Test success scenario' },
+                { value: 'fail', label: 'Force Fail', description: 'Test failure handling' },
+                { value: '3ds', label: '3D Secure', description: 'Test authentication' },
+              ].map((mode) => (
+                <Button
+                  key={mode.value}
+                  variant={testMode === mode.value ? "default" : "outline"}
+                  onClick={() => setTestMode(mode.value as any)}
+                  size="sm"
+                >
+                  {mode.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Settings */}
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="autoPolling"
+                checked={autoPolling}
+                onChange={(e) => setAutoPolling(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="autoPolling" className="text-sm font-medium">
+                Auto-poll payment status
+              </label>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Current State Display */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment Intent State</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div>
+                <span className="text-sm font-medium text-gray-600">Status:</span>
+                <Badge className="ml-2" variant={
+                  paymentManagement.isSuccessful ? "default" :
+                  paymentManagement.error ? "destructive" :
+                  paymentManagement.isLoading ? "secondary" : "outline"
+                }>
+                  {paymentManagement.currentStep}
+                </Badge>
+              </div>
+              
+              <div>
+                <span className="text-sm font-medium text-gray-600">Progress:</span>
+                <div className="mt-1">
+                  <Progress value={paymentManagement.progress} className="h-2" />
+                  <span className="text-xs text-gray-500">{paymentManagement.progress}%</span>
+                </div>
+              </div>
+
+              {paymentManagement.paymentIntent && (
+                <div>
+                  <span className="text-sm font-medium text-gray-600">Payment Intent:</span>
+                  <div className="mt-1 text-sm space-y-1">
+                    <div>ID: <code className="text-xs">{paymentManagement.paymentIntent.id}</code></div>
+                    <div>Status: <Badge variant="outline">{paymentManagement.paymentIntent.status}</Badge></div>
+                    <div>Amount: €{(paymentManagement.paymentIntent.amount / 100).toFixed(2)}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <span className="text-sm font-medium text-gray-600">Actions Available:</span>
+                <div className="mt-1 space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className={cn("w-4 h-4", paymentManagement.canConfirm ? "text-green-500" : "text-gray-300")} />
+                    <span className="text-sm">Can Confirm</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className={cn("w-4 h-4", paymentManagement.canCancel ? "text-green-500" : "text-gray-300")} />
+                    <span className="text-sm">Can Cancel</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className={cn("w-4 h-4", paymentManagement.canRetry ? "text-green-500" : "text-gray-300")} />
+                    <span className="text-sm">Can Retry</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className={cn("w-4 h-4", paymentManagement.requiresAction ? "text-orange-500" : "text-gray-300")} />
+                    <span className="text-sm">Requires Action</span>
+                  </div>
+                </div>
+              </div>
+
+              {paymentManagement.error && (
+                <Alert className="border-red-200 bg-red-50">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <AlertDescription className="text-red-800 text-sm">
+                    {paymentManagement.error}
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Action Buttons */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment Intent Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <Button
+              onClick={handleCreatePaymentIntent}
+              disabled={paymentManagement.isCreating || !!paymentManagement.paymentIntent}
+              className="flex flex-col h-auto p-4"
+            >
+              {paymentManagement.isCreating ? (
+                <Loader2 className="h-4 w-4 animate-spin mb-1" />
+              ) : (
+                <DollarSign className="h-4 w-4 mb-1" />
+              )}
+              <span className="text-xs">Create Intent</span>
+            </Button>
+
+            <Button
+              onClick={handleConfirmPayment}
+              disabled={!paymentManagement.canConfirm || paymentManagement.isConfirming}
+              className="flex flex-col h-auto p-4"
+              variant="default"
+            >
+              {paymentManagement.isConfirming ? (
+                <Loader2 className="h-4 w-4 animate-spin mb-1" />
+              ) : (
+                <CheckCircle className="h-4 w-4 mb-1" />
+              )}
+              <span className="text-xs">Confirm</span>
+            </Button>
+
+            <Button
+              onClick={handleRefreshStatus}
+              disabled={paymentManagement.isStatusPolling}
+              className="flex flex-col h-auto p-4"
+              variant="outline"
+            >
+              {paymentManagement.isStatusPolling ? (
+                <Loader2 className="h-4 w-4 animate-spin mb-1" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mb-1" />
+              )}
+              <span className="text-xs">Refresh</span>
+            </Button>
+
+            <Button
+              onClick={handleCancelPayment}
+              disabled={!paymentManagement.canCancel || paymentManagement.isCancelling}
+              className="flex flex-col h-auto p-4"
+              variant="destructive"
+            >
+              {paymentManagement.isCancelling ? (
+                <Loader2 className="h-4 w-4 animate-spin mb-1" />
+              ) : (
+                <X className="h-4 w-4 mb-1" />
+              )}
+              <span className="text-xs">Cancel</span>
+            </Button>
+
+            <Button
+              onClick={handleRetryPayment}
+              disabled={!paymentManagement.canRetry || paymentManagement.isRetrying}
+              className="flex flex-col h-auto p-4"
+              variant="secondary"
+            >
+              {paymentManagement.isRetrying ? (
+                <Loader2 className="h-4 w-4 animate-spin mb-1" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mb-1" />
+              )}
+              <span className="text-xs">Retry</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Debug Information */}
+      {paymentManagement.paymentIntent && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Debug Information</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto">
+              {JSON.stringify({
+                paymentIntent: paymentManagement.paymentIntent,
+                payment: paymentManagement.payment,
+                retryCount: paymentManagement.retryCount,
+                maxRetries: paymentManagement.maxRetries,
+              }, null, 2)}
+            </pre>
           </CardContent>
         </Card>
       )}
