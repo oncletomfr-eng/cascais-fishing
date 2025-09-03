@@ -313,6 +313,10 @@ model User {
   image                String?
   password             String?               // For credentials provider
   role                 UserRole              @default(PARTICIPANT)
+  
+  // Stripe integration
+  stripeCustomerId     String?               @unique // Stripe Customer ID
+  
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   accounts             Account[]
@@ -328,6 +332,7 @@ model User {
   // Монетизация
   subscriptions     Subscription[]
   payments          Payment[]
+  paymentMethods    PaymentMethod[]    // Сохраненные методы платежа
   courseEnrollments CourseEnrollment[]
   advertisements    Advertisement[]
   
@@ -608,6 +613,10 @@ model Payment {
   stripePaymentId String? @unique
   stripeInvoiceId String? @unique
   
+  // Payment method used for this payment
+  paymentMethodId String?
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+  
   // Платеж
   type     PaymentType
   amount   Int // В центах
@@ -692,6 +701,66 @@ model PaymentDispute {
   payment          Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
   
   @@map("payment_disputes")
+}
+
+// Сохраненные методы платежа пользователей
+model PaymentMethod {
+  id                 String             @id @default(cuid())
+  userId             String             // ID пользователя
+  stripePaymentMethodId String          @unique // Stripe Payment Method ID
+  
+  // Основная информация
+  type               PaymentMethodType  @default(CARD)
+  isDefault          Boolean            @default(false)
+  
+  // Card данные (PCI compliant - только последние 4 цифры и бренд)
+  cardLast4          String?
+  cardBrand          String?            // visa, mastercard, etc.
+  cardExpMonth       Int?
+  cardExpYear        Int?
+  cardFingerprint    String?            // Unique identifier for the card
+  
+  // Billing address данные
+  billingName        String?
+  billingEmail       String?
+  billingCountry     String?
+  billingCity        String?
+  billingPostalCode  String?
+  
+  // Metadata и статус
+  status             PaymentMethodStatus @default(ACTIVE)
+  metadata           Json?               // Дополнительные данные от Stripe
+  
+  // Timestamps
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  lastUsedAt         DateTime?           // Когда последний раз использовался
+  
+  // Связи
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments           Payment[]           // Платежи сделанные этим методом
+  
+  // Индексы для оптимизации
+  @@index([userId])
+  @@index([userId, isDefault])
+  @@map("payment_methods")
+}
+
+enum PaymentMethodType {
+  CARD
+  SEPA_DEBIT
+  IDEAL
+  BANCONTACT
+  GIROPAY
+  SOFORT
+  PAYPAL
+}
+
+enum PaymentMethodStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+  FAILED
 }
 
 // Сертификационные курсы онлайн

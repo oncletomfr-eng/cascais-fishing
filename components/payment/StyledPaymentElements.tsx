@@ -24,6 +24,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { 
   Loader2, 
   Shield, 
@@ -74,6 +76,8 @@ export interface StyledPaymentElementsProps {
   appearance?: 'light' | 'dark' | 'auto';
   layout?: 'tabs' | 'accordion';
   allowedPaymentMethods?: string[];
+  enableSavePaymentMethod?: boolean; // Task 5.5: Enable payment method saving
+  onPaymentMethodSaved?: (paymentMethod: any) => void; // Callback when payment method is saved
 }
 
 export interface PaymentMethodIconProps {
@@ -297,7 +301,9 @@ function EnhancedPaymentForm({
   onError, 
   onProcessing, 
   layout = 'tabs',
-  className 
+  className,
+  enableSavePaymentMethod = false,
+  onPaymentMethodSaved
 }: Omit<StyledPaymentElementsProps, 'clientSecret' | 'appearance' | 'allowedPaymentMethods'> & {
   layout?: 'tabs' | 'accordion';
 }) {
@@ -312,6 +318,7 @@ function EnhancedPaymentForm({
   const [elementError, setElementError] = useState<string | null>(null);
   const [elementReady, setElementReady] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [savePaymentMethod, setSavePaymentMethod] = useState(false); // Task 5.5: Save payment method state
 
   const steps = ['Payment Details', 'Review', 'Processing'];
 
@@ -368,6 +375,33 @@ function EnhancedPaymentForm({
         setProgress(100);
         setIsComplete(true);
         setCurrentStep(2);
+        
+        // Task 5.5: Save payment method if requested
+        if (savePaymentMethod && paymentIntent.payment_method) {
+          try {
+            const response = await fetch('/api/payment-methods', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                stripePaymentMethodId: paymentIntent.payment_method,
+                billingName: email ? email.split('@')[0] : undefined,
+                billingEmail: email || undefined,
+              }),
+            });
+            
+            const saveData = await response.json();
+            if (saveData.success) {
+              console.log('✅ Payment method saved:', saveData.paymentMethod);
+              onPaymentMethodSaved?.(saveData.paymentMethod);
+            } else {
+              console.warn('⚠️ Failed to save payment method:', saveData.error);
+            }
+          } catch (saveError) {
+            console.error('❌ Error saving payment method:', saveError);
+            // Don't fail the payment success if saving fails
+          }
+        }
+        
         onSuccess?.(paymentIntent);
       }
     } catch (err) {
@@ -480,6 +514,38 @@ function EnhancedPaymentForm({
         </Card>
       )}
 
+      {/* Save Payment Method Option - Task 5.5 */}
+      {enableSavePaymentMethod && !isComplete && (
+        <Card className="border-dashed">
+          <CardContent className="pt-6">
+            <div className="flex items-start space-x-3">
+              <Checkbox 
+                id="save-payment-method"
+                checked={savePaymentMethod}
+                onCheckedChange={(checked) => setSavePaymentMethod(checked === true)}
+                className="mt-1"
+              />
+              <div className="grid gap-1.5 leading-none">
+                <Label 
+                  htmlFor="save-payment-method"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Save payment method for future use
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Securely save this payment method to make future purchases faster and more convenient.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-3 pt-3 border-t">
+              <Shield className="h-3 w-3" />
+              <span>Your payment details are encrypted and never stored by us</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Error Display */}
       <AnimatePresence>
         {elementError && (
@@ -570,7 +636,9 @@ export function StyledPaymentElements({
   className,
   appearance = 'light',
   layout = 'tabs',
-  allowedPaymentMethods
+  allowedPaymentMethods,
+  enableSavePaymentMethod = false,
+  onPaymentMethodSaved
 }: StyledPaymentElementsProps) {
   if (!isStripeConfigured()) {
     return (
@@ -599,6 +667,8 @@ export function StyledPaymentElements({
               onError={onError}
               onProcessing={onProcessing}
               layout={layout}
+              enableSavePaymentMethod={enableSavePaymentMethod}
+              onPaymentMethodSaved={onPaymentMethodSaved}
             />
           </div>
           
