@@ -24,6 +24,10 @@ import {
   Code2
 } from 'lucide-react';
 import { PaymentDemo, useCreatePaymentIntent } from '@/components/payment/RealStripeIntegration';
+import { StyledPaymentElements, type PaymentFormData } from '@/components/payment/StyledPaymentElements';
+import { PaymentMethodSelector } from '@/components/payment/PaymentMethodSelector';
+import { PaymentLoading, PaymentSuccess, PaymentError, MobilePaymentHeader } from '@/components/payment/PaymentStateComponents';
+import { usePaymentFlow, usePaymentValidation, usePaymentAnalytics, type PaymentMethodType } from '@/hooks/usePaymentFlow';
 import { isStripeConfigured } from '@/lib/stripe-config';
 import { useSession } from 'next-auth/react';
 
@@ -128,52 +132,11 @@ export default function StripeElementsTestPage() {
 
         {/* Payment Demo Tab */}
         <TabsContent value="demo" className="mt-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Amount Selection */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Select Payment Amount</CardTitle>
-                <CardDescription>
-                  Choose a test amount for the payment demo
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {amounts.map((amount) => (
-                  <Button
-                    key={amount.value}
-                    variant={selectedAmount === amount.value ? "default" : "outline"}
-                    className="w-full justify-between"
-                    onClick={() => setSelectedAmount(amount.value)}
-                  >
-                    <span>{amount.label}</span>
-                    <span className="text-sm text-gray-500">{amount.description}</span>
-                  </Button>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Payment Form */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <DollarSign className="mr-2 h-5 w-5" />
-                  Payment Form
-                </CardTitle>
-                <CardDescription>
-                  Real Stripe Payment Elements integration
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Suspense fallback={
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                  </div>
-                }>
-                  <PaymentDemo />
-                </Suspense>
-              </CardContent>
-            </Card>
-          </div>
+          <AdvancedPaymentDemo 
+            selectedAmount={selectedAmount} 
+            onAmountChange={setSelectedAmount}
+            amounts={amounts}
+          />
         </TabsContent>
 
         {/* Configuration Tab */}
@@ -389,5 +352,284 @@ function DebugInformation({ session }: { session: any }) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * Advanced Payment Demo with Full Integration
+ */
+function AdvancedPaymentDemo({ 
+  selectedAmount, 
+  onAmountChange, 
+  amounts 
+}: {
+  selectedAmount: number;
+  onAmountChange: (amount: number) => void;
+  amounts: any[];
+}) {
+  const { data: session } = useSession();
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodType | null>(null);
+  const [appearance, setAppearance] = useState<'light' | 'dark' | 'auto'>('light');
+  const [layout, setLayout] = useState<'tabs' | 'accordion'>('tabs');
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  
+  const { state, actions } = usePaymentFlow({
+    onSuccess: (paymentIntent) => {
+      console.log('Payment succeeded:', paymentIntent);
+      analytics.trackEvent('payment_success', { paymentIntent: paymentIntent.id });
+    },
+    onError: (error) => {
+      console.error('Payment failed:', error);
+      analytics.trackEvent('payment_error', { error });
+    },
+  });
+
+  const validation = usePaymentValidation();
+  const analytics = usePaymentAnalytics();
+
+  // Initialize payment when amount or method changes
+  const handleInitializePayment = async () => {
+    if (!session?.user?.email) return;
+
+    const formData: PaymentFormData = {
+      amount: selectedAmount,
+      currency: 'eur',
+      description: `Test Payment - ${amounts.find(a => a.value === selectedAmount)?.description}`,
+      customerEmail: session.user.email,
+      metadata: {
+        demo: 'true',
+        source: 'advanced_payment_demo',
+        selectedMethod: selectedMethod || 'not_selected',
+      },
+      billingRequired: showAdvanced,
+      shippingRequired: false,
+    };
+
+    analytics.trackEvent('payment_initialized', { amount: selectedAmount, method: selectedMethod });
+    await actions.initializePayment(formData);
+  };
+
+  if (state.step === 'processing') {
+    return (
+      <PaymentLoading 
+        progress={state.progress}
+        message="Processing your test payment..."
+        step="Confirming payment with bank"
+      />
+    );
+  }
+
+  if (state.step === 'success') {
+    return (
+      <PaymentSuccess 
+        paymentIntent={state.paymentIntent}
+        onNewPayment={() => actions.reset()}
+      />
+    );
+  }
+
+  if (state.step === 'error') {
+    return (
+      <PaymentError 
+        error={state.error!}
+        onRetry={() => actions.retry()}
+        onCancel={() => actions.reset()}
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Mobile Header */}
+      <div className="md:hidden">
+        <MobilePaymentHeader 
+          step={state.step}
+          title="Payment Elements Demo"
+        />
+      </div>
+
+      {/* Demo Configuration */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Demo Configuration</CardTitle>
+          <CardDescription>
+            Configure the payment demo settings
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Amount Selection */}
+          <div className="space-y-3">
+            <h4 className="font-medium">Payment Amount</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {amounts.map((amount) => (
+                <Button
+                  key={amount.value}
+                  variant={selectedAmount === amount.value ? "default" : "outline"}
+                  onClick={() => onAmountChange(amount.value)}
+                  className="flex flex-col h-auto p-4"
+                >
+                  <span className="font-semibold">{amount.label}</span>
+                  <span className="text-xs opacity-70">{amount.description}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Appearance & Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <h4 className="font-medium">Appearance</h4>
+              <div className="flex space-x-2">
+                {(['light', 'dark', 'auto'] as const).map((mode) => (
+                  <Button
+                    key={mode}
+                    variant={appearance === mode ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setAppearance(mode)}
+                    className="capitalize"
+                  >
+                    {mode}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-medium">Layout</h4>
+              <div className="flex space-x-2">
+                {(['tabs', 'accordion'] as const).map((layoutMode) => (
+                  <Button
+                    key={layoutMode}
+                    variant={layout === layoutMode ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setLayout(layoutMode)}
+                    className="capitalize"
+                  >
+                    {layoutMode}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Advanced Options */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="advanced"
+                checked={showAdvanced}
+                onChange={(e) => setShowAdvanced(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="advanced" className="text-sm font-medium">
+                Advanced options (billing details, etc.)
+              </label>
+            </div>
+          </div>
+
+          {/* Initialize Button */}
+          {!state.clientSecret && (
+            <Button
+              onClick={handleInitializePayment}
+              disabled={state.isLoading}
+              className="w-full"
+              size="lg"
+            >
+              {state.isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Setting up payment...
+                </>
+              ) : (
+                <>
+                  Initialize Payment (€{selectedAmount})
+                </>
+              )}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Payment Method Selection */}
+      {state.step === 'setup' && state.clientSecret && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment Method Selection</CardTitle>
+            <CardDescription>
+              Choose your preferred payment method before proceeding
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PaymentMethodSelector
+              selectedMethod={selectedMethod}
+              onMethodSelect={setSelectedMethod}
+              layout="grid"
+              showDetails={true}
+            />
+            
+            {selectedMethod && (
+              <div className="mt-4">
+                <Button 
+                  onClick={() => actions.setStep('payment')}
+                  className="w-full"
+                  size="lg"
+                >
+                  Continue with {selectedMethod.replace('_', ' ')}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Styled Payment Elements */}
+      {state.step === 'payment' && state.clientSecret && state.formData && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment Form</CardTitle>
+            <CardDescription>
+              Complete your payment using the enhanced Stripe Payment Elements
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            <StyledPaymentElements
+              clientSecret={state.clientSecret}
+              formData={state.formData}
+              onSuccess={actions.handleSuccess as any}
+              onError={actions.handleError as any}
+              onProcessing={actions.handleProcessing as any}
+              appearance={appearance}
+              layout={layout}
+              className="p-6"
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Analytics Debug */}
+      {analytics.events.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment Analytics</CardTitle>
+            <CardDescription>
+              Real-time tracking of payment events
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm">
+              {analytics.events.slice(-5).map((event, index) => (
+                <div key={index} className="flex justify-between items-center py-2 border-b">
+                  <span className="font-medium">{event.event}</span>
+                  <span className="text-gray-500">
+                    {event.timestamp.toLocaleTimeString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 }

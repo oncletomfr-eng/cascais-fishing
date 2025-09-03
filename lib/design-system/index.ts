@@ -256,7 +256,7 @@ export const COMPONENT_SIZES = {
 
 // Payment system components
 export { default as PaymentMethodSelector } from '../../components/payment/PaymentMethodSelector';
-export type { PaymentMethodType, PaymentMethod } from '../../components/payment/PaymentMethodSelector';
+export type { PaymentMethodInfo } from '../../components/payment/PaymentMethodSelector';
 
 export { default as PriceDisplay } from '../../components/payment/PriceDisplay';
 export type { 
