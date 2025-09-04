@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 
@@ -13,6 +15,7 @@ interface LeaderboardPlayer {
   completedTrips: number;
   totalFishCaught: number;
   achievementsCount: number;
+  isAnonymous?: boolean;
 }
 
 interface FetchLeaderboardResponse {
@@ -51,10 +54,14 @@ export async function GET(request: NextRequest) {
     // Валидация параметров
     const validatedQuery = FetchLeaderboardSchema.parse(query);
 
+    // Получаем сессию пользователя для проверки приватности
+    const session = await getServerSession(authOptions);
+    const currentUserId = session?.user?.id;
+
     // Подготавливаем запрос для сортировки
     const orderByField = getOrderByField(validatedQuery.orderBy);
     
-    // Получаем профили с пользователями и достижениями
+    // Получаем профили с учетом настроек приватности
     const profiles = await prisma.fisherProfile.findMany({
       include: {
         user: {
@@ -74,23 +81,40 @@ export async function GET(request: NextRequest) {
       take: validatedQuery.limit,
       where: {
         isActive: true,
+        // Фильтруем профили по настройкам приватности
+        OR: [
+          // Публичные профили
+          { leaderboardVisibility: 'PUBLIC' },
+          // Анонимные профили (показываем их тоже)  
+          { leaderboardVisibility: 'ANONYMOUS' },
+          // Если пользователь авторизован, показываем его собственный профиль
+          ...(currentUserId ? [{ userId: currentUserId }] : []),
+          // TODO: добавить логику для друзей когда будет система друзей
+        ],
       },
     });
 
     // Формируем данные игроков для рейтинга
     const players: LeaderboardPlayer[] = profiles
       .filter(profile => profile.user) // Фильтруем только профили с валидными пользователями
-      .map((profile, index) => ({
-        position: index + 1,
-        userId: profile.userId,
-        name: profile.user.name || 'Неизвестный пользователь',
-        avatar: profile.user.image || null,
-        rating: Number(profile.rating),
-        level: profile.level,
-        completedTrips: profile.completedTrips,
-        totalFishCaught: profile.totalFishCaught,
-        achievementsCount: profile._count?.badges || 0,
-      }));
+      .map((profile, index) => {
+        // Проверяем анонимность профиля
+        const isAnonymous = profile.leaderboardVisibility === 'ANONYMOUS' && 
+                           profile.userId !== currentUserId;
+        
+        return {
+          position: index + 1,
+          userId: profile.userId,
+          name: isAnonymous ? 'Анонимный игрок' : (profile.user.name || 'Неизвестный пользователь'),
+          avatar: isAnonymous ? null : (profile.user.image || null),
+          rating: Number(profile.rating),
+          level: profile.level,
+          completedTrips: profile.completedTrips,
+          totalFishCaught: profile.totalFishCaught,
+          achievementsCount: profile._count?.badges || 0,
+          isAnonymous,
+        };
+      });
 
     // Если нужно показать ближайших игроков к конкретному пользователю
     let currentUserPosition: number | undefined;

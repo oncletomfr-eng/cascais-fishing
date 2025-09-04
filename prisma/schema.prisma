@@ -155,6 +155,16 @@ model FisherProfile {
   favoriteLocations String[] @default([]) // Любимые места рыбалки
   fishingZones      String[] @default([]) // Зоны где рыбачил
 
+  // Privacy Controls for Rankings
+  leaderboardVisibility    LeaderboardVisibility @default(PUBLIC) // Видимость в лидербордах
+  profileVisibility        ProfileVisibility     @default(PUBLIC) // Видимость профиля
+  showInCompetitions      Boolean               @default(true)   // Участие в соревнованиях
+  showRankingHistory      Boolean               @default(true)   // Показывать историю рангов
+  allowAchievementSharing Boolean               @default(true)   // Разрешить делиться достижениями
+  anonymousMode           Boolean               @default(false)  // Анонимный режим
+  visibleToFriendsOnly    Boolean               @default(false)  // Видимость только друзьям
+  competitionOptOuts      String[]              @default([])     // Исключения из соревнований по ID
+
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   badges    FisherBadge[]
@@ -348,6 +358,30 @@ model User {
   recommendationInteractions RecommendationInteraction[] // Взаимодействия с рекомендациями
   captainRecommendations CaptainRecommendation[] @relation("CaptainRecommendationsAuthored") // Авторские рекомендации капитана
   captainRecommendationVotes CaptainRecommendationVote[] // Голоса за рекомендации капитанов
+  
+  // Система выплат
+  payouts Payout[] @relation("CaptainPayouts") // Выплаты капитану
+  payoutSchedule PayoutSchedule? @relation("CaptainPayoutSchedule") // График выплат капитана
+  
+  // Налоговая отчетность
+  taxDocuments TaxDocument[] @relation("CaptainTaxDocuments") // Налоговые документы капитана
+  
+  // Competition system
+  createdCompetitions Competition[] @relation("CompetitionCreator") // Созданные соревнования  
+  competitionParticipations CompetitionParticipant[] @relation("CompetitionParticipants") // Участие в соревнованиях
+  competitionRankings CompetitionRanking[] @relation("CompetitionRankings") // Рейтинги в соревнованиях
+  
+  // Seasonal competition system
+  createdSeasons Season[] @relation("SeasonCreator") // Созданные сезоны
+  seasonParticipations SeasonParticipant[] @relation("SeasonParticipants") // Участие в сезонных соревнованиях
+  archivedSeasons SeasonArchive[] @relation("SeasonArchivers") // Архивированные сезоны
+  createdCompetitionEvents CompetitionEvent[] @relation("CompetitionEventCreator") // Созданные события соревнований
+  createdSeasonAnnouncements SeasonAnnouncement[] @relation("SeasonAnnouncementCreator") // Созданные объявления сезонов
+
+  // Reward distribution system
+  rewardDistributions RewardDistribution[] // Полученные награды
+  rewardInventory RewardInventory[] // Инвентарь наград
+  wonRewardEvents RewardEvent[] @relation("RewardEventWinner") // События где был победителем
 
   @@map("users")
 }
@@ -376,6 +410,49 @@ enum BadgeCategory {
   TECHNIQUE // Достижения по техникам
   SOCIAL // Социальные достижения
   GEOGRAPHY // Географические достижения
+}
+
+enum CompetitionCategory {
+  MONTHLY_CHAMPIONS
+  BIGGEST_CATCH
+  MOST_ACTIVE
+  BEST_MENTOR
+  TECHNIQUE_MASTER
+  SPECIES_SPECIALIST
+  CONSISTENCY_KING
+  ROOKIE_OF_MONTH
+  VETERAN_ANGLER
+  SOCIAL_BUTTERFLY
+}
+
+enum CompetitionType {
+  SEASONAL
+  MONTHLY
+  WEEKLY
+  ONGOING
+  SPECIAL_EVENT
+}
+
+enum CompetitionStatus {
+  ACTIVE
+  COMPLETED
+  UPCOMING
+  CANCELLED
+}
+
+enum SeasonType {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  CUSTOM
+}
+
+enum SeasonStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+  CANCELLED
 }
 
 enum BookingStatus {
@@ -739,6 +816,8 @@ model PaymentMethod {
   // Связи
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   payments           Payment[]           // Платежи сделанные этим методом
+  payouts            Payout[]            // Выплаты через этот способ
+  payoutSchedules    PayoutSchedule[]    // Настройки графика выплат
   
   // Индексы для оптимизации
   @@index([userId])
@@ -1150,6 +1229,366 @@ model FishingHotspot {
   
   @@index([latitude, longitude])
   @@map("fishing_hotspots")
+}
+
+// Competition and Leaderboard System Models
+
+// Seasonal competitions and time-based tracking
+model Season {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  displayName String
+  description String?
+  type        SeasonType
+  status      SeasonStatus @default(UPCOMING)
+  
+  // Time period
+  startDate             DateTime
+  endDate               DateTime
+  registrationStartDate DateTime?
+  registrationEndDate   DateTime?
+  
+  // Configuration
+  maxParticipants Int?
+  minParticipants Int?     @default(1)
+  isPublic        Boolean  @default(true)
+  autoEnroll      Boolean  @default(false)
+  allowLateJoin   Boolean  @default(true)
+  
+  // Categories included in this season
+  includedCategories String[] @default([])
+  excludedCategories String[] @default([])
+  
+  // Rewards and recognition
+  rewards           Json?
+  trophyTiers       Json?
+  specialRecognition Json?
+  
+  // Metadata
+  metadata  Json?
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  creator       User?                  @relation("SeasonCreator", fields: [createdBy], references: [id])
+  participants  SeasonParticipant[]
+  archives      SeasonArchive[]
+  events        CompetitionEvent[]
+  announcements SeasonAnnouncement[]
+  seasonRewards Reward[]               // Награды этого сезона
+  rewardCalendars RewardCalendar[]     // Календари наград
+  
+  @@index([type, status, startDate, endDate])
+  @@index([status])
+  @@map("seasons")
+}
+
+// Season participants with detailed tracking
+model SeasonParticipant {
+  id       String @id @default(cuid())
+  seasonId String
+  userId   String
+  
+  // Participation details
+  enrolledAt   DateTime @default(now())
+  isActive     Boolean  @default(true)
+  autoEnrolled Boolean  @default(false)
+  
+  // Season performance across all categories
+  totalScore    Decimal @default(0) @db.Decimal(12, 2)
+  overallRank   Int?
+  categoryRanks Json    @default("{}")
+  categoryScores Json   @default("{}")
+  
+  // Progress tracking
+  weeklyProgress  Json   @default("[]")
+  monthlyProgress Json   @default("[]")
+  achievementsEarned String[] @default([])
+  badgesEarned       String[] @default([])
+  
+  // Historical data
+  progressHistory Json @default("[]")
+  rankHistory     Json @default("[]")
+  
+  // Season-specific stats
+  seasonStats   Json?
+  personalBests Json?
+  
+  // Metadata
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  user   User   @relation("SeasonParticipants", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([seasonId, userId])
+  @@index([seasonId, overallRank])
+  @@map("season_participants")
+}
+
+// Historical season data archive
+model SeasonArchive {
+  id         String     @id @default(cuid())
+  seasonId   String
+  seasonName String
+  seasonType SeasonType
+  startDate  DateTime
+  endDate    DateTime
+  
+  // Final results
+  finalRankings    Json
+  categoryWinners  Json?
+  specialAwards    Json?
+  participantCount Int   @default(0)
+  
+  // Season statistics
+  seasonStats Json?
+  recordsSet  Json?
+  milestones  Json?
+  
+  // Rewards distributed
+  rewardsDistributed Json?
+  ceremonyData       Json?
+  
+  // Archive metadata
+  archivedAt     DateTime @default(now())
+  archivedBy     String?
+  archiveVersion Int      @default(1)
+  metadata       Json?
+  
+  // Relations
+  season   Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  archiver User?  @relation("SeasonArchivers", fields: [archivedBy], references: [id])
+  
+  @@index([seasonType, startDate, endDate])
+  @@map("season_archives")
+}
+
+// Scheduled competition events within seasons
+model CompetitionEvent {
+  id          String              @id @default(cuid())
+  seasonId    String?
+  title       String
+  description String?
+  eventType   CompetitionType     @default(SPECIAL_EVENT)
+  category    CompetitionCategory
+  
+  // Scheduling
+  scheduledStart DateTime
+  scheduledEnd   DateTime
+  actualStart    DateTime?
+  actualEnd      DateTime?
+  status         CompetitionStatus @default(UPCOMING)
+  
+  // Event configuration
+  maxParticipants   Int?
+  entryRequirements Json? // Level, achievements, etc required to join
+  scoringRules      Json
+  rewards           Json?
+  
+  // Notifications and announcements
+  announcementSent Boolean @default(false)
+  reminderSent     Boolean @default(false)
+  resultsSent      Boolean @default(false)
+  
+  // Results
+  winners    Json?
+  results    Json?
+  highlights Json?
+  
+  // Metadata
+  createdBy String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  season        Season?              @relation(fields: [seasonId], references: [id])
+  creator       User?                @relation("CompetitionEventCreator", fields: [createdBy], references: [id])
+  announcements SeasonAnnouncement[]
+  
+  @@index([seasonId, scheduledStart, scheduledEnd])
+  @@index([category, status])
+  @@map("competition_events")
+}
+
+// Season and event announcements
+model SeasonAnnouncement {
+  id        String  @id @default(cuid())
+  seasonId  String?
+  eventId   String?
+  title     String
+  content   String
+  type      String // 'season_start', 'event_reminder', 'results', 'awards', 'general'
+  priority  String  @default("normal") // 'low', 'normal', 'high', 'urgent'
+  
+  // Targeting
+  targetAudience String @default("all") // 'all', 'participants', 'category', 'level_range'
+  targetFilters  Json?
+  
+  // Scheduling
+  scheduledFor DateTime?
+  sentAt       DateTime?
+  status       String    @default("draft") // 'draft', 'scheduled', 'sent', 'cancelled'
+  
+  // Engagement
+  recipientCount Int?     @default(0)
+  openRate       Decimal? @default(0) @db.Decimal(5, 2)
+  clickRate      Decimal? @default(0) @db.Decimal(5, 2)
+  
+  // Metadata
+  createdBy String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  season  Season?          @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  event   CompetitionEvent? @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  creator User?            @relation("SeasonAnnouncementCreator", fields: [createdBy], references: [id])
+  
+  @@index([scheduledFor, status])
+  @@index([seasonId, type])
+  @@map("season_announcements")
+}
+
+// Competition categories for leaderboards
+model LeaderboardCategory {
+  id          String @id @default(cuid())
+  name        String @unique
+  displayName String
+  category    CompetitionCategory
+  description String?
+  
+  // Configuration
+  isActive        Boolean @default(true)
+  sortOrder       Int     @default(0)
+  icon            String?
+  color           String?
+  
+  // Scoring rules
+  scoringAlgorithm Json
+  updateFrequency  String @default("daily") // 'realtime', 'hourly', 'daily', 'weekly'
+  
+  // Visibility
+  isPublic      Boolean @default(true)
+  requiredLevel Int     @default(1)
+  
+  // Metadata
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  
+  @@index([isActive, sortOrder])
+  @@map("leaderboard_categories")
+}
+
+// Competitions and tournaments
+model Competition {
+  id          String            @id @default(cuid())
+  title       String
+  description String?
+  category    CompetitionCategory
+  type        CompetitionType   @default(MONTHLY)
+  status      CompetitionStatus @default(UPCOMING)
+  
+  // Time period
+  startDate DateTime
+  endDate   DateTime
+  
+  // Rules and configuration
+  rules            Json?
+  scoringAlgorithm Json
+  maxParticipants  Int?
+  minParticipants  Int? @default(1)
+  
+  // Rewards
+  rewards    Json?
+  prizeTiers Json?
+  
+  // Visibility and privacy
+  isPublic       Boolean @default(true)
+  allowAnonymous Boolean @default(false)
+  
+  // Metadata
+  metadata  Json?
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  creator      User?                     @relation("CompetitionCreator", fields: [createdBy], references: [id])
+  participants CompetitionParticipant[]
+  rankings     CompetitionRanking[]
+  
+  @@index([category, type])
+  @@index([status, startDate, endDate])
+  @@map("competitions")
+}
+
+// Competition participants
+model CompetitionParticipant {
+  id            String @id @default(cuid())
+  competitionId String
+  userId        String
+  
+  // Participation details
+  joinedAt    DateTime @default(now())
+  isActive    Boolean  @default(true)
+  isAnonymous Boolean  @default(false)
+  
+  // Current standings
+  currentScore Decimal  @default(0) @db.Decimal(10, 2)
+  currentRank  Int?
+  lastUpdated  DateTime @default(now())
+  
+  // Historical data
+  scoreHistory Json @default("[]")
+  rankHistory  Json @default("[]")
+  
+  // Metadata
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  user        User        @relation("CompetitionParticipants", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([competitionId, userId])
+  @@index([competitionId, currentRank])
+  @@map("competition_participants")
+}
+
+// Competition rankings snapshots
+model CompetitionRanking {
+  id            String @id @default(cuid())
+  competitionId String
+  userId        String
+  rank          Int
+  score         Decimal @db.Decimal(10, 2)
+  details       Json? // Category-specific details
+  
+  // Snapshot info
+  snapshotDate     DateTime @default(now())
+  isCurrentRanking Boolean  @default(true)
+  
+  // Metadata
+  metadata  Json?
+  createdAt DateTime @default(now())
+  
+  // Relations
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  user        User        @relation("CompetitionRankings", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([competitionId, isCurrentRanking])
+  @@index([competitionId, rank])
+  @@map("competition_rankings")
 }
 
 // Приливы и отливы
@@ -1656,4 +2095,691 @@ enum ModerationStatus {
   FLAGGED // Помечено для проверки
   
   @@map("moderation_status")
+}
+
+// ============================================================================
+// СИСТЕМА ВЫПЛАТ (PAYOUT SYSTEM)
+// ============================================================================
+
+// Графики выплат для капитанов
+model Payout {
+  id String @id @default(cuid())
+  
+  // Связь с капитаном
+  captainId String
+  captain   User   @relation("CaptainPayouts", fields: [captainId], references: [id], onDelete: Cascade)
+  
+  // Финансовые данные
+  amount               Int      // Сумма выплаты в центах
+  currency             String   @default("EUR")
+  commissionAmount     Int      // Сумма комиссии, которая выплачивается
+  commissionRate       Float    // Процент комиссии на момент выплаты
+  
+  // Период выплаты
+  periodStart          DateTime // Начало периода
+  periodEnd            DateTime // Конец периода
+  
+  // Статус и обработка
+  status               PayoutStatus @default(PENDING)
+  scheduleType         PayoutScheduleType @default(MONTHLY)
+  
+  // Платежная информация
+  paymentMethodId      String?  // ID способа оплаты капитана
+  paymentMethod        PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+  
+  // Stripe данные (если используется Stripe Connect)
+  stripeTransferId     String?  @unique
+  stripeAccountId      String?  // Connected Account ID капитана
+  
+  // Банковские реквизиты (если не используется Stripe)
+  bankAccountNumber    String?
+  bankRoutingNumber    String?
+  bankName             String?
+  bankAccountHolderName String?
+  
+  // Обработка и подтверждение
+  processedAt          DateTime? // Когда обработана
+  processedBy          String?   // Кто обработал (admin user ID)
+  approvedAt           DateTime? // Когда одобрена
+  approvedBy           String?   // Кто одобрил
+  rejectedAt           DateTime? // Когда отклонена
+  rejectedBy           String?   // Кто отклонил
+  rejectionReason      String?   // Причина отклонения
+  
+  // Уведомления
+  notificationSent     Boolean   @default(false)
+  remindersSent        Int       @default(0) // Количество отправленных напоминаний
+  lastReminderAt       DateTime?
+  
+  // Налоговая отчетность
+  taxYear              Int?      // Налоговый год
+  taxDocumentGenerated Boolean   @default(false)
+  taxDocumentUrl       String?   // URL налогового документа
+  
+  // Метаданные
+  description          String?   // Описание выплаты
+  notes                String?   // Внутренние заметки
+  metadata             Json?     // Дополнительные данные
+  
+  // Связанные платежи
+  relatedPaymentIds    String[]  @default([]) // ID платежей, включенных в выплату
+  
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  
+  @@index([captainId, status])
+  @@index([periodStart, periodEnd])
+  @@index([status, scheduleType])
+  @@map("payouts")
+}
+
+// Настройки графика выплат для капитанов
+model PayoutSchedule {
+  id String @id @default(cuid())
+  
+  // Связь с капитаном
+  captainId String @unique
+  captain   User   @relation("CaptainPayoutSchedule", fields: [captainId], references: [id], onDelete: Cascade)
+  
+  // Настройки графика
+  scheduleType         PayoutScheduleType @default(MONTHLY)
+  isActive             Boolean            @default(true)
+  
+  // Минимальная сумма для выплаты
+  minimumPayoutAmount  Int                @default(5000) // €50 минимум
+  
+  // Автоматические выплаты
+  autoPayoutEnabled    Boolean            @default(false)
+  
+  // День выплаты
+  payoutDay            Int?               // День месяца (1-31) для месячных, день недели (1-7) для еженедельных
+  
+  // Способ оплаты по умолчанию
+  defaultPaymentMethodId String?
+  defaultPaymentMethod   PaymentMethod? @relation(fields: [defaultPaymentMethodId], references: [id], onDelete: SetNull)
+  
+  // Банковские реквизиты по умолчанию
+  defaultBankAccount   Json?              // Банковские данные по умолчанию
+  
+  // Уведомления
+  notifyBeforePayoutDays Int              @default(3) // За сколько дней уведомлять
+  emailNotifications     Boolean          @default(true)
+  smsNotifications       Boolean          @default(false)
+  
+  // Налоговые настройки
+  taxSettings          Json?              // Налоговые настройки и документы
+  
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  
+  @@map("payout_schedules")
+}
+
+// История изменений выплат для аудита
+model PayoutHistoryLog {
+  id String @id @default(cuid())
+  
+  payoutId String
+  
+  // Изменения
+  action         PayoutAction  // Тип действия
+  previousStatus PayoutStatus? // Предыдущий статус
+  newStatus      PayoutStatus? // Новый статус
+  
+  // Кто и когда
+  performedBy    String        // User ID
+  performedAt    DateTime      @default(now())
+  
+  // Детали изменения
+  changeDetails  Json?         // Подробности изменения
+  reason         String?       // Причина изменения
+  
+  // IP и device tracking для безопасности
+  ipAddress      String?
+  userAgent      String?
+  
+  createdAt      DateTime      @default(now())
+  
+  @@index([payoutId])
+  @@index([performedAt])
+  @@map("payout_history_logs")
+}
+
+enum PayoutStatus {
+  PENDING      // Ожидает обработки
+  APPROVED     // Одобрена для выплаты
+  PROCESSING   // Обрабатывается
+  COMPLETED    // Выполнена успешно
+  FAILED       // Неуспешная выплата
+  CANCELLED    // Отменена
+  ON_HOLD      // Приостановлена
+}
+
+enum PayoutScheduleType {
+  WEEKLY       // Еженедельно
+  BIWEEKLY     // Раз в две недели
+  MONTHLY      // Ежемесячно
+  QUARTERLY    // Ежеквартально
+  MANUAL       // Вручную по запросу
+}
+
+enum PayoutAction {
+  CREATED      // Создана
+  APPROVED     // Одобрена
+  REJECTED     // Отклонена
+  PROCESSED    // Обработана
+  COMPLETED    // Завершена
+  FAILED       // Неудачная
+  CANCELLED    // Отменена
+  UPDATED      // Обновлена
+}
+
+// ============================================================================
+// НАЛОГОВАЯ ОТЧЕТНОСТЬ (TAX REPORTING SYSTEM)
+// ============================================================================
+
+// Основная модель налогового отчета (годовой/квартальный)
+model TaxReport {
+  id String @id @default(cuid())
+  
+  // Период отчета
+  taxYear        Int         // Налоговый год
+  reportType     TaxReportType // Тип отчета (годовой, квартальный)
+  quarterNumber  Int?        // Номер квартала (1-4), если квартальный отчет
+  
+  // Период данных
+  periodStart    DateTime    // Начало отчетного периода
+  periodEnd      DateTime    // Конец отчетного периода
+  
+  // Статус отчета
+  status         TaxReportStatus @default(DRAFT)
+  
+  // Финансовые итоги
+  totalGrossCommissions    Int      // Общая сумма комиссий до вычетов (центы)
+  totalNetCommissions      Int      // Общая чистая сумма комиссий (центы)
+  totalWithholdings        Int      // Общие удержания (центы)
+  totalPayouts             Int      // Общие выплаты (центы)
+  
+  // Количественные показатели
+  totalCaptains            Int      // Количество капитанов
+  totalTransactions        Int      // Количество транзакций
+  totalDocumentsGenerated  Int      // Количество созданных документов
+  
+  // Генерация отчета
+  generatedAt    DateTime?   // Когда сгенерирован
+  generatedBy    String?     // Кто сгенерировал (admin user ID)
+  
+  // Файлы отчета
+  reportFileUrl       String?     // URL основного файла отчета
+  summaryFileUrl      String?     // URL сводного файла
+  backupFileUrl       String?     // URL резервной копии
+  
+  // Статистика и аналитика
+  reportSummary      Json?        // Сводная статистика отчета
+  complianceChecks   Json?        // Результаты проверок соответствия
+  
+  // Аудит и подписи
+  approvedAt         DateTime?    // Когда утвержден
+  approvedBy         String?      // Кто утвердил
+  digitalSignature   String?      // Цифровая подпись
+  
+  // Связи
+  taxDocuments       TaxDocument[] // Связанные налоговые документы
+  auditLogs          TaxAuditLog[] // Аудиторские записи
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([taxYear, reportType, quarterNumber])
+  @@index([taxYear, status])
+  @@index([periodStart, periodEnd])
+  @@map("tax_reports")
+}
+
+// Налоговые документы (1099-MISC и другие)
+model TaxDocument {
+  id String @id @default(cuid())
+  
+  // Связи
+  taxReportId    String?     // Связь с отчетом (может быть независимым)
+  taxReport      TaxReport?  @relation(fields: [taxReportId], references: [id], onDelete: SetNull)
+  
+  captainId      String      // Для кого документ
+  captain        User        @relation("CaptainTaxDocuments", fields: [captainId], references: [id], onDelete: Cascade)
+  
+  // Тип и характеристики документа
+  documentType   TaxDocumentType   // Тип документа (1099-MISC, etc.)
+  formType       String            // Форма документа ("1099-MISC", "1099-K", etc.)
+  
+  // Налоговый период
+  taxYear        Int               // Налоговый год
+  
+  // Финансовые данные документа
+  totalAmount    Int               // Общая сумма в центах
+  
+  // Детализация сумм (специфично для 1099-MISC)
+  box1Amount     Int?             // Box 1: Rents
+  box2Amount     Int?             // Box 2: Royalties  
+  box3Amount     Int?             // Box 3: Other Income
+  box4Amount     Int?             // Box 4: Federal Income Tax Withheld
+  box5Amount     Int?             // Box 5: Fishing Boat Proceeds
+  box6Amount     Int?             // Box 6: Medical and Health Care Payments
+  box7Amount     Int?             // Box 7: Nonemployee Compensation (основное для нас)
+  box8Amount     Int?             // Box 8: Substitute Payments
+  box9Amount     Int?             // Box 9: Direct Sales
+  box10Amount    Int?             // Box 10: Crop Insurance Proceeds
+  box11Amount    Int?             // Box 11: Foreign Tax Paid
+  box12Amount    Int?             // Box 12: Section 409A Deferrals
+  box13Amount    Int?             // Box 13: Excess Golden Parachute Payments
+  box14Amount    Int?             // Box 14: Gross Proceeds Paid to Attorney
+  
+  // Статус документа
+  status         TaxDocumentStatus @default(DRAFT)
+  
+  // Генерация и отправка
+  generatedAt    DateTime?        // Когда сгенерирован
+  sentAt         DateTime?        // Когда отправлен получателю
+  receivedAt     DateTime?        // Когда получен подтверждение
+  
+  // Файлы документа
+  documentUrl    String?          // URL PDF файла
+  xmlDataUrl     String?          // URL XML данных (для электронной подачи)
+  backupUrl      String?          // URL резервной копии
+  
+  // Получатель информации
+  recipientTin   String?          // TIN получателя (Tax Identification Number)
+  recipientName  String           // Полное имя получателя
+  recipientAddress Json?          // Адрес получателя
+  
+  // Плательщик (Cascais Fishing)
+  payerTin       String?          // TIN плательщика  
+  payerName      String           // Название компании
+  payerAddress   Json?            // Адрес компании
+  
+  // Соответствие и валидация
+  isValidated    Boolean          @default(false) // Прошел ли валидацию
+  validationErrors Json?          // Ошибки валидации
+  complianceFlags  String[]       @default([])    // Флаги соответствия
+  
+  // Коррекции и исправления
+  isCorrection   Boolean          @default(false) // Является ли исправлением
+  originalDocId  String?          // ID оригинального документа
+  correctionReason String?        // Причина исправления
+  
+  // Аудит и отслеживание
+  auditLogs      TaxAuditLog[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([captainId, taxYear, documentType])
+  @@index([taxYear, status])
+  @@index([captainId, taxYear])
+  @@index([generatedAt])
+  @@map("tax_documents")
+}
+
+// Аудиторский журнал для налогового соответствия
+model TaxAuditLog {
+  id String @id @default(cuid())
+  
+  // Связи (одна из связей должна быть обязательной)
+  taxReportId     String?
+  taxReport       TaxReport?   @relation(fields: [taxReportId], references: [id], onDelete: SetNull)
+  
+  taxDocumentId   String?
+  taxDocument     TaxDocument? @relation(fields: [taxDocumentId], references: [id], onDelete: SetNull)
+  
+  payoutId        String?     // Связь с выплатой, если применимо
+  
+  // Действие и событие
+  action          TaxAuditAction    // Тип действия
+  eventType       TaxEventType      // Тип события
+  
+  // Пользователь и контекст
+  performedBy     String            // User ID кто выполнил
+  performedByName String?           // Имя пользователя для аудита
+  
+  // Детали события
+  description     String            // Описание действия
+  previousData    Json?             // Предыдущие данные
+  newData         Json?             // Новые данные
+  
+  // Техническая информация
+  ipAddress       String?           // IP адрес
+  userAgent       String?           // User agent
+  sessionId       String?           // ID сессии
+  
+  // Соответствие и риски
+  complianceLevel TaxComplianceLevel @default(NORMAL)
+  riskFlags       String[]           @default([])
+  
+  // Время
+  performedAt DateTime @default(now())
+  
+  @@index([taxReportId])
+  @@index([taxDocumentId])
+  @@index([performedBy])
+  @@index([performedAt])
+  @@index([action, eventType])
+  @@map("tax_audit_logs")
+}
+
+// Enum типы для налоговой системы
+
+enum TaxReportType {
+  ANNUAL     // Годовой отчет
+  QUARTERLY  // Квартальный отчет
+  MONTHLY    // Месячный отчет (если нужен)
+  CUSTOM     // Произвольный период
+}
+
+enum TaxReportStatus {
+  DRAFT      // Черновик
+  PROCESSING // Обрабатывается
+  COMPLETED  // Завершен
+  SUBMITTED  // Отправлен
+  APPROVED   // Утвержден
+  REJECTED   // Отклонен
+  ARCHIVED   // Архивирован
+}
+
+enum TaxDocumentType {
+  FORM_1099_MISC    // 1099-MISC форма
+  FORM_1099_K       // 1099-K форма
+  FORM_1096         // 1096 Summary форма
+  ANNUAL_SUMMARY    // Годовая сводка
+  QUARTERLY_SUMMARY // Квартальная сводка
+  CORRECTION        // Исправление
+  CUSTOM            // Произвольный документ
+}
+
+enum TaxDocumentStatus {
+  DRAFT         // Черновик
+  GENERATED     // Сгенерирован
+  VALIDATED     // Проверен
+  APPROVED      // Утвержден
+  SENT          // Отправлен
+  RECEIVED      // Получен
+  FILED         // Подан
+  CORRECTED     // Исправлен
+  CANCELLED     // Отменен
+}
+
+enum TaxAuditAction {
+  CREATED       // Создан
+  UPDATED       // Обновлен
+  DELETED       // Удален
+  GENERATED     // Сгенерирован
+  SENT          // Отправлен
+  APPROVED      // Утвержден
+  REJECTED      // Отклонен
+  VALIDATED     // Проверен
+  CORRECTED     // Исправлен
+  ARCHIVED      // Архивирован
+  ACCESSED      // Доступ осуществлен
+  DOWNLOADED    // Скачан
+  EXPORTED      // Экспортирован
+}
+
+enum TaxEventType {
+  REPORT_MANAGEMENT    // Управление отчетами
+  DOCUMENT_MANAGEMENT  // Управление документами
+  DATA_EXPORT          // Экспорт данных
+  COMPLIANCE_CHECK     // Проверка соответствия
+  USER_ACCESS          // Доступ пользователя
+  SYSTEM_MAINTENANCE   // Обслуживание системы
+  AUDIT_REVIEW         // Аудиторская проверка
+  CORRECTION_PROCESS   // Процесс исправления
+  NOTIFICATION_SENT    // Отправка уведомления
+}
+
+enum TaxComplianceLevel {
+  LOW       // Низкий уровень риска
+  NORMAL    // Обычный уровень
+  HIGH      // Высокий уровень риска
+  CRITICAL  // Критический уровень
+}
+
+// Privacy controls for leaderboards and rankings
+enum LeaderboardVisibility {
+  PUBLIC      // Виден всем в лидербордах
+  FRIENDS     // Виден только друзьям
+  PRIVATE     // Не виден никому в лидербордах
+  ANONYMOUS   // Виден анонимно (без имени)
+}
+
+enum ProfileVisibility {
+  PUBLIC      // Профиль виден всем
+  FRIENDS     // Профиль виден только друзьям  
+  PRIVATE     // Профиль приватный
+  LIMITED     // Ограниченная видимость (только базовые данные)
+}
+
+// ============================================================================
+// СИСТЕМА НАГРАД И РАСПРЕДЕЛЕНИЯ (REWARD DISTRIBUTION SYSTEM)
+// ============================================================================
+
+// Основные награды в системе
+model Reward {
+  id          String      @id @default(cuid())
+  name        String      // Название награды
+  description String?     // Описание награды
+  type        RewardType  // Тип награды
+  tier        RewardTier  // Уровень награды (bronze, silver, gold, platinum)
+  
+  // Визуальное оформление
+  icon        String      // Иконка награды
+  color       String?     // Цвет награды
+  imageUrl    String?     // URL изображения награды
+  
+  // Критерии получения
+  requirements Json?      // Требования для получения
+  rarity      AchievementRarity @default(COMMON)
+  
+  // Статус и даты
+  isActive    Boolean     @default(true)
+  isLimited   Boolean     @default(false) // Ограниченное количество
+  maxQuantity Int?        // Максимальное количество экземпляров
+  
+  // Сезонность
+  seasonId    String?     // Привязка к сезону
+  validFrom   DateTime?   // Действительна с
+  validUntil  DateTime?   // Действительна до
+  
+  // Метаданные
+  metadata    Json?       // Дополнительные данные
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Связи
+  season          Season?             @relation(fields: [seasonId], references: [id])
+  distributions   RewardDistribution[] // Раздачи этой награды
+  inventory       RewardInventory[]   // В инвентарях пользователей
+  events          RewardEvent[]       // События награждения
+  
+  @@map("rewards")
+}
+
+// Распределение наград (кто, что, когда получил)
+model RewardDistribution {
+  id          String                @id @default(cuid())
+  rewardId    String
+  userId      String
+  
+  // Источник награды
+  sourceType  RewardSourceType      // Откуда награда (competition, achievement, etc)
+  sourceId    String?               // ID источника (competitionId, achievementId, etc)
+  
+  // Детали распределения
+  rank        Int?                  // Место в соревновании (если применимо)
+  score       Decimal?              @db.Decimal(10, 2) // Балл/результат
+  reason      String?               // Причина награждения
+  
+  // Статус
+  status      RewardDistributionStatus @default(PENDING)
+  distributedAt DateTime?            // Когда была выдана
+  claimedAt   DateTime?             // Когда была получена пользователем
+  
+  // Уведомления
+  notificationSent Boolean          @default(false)
+  ceremonyShown   Boolean           @default(false)
+  
+  // Метаданные
+  metadata    Json?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  
+  // Связи
+  reward      Reward                @relation(fields: [rewardId], references: [id])
+  user        User                  @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([sourceType, sourceId])
+  @@map("reward_distributions")
+}
+
+// Инвентарь наград пользователя
+model RewardInventory {
+  id          String    @id @default(cuid())
+  userId      String
+  rewardId    String
+  
+  // Количество и статус
+  quantity    Int       @default(1)     // Количество экземпляров
+  isActive    Boolean   @default(true)  // Активна ли награда
+  isDisplayed Boolean   @default(true)  // Отображается ли в профиле
+  
+  // Порядок отображения
+  displayOrder Int?     // Порядок в профиле
+  category    String?   // Категория для группировки
+  
+  // Получение
+  obtainedAt  DateTime  @default(now()) // Когда получена
+  firstObtainedAt DateTime @default(now()) // Когда получена впервые
+  
+  // Связи
+  reward      Reward    @relation(fields: [rewardId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, rewardId])
+  @@index([userId, isActive])
+  @@map("reward_inventory")
+}
+
+// События награждения (для церемоний и уведомлений)
+model RewardEvent {
+  id          String         @id @default(cuid())
+  rewardId    String
+  
+  // Тип и контекст события
+  eventType   RewardEventType // Тип события (ceremony, notification, etc)
+  title       String         // Заголовок события
+  description String?        // Описание события
+  
+  // Участники
+  participants String[]      // ID пользователей-участников
+  winnerId    String?        // ID главного победителя
+  
+  // Расписание
+  scheduledFor DateTime?     // Запланировано на
+  startedAt   DateTime?      // Когда началось
+  completedAt DateTime?      // Когда завершилось
+  
+  // Статус
+  status      RewardEventStatus @default(SCHEDULED)
+  isPublic    Boolean        @default(true)
+  
+  // Контент события
+  bannerUrl   String?        // Баннер события
+  messageContent Json?       // Содержание сообщения
+  
+  // Связи
+  reward      Reward         @relation(fields: [rewardId], references: [id])
+  winner      User?          @relation("RewardEventWinner", fields: [winnerId], references: [id])
+  
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  @@index([eventType, scheduledFor])
+  @@map("reward_events")
+}
+
+// Сезонные календари наград
+model RewardCalendar {
+  id          String    @id @default(cuid())
+  name        String    // Название календаря
+  description String?   // Описание
+  
+  // Период действия
+  startDate   DateTime  // Начало календаря
+  endDate     DateTime  // Конец календаря
+  
+  // Конфигурация
+  rewards     Json      // Награды и правила их получения
+  milestones  Json?     // Этапы и промежуточные цели
+  
+  // Статус
+  isActive    Boolean   @default(true)
+  isPublic    Boolean   @default(true)
+  
+  // Связь с сезоном
+  seasonId    String?
+  season      Season?   @relation(fields: [seasonId], references: [id])
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@map("reward_calendars")
+}
+
+// Enums для системы наград
+enum RewardType {
+  TROPHY      // Трофей
+  BADGE       // Значок
+  TITLE       // Титул
+  DECORATION  // Украшение профиля
+  FEATURE     // Эксклюзивная функция
+  VIRTUAL_ITEM // Виртуальный предмет
+}
+
+enum RewardTier {
+  BRONZE      // Бронза
+  SILVER      // Серебро
+  GOLD        // Золото
+  PLATINUM    // Платина
+  DIAMOND     // Алмаз
+  LEGENDARY   // Легендарный
+}
+
+enum RewardSourceType {
+  COMPETITION       // Соревнование
+  ACHIEVEMENT       // Достижение
+  MILESTONE        // Веха
+  SEASONAL_EVENT   // Сезонное событие
+  SPECIAL_EVENT    // Специальное событие
+  ADMIN_GRANT      // Выдано администратором
+  COMMUNITY_VOTE   // Голосование сообщества
+}
+
+enum RewardDistributionStatus {
+  PENDING     // Ожидает распределения
+  DISTRIBUTED // Распределена
+  CLAIMED     // Получена пользователем
+  EXPIRED     // Истекла
+  CANCELLED   // Отменена
+}
+
+enum RewardEventType {
+  CEREMONY    // Церемония награждения
+  NOTIFICATION // Уведомление
+  ANNOUNCEMENT // Объявление
+  MILESTONE   // Достижение вехи
+}
+
+enum RewardEventStatus {
+  SCHEDULED   // Запланировано
+  ACTIVE      // Активно
+  COMPLETED   // Завершено
+  CANCELLED   // Отменено
 }

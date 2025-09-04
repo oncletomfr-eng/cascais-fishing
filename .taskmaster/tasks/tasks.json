@@ -317,7 +317,7 @@
         "id": 8,
         "title": "Commission Tracking & Reporting",
         "description": "Build commission calculation system with rate display, history tracking, payout scheduling, and tax reporting preparation",
-        "status": "in-progress",
+        "status": "done",
         "priority": "high",
         "phase": "Payment System",
         "estimatedHours": 35,
@@ -357,7 +357,7 @@
             "title": "Payout Schedule Management",
             "description": "Implement payout schedule management interface for captain commission payments",
             "details": "Build payout schedule dashboard showing upcoming and past payouts. Create payout calendar with customizable schedule settings (weekly, bi-weekly, monthly). Add payout processing workflow with approval and confirmation systems. Include payout history tracking with status updates. Build payment method management for captains (bank accounts, payment preferences). Add automated payout notifications and reminders.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 8
           },
@@ -366,7 +366,7 @@
             "title": "Tax Reporting Data Preparation",
             "description": "Add tax reporting data preparation and export capabilities for commission payments",
             "details": "Create tax reporting module for commission income tracking. Build 1099-MISC form data preparation for captain commissions. Add tax year summary reports with commission totals and deductions. Include tax document generation and export capabilities. Build tax reporting dashboard with annual and quarterly views. Add tax-compliant record keeping with proper documentation and audit trails.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 8
           },
@@ -375,7 +375,7 @@
             "title": "Captain Subscription Tier Integration",
             "description": "Integrate commission system with captain subscription tiers and tier-based rate calculations",
             "details": "Build subscription tier management interface showing captain tier levels and benefits. Create tier-based commission rate logic with automatic rate adjustments. Add tier upgrade/downgrade workflows with commission rate changes. Include tier analytics showing tier distribution and commission optimization recommendations. Build tier comparison tools for captains to understand commission benefits. Integrate with existing payment system and subscription management.",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 8
           }
@@ -490,7 +490,7 @@
         "id": 12,
         "title": "Leaderboard & Competition System",
         "description": "Create competitive ranking interface with category-based leaderboards, seasonal competitions, and user comparisons",
-        "status": "pending",
+        "status": "in-progress",
         "priority": "medium",
         "phase": "Gamification",
         "estimatedHours": 30,
@@ -504,7 +504,63 @@
           "competition",
           "ranking"
         ],
-        "details": "Build category-based ranking tables. Add user position highlighting. Implement seasonal competition tracking. Create achievement comparison tools. Include privacy controls for rankings. Add reward distribution system. Implement with privacy considerations and ensure fair ranking algorithms."
+        "details": "Build category-based ranking tables. Add user position highlighting. Implement seasonal competition tracking. Create achievement comparison tools. Include privacy controls for rankings. Add reward distribution system. Implement with privacy considerations and ensure fair ranking algorithms.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Category-Based Leaderboard System",
+            "description": "Create separate leaderboard categories for different competition types and skill areas",
+            "details": "Build category-based ranking system extending existing leaderboard API. Create categories like 'Monthly Champions', 'Biggest Catch', 'Most Active', 'Best Mentor', 'Technique Master'. Add category selection interface. Implement category-specific scoring algorithms. Include category badges and recognition systems. Integrate with existing leaderboard table component.",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 12
+          },
+          {
+            "id": 2,
+            "title": "Seasonal Competition Tracking",
+            "description": "Implement seasonal competitions with time-based rankings and historical tracking",
+            "details": "Create seasonal competition system with quarterly/monthly/weekly competitions. Add competition calendar and scheduling. Implement historical season rankings with archival. Build season-specific leaderboards with rollover functionality. Add competition announcements and notifications. Include season rewards and recognition ceremonies. Track seasonal progress and achievements.",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 12
+          },
+          {
+            "id": 3,
+            "title": "Enhanced User Position Highlighting",
+            "description": "Improve user position visualization with advanced highlighting and nearby player context",
+            "details": "Enhance existing position highlighting with animated indicators. Add 'near me' view showing players ranked closely. Implement position change tracking (up/down arrows). Build position history graphs. Add motivational messages based on rank changes. Include personalized rank improvement suggestions. Improve mobile-responsive position display.",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 12
+          },
+          {
+            "id": 4,
+            "title": "Achievement Comparison Tools",
+            "description": "Build tools for comparing achievements and progress between users",
+            "details": "Create achievement comparison interface for users to compare with friends or top players. Add side-by-side achievement displays. Implement achievement gap analysis showing what's needed to reach next milestone. Build achievement recommendation engine. Include achievement sharing and social features. Add achievement-based challenges between users.",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 12
+          },
+          {
+            "id": 5,
+            "title": "Privacy Controls for Rankings",
+            "description": "Implement privacy settings allowing users to control their visibility in leaderboards",
+            "details": "Add privacy settings for leaderboard participation. Create anonymous mode option. Implement friend-only visibility settings. Add opt-out mechanisms for specific competitions. Build privacy preference dashboard. Include GDPR-compliant data controls. Add profile visibility controls for ranking displays.",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 12
+          },
+          {
+            "id": 6,
+            "title": "Reward Distribution System",
+            "description": "Create automated reward system for competition winners and milestone achievements",
+            "details": "Build automated reward distribution for top performers. Create reward tiers (bronze, silver, gold, platinum). Implement badge/trophy collection system. Add virtual rewards like profile decorations, exclusive features. Build reward history and inventory. Include reward ceremonies and notifications. Add seasonal reward calendars and special events.",
+            "status": "done",
+            "dependencies": [],
+            "parentTaskId": 12
+          }
+        ]
       },
       {
         "id": 13,
@@ -837,7 +893,7 @@
       "budget": "€50,000",
       "expectedROI": "€90k+/month revenue, 2160% ROI over 12 months",
       "created": "2025-09-01T14:28:28.045Z",
-      "updated": "2025-09-04T10:26:07.793Z"
+      "updated": "2025-09-04T15:50:28.873Z"
     }
   }
 }

@@ -47,9 +47,9 @@ import {
   TableRow,
   Tooltip,
   CircularProgress,
-  Skeleton,
-  Grid
+  Skeleton
 } from '@mui/material';
+import { Grid } from '@mui/material';
 import {
   Calculate as CalculateIcon,
   TrendingUp as TrendingUpIcon,
@@ -64,11 +64,14 @@ import {
   CheckCircle as CheckCircleIcon,
   Star as StarIcon,
   Diamond as DiamondIcon,
-  EmojiEvents as CrownIcon
+  EmojiEvents as CrownIcon,
+  Assessment as TaxIcon
 } from '@mui/icons-material';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { CommissionAnalytics } from './CommissionAnalytics';
+import TaxReportingDashboard from './TaxReportingDashboard';
+import { CaptainSubscriptionTierManagement } from './CaptainSubscriptionTierManagement';
 
 // Commission interfaces
 export interface CommissionTier {
@@ -457,6 +460,12 @@ export function CommissionDashboard({ captainId, className = '' }: CommissionDas
                   <Tab label="All Tiers" />
                   <Tab label="Recent Activity" />
                   <Tab label="Analytics" />
+                  <Tab label="Subscription Management" />
+                  <Tab
+                    label="Tax Reporting" 
+                    icon={<TaxIcon />}
+                    disabled={session?.user?.role !== 'ADMIN'}
+                  />
                 </Tabs>
               </Box>
 
@@ -665,6 +674,29 @@ export function CommissionDashboard({ captainId, className = '' }: CommissionDas
               {/* Analytics Tab */}
               <TabPanel value={activeTab} index={3}>
                 <CommissionAnalytics />
+              </TabPanel>
+
+              {/* Subscription Management Tab */}
+              <TabPanel value={activeTab} index={4}>
+                <CaptainSubscriptionTierManagement 
+                  captainId={captainId}
+                  onTierChange={(newTier) => {
+                    toast.success(`Upgraded to ${newTier.displayName} tier!`);
+                    // Refresh commission data
+                    fetchCommissionData();
+                  }}
+                />
+              </TabPanel>
+
+              {/* Tax Reporting Tab */}
+              <TabPanel value={activeTab} index={5}>
+                {session?.user?.role === 'ADMIN' ? (
+                  <TaxReportingDashboard />
+                ) : (
+                  <Alert severity="info">
+                    Tax reporting is only available to administrators. Contact support for access.
+                  </Alert>
+                )}
               </TabPanel>
             </CardContent>
           </Card>

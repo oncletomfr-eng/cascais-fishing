@@ -1,6 +1,6 @@
 # Task ID: 12
 # Title: Leaderboard & Competition System
-# Status: pending
+# Status: in-progress
 # Dependencies: 11
 # Priority: medium
 # Description: Create competitive ranking interface with category-based leaderboards, seasonal competitions, and user comparisons
@@ -8,4 +8,42 @@
 Build category-based ranking tables. Add user position highlighting. Implement seasonal competition tracking. Create achievement comparison tools. Include privacy controls for rankings. Add reward distribution system. Implement with privacy considerations and ensure fair ranking algorithms.
 
 # Test Strategy:
+
+
+# Subtasks:
+## 1. Category-Based Leaderboard System [pending]
+### Dependencies: None
+### Description: Create separate leaderboard categories for different competition types and skill areas
+### Details:
+Build category-based ranking system extending existing leaderboard API. Create categories like 'Monthly Champions', 'Biggest Catch', 'Most Active', 'Best Mentor', 'Technique Master'. Add category selection interface. Implement category-specific scoring algorithms. Include category badges and recognition systems. Integrate with existing leaderboard table component.
+
+## 2. Seasonal Competition Tracking [pending]
+### Dependencies: None
+### Description: Implement seasonal competitions with time-based rankings and historical tracking
+### Details:
+Create seasonal competition system with quarterly/monthly/weekly competitions. Add competition calendar and scheduling. Implement historical season rankings with archival. Build season-specific leaderboards with rollover functionality. Add competition announcements and notifications. Include season rewards and recognition ceremonies. Track seasonal progress and achievements.
+
+## 3. Enhanced User Position Highlighting [pending]
+### Dependencies: None
+### Description: Improve user position visualization with advanced highlighting and nearby player context
+### Details:
+Enhance existing position highlighting with animated indicators. Add 'near me' view showing players ranked closely. Implement position change tracking (up/down arrows). Build position history graphs. Add motivational messages based on rank changes. Include personalized rank improvement suggestions. Improve mobile-responsive position display.
+
+## 4. Achievement Comparison Tools [pending]
+### Dependencies: None
+### Description: Build tools for comparing achievements and progress between users
+### Details:
+Create achievement comparison interface for users to compare with friends or top players. Add side-by-side achievement displays. Implement achievement gap analysis showing what's needed to reach next milestone. Build achievement recommendation engine. Include achievement sharing and social features. Add achievement-based challenges between users.
+
+## 5. Privacy Controls for Rankings [pending]
+### Dependencies: None
+### Description: Implement privacy settings allowing users to control their visibility in leaderboards
+### Details:
+Add privacy settings for leaderboard participation. Create anonymous mode option. Implement friend-only visibility settings. Add opt-out mechanisms for specific competitions. Build privacy preference dashboard. Include GDPR-compliant data controls. Add profile visibility controls for ranking displays.
+
+## 6. Reward Distribution System [pending]
+### Dependencies: None
+### Description: Create automated reward system for competition winners and milestone achievements
+### Details:
+Build automated reward distribution for top performers. Create reward tiers (bronze, silver, gold, platinum). Implement badge/trophy collection system. Add virtual rewards like profile decorations, exclusive features. Build reward history and inventory. Include reward ceremonies and notifications. Add seasonal reward calendars and special events.
 

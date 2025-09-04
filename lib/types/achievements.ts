@@ -373,6 +373,7 @@ export interface LeaderboardPlayer {
   completedTrips: number;
   totalFishCaught: number;
   achievementsCount: number;
+  isAnonymous?: boolean;
 }
 
 export interface FetchLeaderboardRequest {
