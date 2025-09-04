@@ -76,7 +76,7 @@ export function BaseEmailTemplate({ preview, children }: BaseEmailTemplateProps)
             textAlign: 'center' as const,
           }}>
             <Img
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11-MwFTIWjDf7ohD6gHEB3bpur6NtqmV2.webp"
+              src="https://www.cascaisfishing.com/hero-fishing-boat-cascais.png"
               alt="Cascais Premium Fishing"
               width="100"
               height="100"
