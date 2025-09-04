@@ -133,7 +133,7 @@ export function CatchPhotoCard({
                 <Fish className="w-6 h-6 text-blue-600" />
                 <h3 className="font-semibold text-lg">Улов!</h3>
                 {payload.fishSpecies && (
-                  {getFishIcon(payload.fishSpecies)}
+                  getFishIcon(payload.fishSpecies)
                 )}
               </div>
               <Badge variant="secondary" className="bg-blue-600 text-white">
