@@ -40,7 +40,7 @@ import {
 } from '@mui/material';
 import {
   EmojiEvents as TrophyIcon,
-  Military as MilitaryIcon,
+  MilitaryIconLucide as MilitaryIconLucide,
   Favorite as HeartIcon,
   School as SchoolIcon,
   Psychology as SkillIcon,
@@ -53,7 +53,8 @@ import {
   Info as InfoIcon,
   Star as StarIcon,
   WorkspacePremium as BadgeIcon
-} from '@mui/icons-material';
+} from '@mui/icons-material'
+import { Shield as MilitaryIconLucideIconLucide } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -102,7 +103,7 @@ interface CategoryLeaderboardProps {
 const getCategoryIcon = (category: string) => {
   const icons: Record<string, React.ReactNode> = {
     'MONTHLY_CHAMPIONS': <TrophyIcon />,
-    'BIGGEST_CATCH': <MilitaryIcon />,
+    'BIGGEST_CATCH': <MilitaryIconLucide />,
     'MOST_ACTIVE': <TimerIcon />,
     'BEST_MENTOR': <SchoolIcon />,
     'TECHNIQUE_MASTER': <SkillIcon />,

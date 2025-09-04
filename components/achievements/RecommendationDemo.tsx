@@ -15,8 +15,9 @@ import { Slider } from '@/components/ui/slider'
 import {
   Users, Target, TrendingUp, BarChart3, Settings,
   User, Zap, Clock, Trophy, Star, Brain,
-  Shuffle, RotateCcw, Eye, Filter
+  Shuffle, RotateCcw, Eye, Filter, Fish
 } from 'lucide-react'
+import { getIconComponent } from '@/lib/utils/icon-mapper'
 import AchievementRecommendations from './AchievementRecommendations'
 import {
   type UserProfile,
@@ -172,34 +173,34 @@ const DEMO_USER_PROFILES: Record<string, UserProfile> = {
 
 // Profile descriptions
 const PROFILE_DESCRIPTIONS = {
-  beginner: {
+    beginner: {
     title: 'New Fisher',
     description: 'Just starting their fishing journey, prefers easy achievements',
-    icon: Fish,
+    icon: 'Fish',
     traits: ['New to fishing', 'Prefers short sessions', 'Focuses on basics']
   },
   experienced: {
-    title: 'Skilled Angler',
+    title: 'Skilled Angler', 
     description: 'Has moderate experience, enjoys medium difficulty challenges',
-    icon: Fish,
+    icon: 'Fish',
     traits: ['Balanced approach', 'Social participant', 'Technique focused']
   },
   expert: {
     title: 'Master Fisher',
     description: 'Highly skilled, seeks challenging achievements',
-    icon: Trophy,
+    icon: 'Trophy',
     traits: ['Seeks challenges', 'Deep expertise', 'Long sessions']
   },
   socializer: {
     title: 'Community Builder',
     description: 'Loves social aspects, organizes group activities',
-    icon: Users,
+    icon: 'Users',
     traits: ['Social focused', 'Group organizer', 'Community driven']
   },
   completionist: {
     title: 'Achievement Hunter',
     description: 'Wants to complete everything, including rare achievements',
-    icon: Star,
+    icon: 'Star',
     traits: ['100% completion', 'Rare achievements', 'Systematic approach']
   }
 }
@@ -236,7 +237,7 @@ function ProfileSelector({ currentProfile, onProfileChange }: ProfileSelectorPro
               >
                 <CardContent className="p-4">
                   <div className="text-center">
-                    <div className="mb-2"><profile.icon className="w-6 h-6" /></div>
+                    <div className="mb-2">{React.createElement(getIconComponent(profile.icon), { className: "w-6 h-6" })}</div>
                     <h3 className="font-semibold text-sm mb-1">{profile.title}</h3>
                     <p className="text-xs text-muted-foreground mb-2">{profile.description}</p>
                     <div className="flex flex-wrap justify-center gap-1">
@@ -442,7 +443,7 @@ function RecommendationInsights({ profileKey, onProfileChange }: RecommendationI
       title: 'Personalization',
       description: 'Recommendations adapt based on completed achievements and user behavior patterns',
       action: 'See Examples',
-      icon: Target
+      icon: 'Target'
     }
   ]
 

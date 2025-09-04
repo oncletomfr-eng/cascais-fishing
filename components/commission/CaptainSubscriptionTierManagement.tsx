@@ -37,14 +37,15 @@ import {
   TrendingUp as TrendingUpIcon,
   Star as StarIcon,
   Diamond as DiamondIcon,
-  Crown as CrownIcon,
+  CrownIconLucide as CrownIconLucide,
   Check as CheckIcon,
   ArrowUpward as ArrowUpwardIcon,
   Info as InfoIcon,
   Timeline as TimelineIcon,
   EuroSymbol as EuroIcon,
   Schedule as ScheduleIcon
-} from '@mui/icons-material';
+} from '@mui/icons-material'
+import { CrownIconLucide as CrownIconLucideIconLucide } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 
 // Types
@@ -111,7 +112,7 @@ const COMMISSION_TIERS: CommissionTier[] = [
     commissionRate: 15.0,
     minimumEarnings: 300000, // €3000
     features: ['Real-time analytics', 'Weekly payouts', 'Dedicated support', 'Advanced tax tools', 'Custom reporting'],
-    icon: <CrownIcon />,
+    icon: <CrownIconLucide />,
     color: '#FF9800'
   }
 ];

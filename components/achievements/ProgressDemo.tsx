@@ -16,6 +16,7 @@ import {
   Play, Pause, RotateCcw, TrendingUp, Target,
   Fish, Trophy, Clock, Zap, Calendar
 } from 'lucide-react'
+import { getIconComponent } from '@/lib/utils/icon-mapper'
 import {
   CircularProgressBar,
   LinearProgressBar, 
@@ -255,7 +256,7 @@ export default function ProgressDemo() {
                       transition={{ delay: index * 0.1 }}
                     >
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
-                        {item.milestone ? <Trophy className="w-4 h-4 text-yellow-600" /> : <Fish className="w-4 h-4 text-blue-600" />}
+                        {item.milestone ? <Trophy className="w-4 h-4 text-yellow-600" /> : React.createElement(getIconComponent('Fish'), { className: "w-4 h-4 text-blue-600" })}
                       </div>
                       <div className="flex-1">
                         <div className="font-medium text-sm">

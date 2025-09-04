@@ -83,7 +83,7 @@ interface AchievementGridProps {
 const CATEGORY_CONFIG = {
   FISH_SPECIES: {
     label: 'Виды рыб',
-    icon: Fish,
+    icon: 'Fish',
     description: 'Достижения за ловлю различных видов рыб',
     color: 'bg-blue-500',
     lightColor: 'bg-blue-50',
@@ -91,7 +91,7 @@ const CATEGORY_CONFIG = {
   },
   TECHNIQUE: {
     label: 'Техники',
-    icon: Target,
+    icon: 'Target',
     description: 'Мастерство в различных техниках рыбалки', 
     color: 'bg-green-500',
     lightColor: 'bg-green-50',
@@ -99,7 +99,7 @@ const CATEGORY_CONFIG = {
   },
   SOCIAL: {
     label: 'Социальные',
-    icon: Users,
+    icon: 'Users',
     description: 'Достижения в сообществе и взаимодействии',
     color: 'bg-purple-500', 
     lightColor: 'bg-purple-50',
@@ -107,7 +107,7 @@ const CATEGORY_CONFIG = {
   },
   GEOGRAPHY: {
     label: 'География',
-    icon: MapPin,
+    icon: 'MapPin',
     description: 'Исследование различных локаций для рыбалки',
     color: 'bg-orange-500',
     lightColor: 'bg-orange-50', 
@@ -115,7 +115,7 @@ const CATEGORY_CONFIG = {
   },
   ACHIEVEMENT: {
     label: 'Общие',
-    icon: Trophy,
+    icon: 'Trophy',
     description: 'Основные достижения рыболова',
     color: 'bg-yellow-500',
     lightColor: 'bg-yellow-50',
@@ -139,7 +139,7 @@ const CATEGORY_CONFIG = {
   },
   SEASONAL: {
     label: 'Сезонные',
-    icon: Calendar,
+    icon: 'Calendar',
     description: 'Сезонные события и временные достижения',
     color: 'bg-teal-500',
     lightColor: 'bg-teal-50',
@@ -153,13 +153,13 @@ const RARITY_CONFIG = {
     label: 'Обычное', 
     color: 'text-gray-600', 
     bgColor: 'bg-gray-100',
-    icon: Star
+    icon: 'Star'
   },
   UNCOMMON: { 
     label: 'Необычное', 
     color: 'text-green-600', 
     bgColor: 'bg-green-100',
-    icon: Star
+    icon: 'Star'
   },
   RARE: { 
     label: 'Редкое', 
@@ -354,7 +354,7 @@ export default function AchievementGrid({
                       <DropdownMenuSeparator />
                       {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
                         <DropdownMenuItem key={key} onClick={() => setSelectedCategory(key as BadgeCategory)}>
-                          <config.icon className="w-4 h-4 mr-2" />
+                          {React.createElement(getIconComponent(config.icon), { className: "w-4 h-4 mr-2" })}
                           {config.label}
                         </DropdownMenuItem>
                       ))}
@@ -377,7 +377,7 @@ export default function AchievementGrid({
                       <DropdownMenuSeparator />
                       {Object.entries(RARITY_CONFIG).map(([key, config]) => (
                         <DropdownMenuItem key={key} onClick={() => setSelectedRarity(key as AchievementRarity)}>
-                          <config.icon className={`w-4 h-4 mr-2 ${config.color}`} />
+                          {React.createElement(getIconComponent(config.icon), { className: `w-4 h-4 mr-2 ${config.color}` })}
                           {config.label}
                         </DropdownMenuItem>
                       ))}
@@ -400,7 +400,7 @@ export default function AchievementGrid({
         >
           {Object.entries(CATEGORY_CONFIG).map(([category, config]) => {
             const stats = categoryStats[category as BadgeCategory]
-            const CategoryIcon = config.icon
+            const CategoryIcon = getIconComponent(config.icon)
 
             return (
               <Card 
@@ -439,7 +439,7 @@ export default function AchievementGrid({
             if (categoryAchievements.length === 0) return null
 
             const config = CATEGORY_CONFIG[category as BadgeCategory]
-            const CategoryIcon = config.icon
+            const CategoryIcon = getIconComponent(config.icon)
             const stats = categoryStats[category as BadgeCategory]
 
             return (
