@@ -30,7 +30,7 @@ export default function FishingLandingPage() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11-MwFTIWjDf7ohD6gHEB3bpur6NtqmV2.webp')`,
+            backgroundImage: `url('/hero-underwater-fish.webp')`,
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
@@ -422,4 +422,3 @@ export default function FishingLandingPage() {
     </div>
   )
 }
-// Force redeployment Thu Sep  4 14:03:57 WEST 2025
