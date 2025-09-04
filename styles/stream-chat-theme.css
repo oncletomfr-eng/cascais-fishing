@@ -1,0 +1,460 @@
+/**
+ * Custom Stream Chat Theme for Cascais Fishing Platform
+ * Implementing ocean blue and sunset orange branding with fishing-themed styling
+ */
+
+/* Root variables matching our brand colors */
+.str-chat {
+  /* Brand color overrides */
+  --str-chat__primary-color: oklch(0.5 0.15 240); /* Ocean Blue */
+  --str-chat__secondary-color: oklch(0.65 0.2 45); /* Sunset Orange */
+  --str-chat__accent-color: oklch(0.98 0.01 85); /* Light Sand */
+  --str-chat__background-color: oklch(1 0 0); /* Soft White */
+  --str-chat__text-color: oklch(0.25 0 0); /* Dark Slate */
+  --str-chat__text-color-secondary: oklch(0.45 0 0); /* Medium Gray */
+  
+  /* Border and divider colors */
+  --str-chat__border-color: oklch(0.92 0 0);
+  --str-chat__border-radius: 12px;
+  --str-chat__border-radius-sm: 8px;
+  
+  /* Interactive elements */
+  --str-chat__hover-color: oklch(0.5 0.15 240 / 0.1);
+  --str-chat__active-color: oklch(0.5 0.15 240 / 0.15);
+  
+  /* Message colors */
+  --str-chat__message-bubble-color: oklch(0.98 0.01 85);
+  --str-chat__message-bubble-color-mine: oklch(0.5 0.15 240);
+  --str-chat__message-text-color-mine: oklch(1 0 0);
+  
+  /* Input styling */
+  --str-chat__input-background: oklch(0.98 0 0);
+  --str-chat__input-border-color: oklch(0.92 0 0);
+  --str-chat__input-focus-border-color: oklch(0.5 0.15 240);
+  
+  /* Avatar and user colors */
+  --str-chat__avatar-background: oklch(0.65 0.2 45);
+  
+  /* Status indicators */
+  --str-chat__success-color: oklch(0.65 0.15 142); /* Green for online/success */
+  --str-chat__error-color: oklch(0.577 0.245 27.325); /* Error red */
+  --str-chat__warning-color: oklch(0.75 0.2 65); /* Warning amber */
+  
+  /* Spacing */
+  --str-chat__spacing-xs: 4px;
+  --str-chat__spacing-sm: 8px;
+  --str-chat__spacing-md: 12px;
+  --str-chat__spacing-lg: 16px;
+  --str-chat__spacing-xl: 24px;
+  
+  /* Typography */
+  --str-chat__font-family: var(--font-sans), 'Montserrat', sans-serif;
+  --str-chat__font-size: 14px;
+  --str-chat__font-weight: 400;
+  --str-chat__font-weight-bold: 600;
+  
+  /* Custom fishing theme additions */
+  --fishing-wave-gradient: linear-gradient(135deg, oklch(0.5 0.15 240) 0%, oklch(0.45 0.12 220) 100%);
+  --fishing-sunset-gradient: linear-gradient(135deg, oklch(0.65 0.2 45) 0%, oklch(0.7 0.18 35) 100%);
+}
+
+/* Channel Header Styling */
+.str-chat__channel-header {
+  background: var(--fishing-wave-gradient);
+  border-bottom: 2px solid oklch(0.5 0.15 240 / 0.2);
+  padding: var(--str-chat__spacing-md);
+  border-radius: var(--str-chat__border-radius) var(--str-chat__border-radius) 0 0;
+}
+
+.str-chat__channel-header-text {
+  color: oklch(1 0 0);
+  font-weight: var(--str-chat__font-weight-bold);
+  display: flex;
+  align-items: center;
+  gap: var(--str-chat__spacing-sm);
+}
+
+.str-chat__channel-header-text::before {
+  content: '🎣';
+  font-size: 18px;
+  margin-right: var(--str-chat__spacing-xs);
+}
+
+/* Message List Styling */
+.str-chat__message-list {
+  background: linear-gradient(180deg, 
+    oklch(0.98 0.005 220) 0%, 
+    oklch(1 0 0) 50%,
+    oklch(0.98 0.005 45) 100%
+  );
+  padding: var(--str-chat__spacing-md);
+}
+
+/* Message Bubble Styling */
+.str-chat__message-simple {
+  margin: var(--str-chat__spacing-sm) 0;
+}
+
+.str-chat__message-simple__content {
+  background: var(--str-chat__message-bubble-color);
+  border: 1px solid var(--str-chat__border-color);
+  border-radius: var(--str-chat__border-radius);
+  padding: var(--str-chat__spacing-md);
+  box-shadow: 0 2px 4px oklch(0.25 0 0 / 0.05);
+  max-width: 70%;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.str-chat__message-simple__content:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px oklch(0.25 0 0 / 0.1);
+}
+
+/* My messages styling */
+.str-chat__message--me .str-chat__message-simple__content {
+  background: var(--fishing-wave-gradient);
+  color: var(--str-chat__message-text-color-mine);
+  border-color: oklch(0.5 0.15 240 / 0.3);
+}
+
+/* Message reactions */
+.str-chat__message-reactions {
+  background: oklch(1 0 0 / 0.9);
+  border: 1px solid var(--str-chat__border-color);
+  border-radius: 20px;
+  padding: var(--str-chat__spacing-xs) var(--str-chat__spacing-sm);
+  backdrop-filter: blur(8px);
+  margin-top: var(--str-chat__spacing-xs);
+}
+
+/* Input Area Styling */
+.str-chat__message-input {
+  background: oklch(1 0 0);
+  border-top: 2px solid oklch(0.92 0 0);
+  padding: var(--str-chat__spacing-lg);
+  border-radius: 0 0 var(--str-chat__border-radius) var(--str-chat__border-radius);
+}
+
+.str-chat__message-input-inner {
+  background: var(--str-chat__input-background);
+  border: 2px solid var(--str-chat__input-border-color);
+  border-radius: 24px;
+  padding: var(--str-chat__spacing-md) var(--str-chat__spacing-lg);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+}
+
+.str-chat__message-input-inner:focus-within {
+  border-color: var(--str-chat__input-focus-border-color);
+  box-shadow: 0 0 0 4px oklch(0.5 0.15 240 / 0.1);
+}
+
+.str-chat__message-input-inner textarea {
+  border: none;
+  background: transparent;
+  resize: none;
+  font-family: var(--str-chat__font-family);
+  font-size: var(--str-chat__font-size);
+  color: var(--str-chat__text-color);
+  flex: 1;
+  padding: 0;
+  outline: none;
+}
+
+.str-chat__message-input-inner textarea::placeholder {
+  color: var(--str-chat__text-color-secondary);
+}
+
+/* Send Button */
+.str-chat__send-button {
+  background: var(--fishing-wave-gradient);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-left: var(--str-chat__spacing-sm);
+}
+
+.str-chat__send-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px oklch(0.5 0.15 240 / 0.3);
+}
+
+.str-chat__send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.str-chat__send-button svg {
+  color: oklch(1 0 0);
+  width: 20px;
+  height: 20px;
+}
+
+/* Avatar Styling */
+.str-chat__avatar {
+  border: 2px solid var(--str-chat__primary-color);
+  background: var(--str-chat__avatar-background);
+  transition: transform 0.2s ease;
+}
+
+.str-chat__avatar:hover {
+  transform: scale(1.05);
+}
+
+.str-chat__avatar-image {
+  border-radius: 50%;
+}
+
+.str-chat__avatar-fallback {
+  background: var(--fishing-sunset-gradient);
+  color: oklch(1 0 0);
+  font-weight: var(--str-chat__font-weight-bold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Thread Panel Styling */
+.str-chat__thread {
+  background: oklch(0.99 0 0);
+  border-left: 3px solid var(--str-chat__primary-color);
+}
+
+.str-chat__thread-header {
+  background: var(--fishing-wave-gradient);
+  color: oklch(1 0 0);
+  padding: var(--str-chat__spacing-md);
+  border-bottom: 1px solid oklch(0.5 0.15 240 / 0.2);
+}
+
+/* Typing Indicator */
+.str-chat__typing-indicator {
+  background: oklch(0.95 0 0);
+  border-radius: var(--str-chat__border-radius-sm);
+  padding: var(--str-chat__spacing-sm) var(--str-chat__spacing-md);
+  margin: var(--str-chat__spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--str-chat__spacing-sm);
+}
+
+.str-chat__typing-indicator::before {
+  content: '💬';
+  font-size: 14px;
+}
+
+/* File Upload Styling */
+.str-chat__file-upload-button {
+  background: var(--fishing-sunset-gradient);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  margin-right: var(--str-chat__spacing-sm);
+}
+
+.str-chat__file-upload-button:hover {
+  transform: scale(1.05);
+}
+
+.str-chat__file-upload-button svg {
+  color: oklch(1 0 0);
+  width: 18px;
+  height: 18px;
+}
+
+/* Emoji Picker Button */
+.str-chat__emoji-button {
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-right: var(--str-chat__spacing-sm);
+}
+
+.str-chat__emoji-button:hover {
+  background: var(--str-chat__hover-color);
+}
+
+/* Message Attachments */
+.str-chat__attachment {
+  border: 1px solid var(--str-chat__border-color);
+  border-radius: var(--str-chat__border-radius-sm);
+  overflow: hidden;
+  margin-top: var(--str-chat__spacing-sm);
+  background: oklch(1 0 0);
+}
+
+.str-chat__attachment-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--str-chat__border-radius-sm);
+}
+
+/* Online Status */
+.str-chat__user-online {
+  background: var(--str-chat__success-color);
+  border: 2px solid oklch(1 0 0);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+/* Scrollbar Styling */
+.str-chat__message-list-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.str-chat__message-list-scroll::-webkit-scrollbar-track {
+  background: oklch(0.95 0 0);
+}
+
+.str-chat__message-list-scroll::-webkit-scrollbar-thumb {
+  background: var(--str-chat__primary-color);
+  border-radius: 3px;
+}
+
+.str-chat__message-list-scroll::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.45 0.15 240);
+}
+
+/* Custom Phase Indicators */
+.chat-phase-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--str-chat__spacing-sm);
+  padding: var(--str-chat__spacing-sm) var(--str-chat__spacing-md);
+  background: linear-gradient(90deg, 
+    var(--str-chat__primary-color) 0%, 
+    var(--str-chat__secondary-color) 100%
+  );
+  color: oklch(1 0 0);
+  border-radius: var(--str-chat__border-radius-sm);
+  font-size: 12px;
+  font-weight: var(--str-chat__font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chat-phase-preparation::before { content: '📋'; }
+.chat-phase-live::before { content: '🎣'; }
+.chat-phase-debrief::before { content: '📊'; }
+
+/* Custom Message Types */
+.custom-message-card {
+  background: oklch(1 0 0);
+  border: 2px solid var(--str-chat__border-color);
+  border-radius: var(--str-chat__border-radius);
+  padding: var(--str-chat__spacing-md);
+  margin: var(--str-chat__spacing-sm) 0;
+  box-shadow: 0 2px 8px oklch(0.25 0 0 / 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-message-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px oklch(0.25 0 0 / 0.1);
+}
+
+.custom-message-weather { border-left: 4px solid oklch(0.6 0.15 200); }
+.custom-message-catch { border-left: 4px solid var(--str-chat__secondary-color); }
+.custom-message-location { border-left: 4px solid var(--str-chat__success-color); }
+.custom-message-tip { border-left: 4px solid oklch(0.7 0.2 60); }
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .str-chat {
+    --str-chat__background-color: oklch(0.145 0 0);
+    --str-chat__text-color: oklch(0.985 0 0);
+    --str-chat__text-color-secondary: oklch(0.7 0 0);
+    --str-chat__message-bubble-color: oklch(0.2 0 0);
+    --str-chat__input-background: oklch(0.18 0 0);
+    --str-chat__border-color: oklch(0.3 0 0);
+  }
+  
+  .str-chat__message-list {
+    background: linear-gradient(180deg, 
+      oklch(0.15 0.005 220) 0%, 
+      oklch(0.145 0 0) 50%,
+      oklch(0.15 0.005 45) 100%
+    );
+  }
+}
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+  .str-chat__message-simple__content {
+    max-width: 85%;
+    font-size: 14px;
+  }
+  
+  .str-chat__message-input-inner {
+    min-height: 44px;
+    padding: var(--str-chat__spacing-sm) var(--str-chat__spacing-md);
+  }
+  
+  .str-chat__send-button {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .str-chat__channel-header {
+    padding: var(--str-chat__spacing-sm);
+  }
+}
+
+/* Animation for message appearance */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.str-chat__message-simple {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+/* Fishing-themed loading animation */
+@keyframes fishingBob {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+.str-chat__loading-indicator {
+  color: var(--str-chat__primary-color);
+  animation: fishingBob 1.5s ease-in-out infinite;
+}
+
+.str-chat__loading-indicator::before {
+  content: '🎣 ';
+  margin-right: var(--str-chat__spacing-xs);
+}

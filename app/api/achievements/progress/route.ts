@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { prisma } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { 
   SetAchievementProgressRequest,
   SetAchievementProgressResponse,
@@ -119,6 +119,16 @@ export async function POST(request: NextRequest) {
       
       // Логируем разблокировку
       console.log(`🏆 Achievement unlocked: ${achievement.name} for user ${userId}`);
+      
+      // Отправляем real-time уведомление
+      const achievementWithProgress: AchievementWithProgress = {
+        ...achievement,
+        userProgress: updatedUserAchievement,
+        unlocked: true,
+        progress: updatedUserAchievement.progress,
+        progressPercent: 100
+      };
+      await sendRealTimeNotifications(userId, [{ achievement: achievementWithProgress }]);
     }
 
     // Формируем ответ
@@ -271,5 +281,47 @@ async function updateUserStats(userId: string, event: 'achievement_unlocked') {
   } catch (error) {
     console.error('Error updating user stats:', error);
     // Не блокируем основную операцию если обновление статистики не удалось
+  }
+}
+
+/**
+ * Отправляет real-time уведомления о разблокированных достижениях
+ */
+async function sendRealTimeNotifications(userId: string, achievements: any[]) {
+  try {
+    // Отправляем через SSE систему
+    const achievementData = achievements.map(a => ({
+      name: a.achievement?.name || a.name || 'Unknown Achievement',
+      description: a.achievement?.description || a.description,
+      icon: a.achievement?.icon || a.icon || '🏆',
+      rarity: a.achievement?.rarity || a.rarity || 'COMMON',
+      progressPercent: 100
+    }));
+
+    if (achievementData.length > 0) {
+      const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/achievements/notifications`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId,
+          type: 'achievement_unlocked',
+          data: {
+            achievements: achievementData,
+            totalUnlocked: achievementData.length
+          }
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log(`📢 Real-time notifications sent: ${result.sent} connections`);
+      } else {
+        console.error('❌ Failed to send real-time notifications');
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error sending real-time notifications:', error);
   }
 }

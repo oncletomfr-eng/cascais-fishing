@@ -1,12 +1,6 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { StreamChat } from 'stream-chat';
-
-// Initialize Stream Chat server-side client
-const serverClient = StreamChat.getInstance(
-  process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY!,
-  process.env.STREAM_CHAT_API_SECRET!
-);
+import { generateUserToken, getStreamChatServerClient } from '@/lib/config/stream-chat';
 
 // Generate user token for Stream Chat authentication
 export async function POST(request: NextRequest) {
@@ -15,13 +9,11 @@ export async function POST(request: NextRequest) {
     const session = await auth();
     
     if (!session?.user?.id) {
-      return new Response(JSON.stringify({ 
+      return NextResponse.json({ 
         success: false, 
-        error: 'Unauthorized - user not authenticated' 
-      }), { 
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
+        error: 'Unauthorized - user not authenticated',
+        timestamp: new Date().toISOString()
+      }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -30,49 +22,47 @@ export async function POST(request: NextRequest) {
 
     console.log('🔑 Generating Stream Chat token for user:', userId);
 
-    // Create or update user in Stream
-    const streamUser = {
-      id: userId,
+    // Use production-ready token generation
+    const tokenResult = await generateUserToken(userId, {
       name: userName,
       email: userEmail,
-      image: session.user.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=0ea5e9&color=fff`,
+      image: session.user.image || undefined,
       role: 'user',
-      // Additional user metadata for fishing trips
-      isOnline: true,
-      lastSeen: new Date().toISOString(),
-    };
-
-    // Update user on Stream Chat servers
-    await serverClient.upsertUser(streamUser);
-
-    // Generate user token
-    const token = serverClient.createUserToken(userId);
+      // Additional fishing app metadata
+      profile_type: 'fisher',
+      account_type: 'standard',
+      registration_date: new Date().toISOString()
+    });
 
     console.log('✅ Stream Chat token generated successfully for user:', userId);
 
-    return new Response(JSON.stringify({
+    return NextResponse.json({
       success: true,
-      token,
+      token: tokenResult.token,
       user: {
         id: userId,
         name: userName,
-        image: streamUser.image,
-      }
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
+        image: tokenResult.user.image,
+        email: userEmail
+      },
+      expiresAt: tokenResult.expiresAt?.toISOString(),
+      timestamp: new Date().toISOString()
     });
 
   } catch (error) {
     console.error('❌ Error generating Stream Chat token:', error);
     
-    return new Response(JSON.stringify({
+    // Return detailed error in development, generic in production
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const errorMessage = isDevelopment && error instanceof Error 
+      ? error.message 
+      : 'Token generation failed';
+
+    return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to generate chat token'
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+      error: errorMessage,
+      timestamp: new Date().toISOString()
+    }, { status: 500 });
   }
 }
 
@@ -82,32 +72,31 @@ export async function GET(request: NextRequest) {
     const session = await auth();
     
     if (!session?.user?.id) {
-      return new Response(JSON.stringify({ 
+      return NextResponse.json({ 
         success: false, 
-        error: 'Unauthorized' 
-      }), { 
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
+        error: 'Unauthorized',
+        timestamp: new Date().toISOString()
+      }, { status: 401 });
     }
 
     const userId = session.user.id;
 
+    // Use production-ready client
+    const serverClient = getStreamChatServerClient();
+    
     // Check if user exists in Stream Chat
     const { users } = await serverClient.queryUsers({ id: userId });
     const streamUser = users[0];
 
     if (!streamUser) {
-      return new Response(JSON.stringify({
+      return NextResponse.json({
         success: false,
-        error: 'User not found in chat system'
-      }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      });
+        error: 'User not found in chat system',
+        timestamp: new Date().toISOString()
+      }, { status: 404 });
     }
 
-    return new Response(JSON.stringify({
+    return NextResponse.json({
       success: true,
       user: {
         id: streamUser.id,
@@ -115,21 +104,25 @@ export async function GET(request: NextRequest) {
         image: streamUser.image,
         isOnline: streamUser.online,
         lastSeen: streamUser.last_active,
-      }
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
+        profileType: (streamUser as any).profile_type,
+        accountType: (streamUser as any).account_type
+      },
+      timestamp: new Date().toISOString()
     });
 
   } catch (error) {
     console.error('❌ Error getting user chat status:', error);
     
-    return new Response(JSON.stringify({
+    // Return appropriate error message for production vs development
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const errorMessage = isDevelopment && error instanceof Error 
+      ? error.message 
+      : 'Failed to get user status';
+    
+    return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to get user status'
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+      error: errorMessage,
+      timestamp: new Date().toISOString()
+    }, { status: 500 });
   }
 }

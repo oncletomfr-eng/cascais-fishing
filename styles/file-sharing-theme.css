@@ -1,0 +1,743 @@
+/**
+ * File Sharing Theme for Fishing Chat
+ * Consistent with ocean blue and sunset orange branding
+ */
+
+/* File Sharing Main Container */
+.file-sharing {
+  position: relative;
+}
+
+/* File Upload Controls */
+.file-upload-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-upload-btn {
+  width: 40px;
+  height: 40px;
+  background: oklch(0.65 0.2 45);
+  border: none;
+  border-radius: 50%;
+  color: oklch(1 0 0);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: 0 2px 4px oklch(0.65 0.2 45 / 0.3);
+}
+
+.file-upload-btn:hover:not(:disabled) {
+  background: oklch(0.7 0.18 35);
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px oklch(0.65 0.2 45 / 0.4);
+}
+
+.file-upload-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.hidden-file-input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  pointer-events: none;
+}
+
+/* Upload Modal */
+.upload-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: oklch(0.25 0 0 / 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+  padding: 20px;
+}
+
+.upload-modal {
+  background: oklch(1 0 0);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px oklch(0.25 0 0 / 0.3);
+  border: 2px solid oklch(0.5 0.15 240 / 0.2);
+}
+
+.upload-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 2px solid oklch(0.92 0 0);
+  background: linear-gradient(135deg, oklch(0.5 0.15 240) 0%, oklch(0.45 0.12 220) 100%);
+  color: oklch(1 0 0);
+  border-radius: 14px 14px 0 0;
+}
+
+.upload-modal-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-modal-btn {
+  background: transparent;
+  border: none;
+  color: oklch(1 0 0);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-modal-btn:hover {
+  background: oklch(1 0 0 / 0.2);
+}
+
+/* Upload Methods */
+.upload-methods {
+  padding: 24px;
+}
+
+.quick-upload-section {
+  margin-bottom: 24px;
+}
+
+.quick-upload-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: oklch(0.25 0 0);
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quick-upload-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.quick-upload-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  background: oklch(0.98 0.01 85);
+  border: 2px solid oklch(0.92 0 0);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 500;
+  color: oklch(0.45 0 0);
+}
+
+.quick-upload-btn:hover {
+  background: oklch(0.5 0.15 240 / 0.1);
+  border-color: oklch(0.5 0.15 240);
+  color: oklch(0.5 0.15 240);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px oklch(0.5 0.15 240 / 0.2);
+}
+
+.camera-btn:hover {
+  border-color: oklch(0.65 0.2 45);
+  color: oklch(0.65 0.2 45);
+  background: oklch(0.65 0.2 45 / 0.1);
+  box-shadow: 0 4px 8px oklch(0.65 0.2 45 / 0.2);
+}
+
+/* Drag & Drop Area */
+.drag-drop-area {
+  border: 3px dashed oklch(0.8 0 0);
+  border-radius: 12px;
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: oklch(0.99 0 0);
+  position: relative;
+  overflow: hidden;
+}
+
+.drag-drop-area:hover,
+.drag-drop-area.drag-over {
+  border-color: oklch(0.5 0.15 240);
+  background: oklch(0.5 0.15 240 / 0.05);
+  transform: translateY(-2px);
+}
+
+.drag-drop-area.drag-over {
+  border-style: solid;
+  background: oklch(0.5 0.15 240 / 0.1);
+  box-shadow: 0 8px 24px oklch(0.5 0.15 240 / 0.2);
+}
+
+.upload-icon {
+  color: oklch(0.5 0 0);
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.drag-drop-area:hover .upload-icon,
+.drag-drop-area.drag-over .upload-icon {
+  color: oklch(0.5 0.15 240);
+  transform: scale(1.1);
+}
+
+.drag-drop-area h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: oklch(0.25 0 0);
+  margin: 0 0 8px 0;
+}
+
+.drag-drop-area p {
+  font-size: 14px;
+  color: oklch(0.5 0 0);
+  margin: 0 0 16px 0;
+}
+
+.supported-types {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.file-type-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: oklch(0.45 0 0);
+  padding: 4px 8px;
+  background: oklch(0.95 0 0);
+  border-radius: 16px;
+}
+
+/* File Attachments */
+.file-attachments {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 8px;
+  background: oklch(0.99 0 0);
+  border-radius: 8px;
+  border: 1px solid oklch(0.92 0 0);
+}
+
+.file-attachment {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: oklch(1 0 0);
+  border: 1px solid oklch(0.92 0 0);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.file-attachment:hover {
+  border-color: oklch(0.5 0.15 240 / 0.3);
+  background: oklch(0.5 0.15 240 / 0.02);
+}
+
+.file-attachment.uploading {
+  border-color: oklch(0.65 0.2 45 / 0.5);
+  background: oklch(0.65 0.2 45 / 0.05);
+}
+
+.file-attachment.completed {
+  border-color: oklch(0.65 0.15 142 / 0.5);
+  background: oklch(0.65 0.15 142 / 0.05);
+}
+
+.file-attachment.failed {
+  border-color: oklch(0.577 0.245 27.325 / 0.5);
+  background: oklch(0.577 0.245 27.325 / 0.05);
+}
+
+/* Attachment Preview */
+.attachment-preview {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.image-preview,
+.video-preview {
+  background: oklch(0.95 0 0);
+  border: 1px solid oklch(0.92 0 0);
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-overlay,
+.video-overlay {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: oklch(0.25 0 0 / 0.8);
+  color: oklch(1 0 0);
+  border-radius: 4px;
+  padding: 2px;
+  backdrop-filter: blur(4px);
+}
+
+.video-duration {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: oklch(0.25 0 0 / 0.8);
+  color: oklch(1 0 0);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.file-preview {
+  background: oklch(0.95 0 0);
+  border: 1px solid oklch(0.92 0 0);
+  color: oklch(0.5 0 0);
+}
+
+.file-preview.images { background: oklch(0.65 0.2 45 / 0.1); color: oklch(0.65 0.2 45); }
+.file-preview.videos { background: oklch(0.5 0.15 240 / 0.1); color: oklch(0.5 0.15 240); }
+.file-preview.documents { background: oklch(0.65 0.15 142 / 0.1); color: oklch(0.65 0.15 142); }
+
+/* Attachment Info */
+.attachment-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.attachment-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: oklch(0.25 0 0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.attachment-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: oklch(0.5 0 0);
+}
+
+.file-size {
+  font-weight: 500;
+}
+
+.upload-progress {
+  color: oklch(0.65 0.2 45);
+  font-weight: 600;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: oklch(0.92 0 0);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, oklch(0.65 0.2 45), oklch(0.7 0.18 35));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Attachment Actions */
+.attachment-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.attachment-action-btn {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid oklch(0.92 0 0);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: oklch(0.5 0 0);
+}
+
+.attachment-action-btn:hover {
+  background: oklch(0.95 0 0);
+  border-color: oklch(0.8 0 0);
+  color: oklch(0.25 0 0);
+}
+
+.view-btn:hover {
+  background: oklch(0.5 0.15 240 / 0.1);
+  border-color: oklch(0.5 0.15 240);
+  color: oklch(0.5 0.15 240);
+}
+
+.download-btn:hover {
+  background: oklch(0.65 0.15 142 / 0.1);
+  border-color: oklch(0.65 0.15 142);
+  color: oklch(0.65 0.15 142);
+}
+
+.remove-btn:hover {
+  background: oklch(0.577 0.245 27.325 / 0.1);
+  border-color: oklch(0.577 0.245 27.325);
+  color: oklch(0.577 0.245 27.325);
+}
+
+/* Attachment Status */
+.attachment-status {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-icon {
+  color: oklch(0.65 0.15 142);
+}
+
+.error-icon {
+  color: oklch(0.577 0.245 27.325);
+}
+
+/* Fishing File Shortcuts */
+.fishing-file-shortcuts {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.fishing-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: oklch(0.98 0.01 85);
+  border: 1px solid oklch(0.92 0 0);
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 500;
+  color: oklch(0.45 0 0);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.fishing-shortcut:hover {
+  background: oklch(0.5 0.15 240 / 0.1);
+  border-color: oklch(0.5 0.15 240);
+  color: oklch(0.5 0.15 240);
+  transform: translateY(-1px);
+}
+
+.fishing-shortcut.catch-photo:hover {
+  background: oklch(0.65 0.2 45 / 0.1);
+  border-color: oklch(0.65 0.2 45);
+  color: oklch(0.65 0.2 45);
+}
+
+.fishing-shortcut.location:hover {
+  background: oklch(0.65 0.15 142 / 0.1);
+  border-color: oklch(0.65 0.15 142);
+  color: oklch(0.65 0.15 142);
+}
+
+/* Scrollbar styling for attachments */
+.file-attachments::-webkit-scrollbar {
+  width: 4px;
+}
+
+.file-attachments::-webkit-scrollbar-track {
+  background: oklch(0.95 0 0);
+  border-radius: 2px;
+}
+
+.file-attachments::-webkit-scrollbar-thumb {
+  background: oklch(0.5 0.15 240 / 0.5);
+  border-radius: 2px;
+}
+
+.file-attachments::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.5 0.15 240 / 0.7);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .upload-modal {
+    margin: 10px;
+    max-height: calc(100vh - 20px);
+  }
+  
+  .upload-modal-header {
+    padding: 16px 20px;
+  }
+  
+  .upload-methods {
+    padding: 20px;
+  }
+  
+  .quick-upload-buttons {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .quick-upload-btn {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 12px 16px;
+  }
+  
+  .drag-drop-area {
+    padding: 24px 16px;
+  }
+  
+  .file-attachments {
+    max-height: 150px;
+  }
+  
+  .file-attachment {
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .attachment-preview {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .attachment-name {
+    font-size: 13px;
+  }
+  
+  .attachment-details {
+    font-size: 11px;
+  }
+  
+  .fishing-file-shortcuts {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .fishing-shortcut {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+  
+  .file-upload-btn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .upload-modal {
+    background: oklch(0.18 0 0);
+    border-color: oklch(0.3 0 0);
+  }
+  
+  .upload-modal-header h3 {
+    color: oklch(1 0 0);
+  }
+  
+  .upload-methods,
+  .drag-drop-area {
+    background: oklch(0.16 0 0);
+  }
+  
+  .quick-upload-section h4 {
+    color: oklch(0.9 0 0);
+  }
+  
+  .quick-upload-btn {
+    background: oklch(0.2 0 0);
+    border-color: oklch(0.3 0 0);
+    color: oklch(0.7 0 0);
+  }
+  
+  .drag-drop-area {
+    border-color: oklch(0.4 0 0);
+  }
+  
+  .drag-drop-area h4 {
+    color: oklch(0.9 0 0);
+  }
+  
+  .drag-drop-area p {
+    color: oklch(0.6 0 0);
+  }
+  
+  .file-type-info {
+    background: oklch(0.22 0 0);
+    color: oklch(0.7 0 0);
+  }
+  
+  .file-attachments {
+    background: oklch(0.16 0 0);
+    border-color: oklch(0.3 0 0);
+  }
+  
+  .file-attachment {
+    background: oklch(0.18 0 0);
+    border-color: oklch(0.3 0 0);
+  }
+  
+  .attachment-name {
+    color: oklch(0.9 0 0);
+  }
+  
+  .attachment-details {
+    color: oklch(0.6 0 0);
+  }
+  
+  .attachment-action-btn {
+    border-color: oklch(0.3 0 0);
+    color: oklch(0.6 0 0);
+  }
+  
+  .attachment-action-btn:hover {
+    background: oklch(0.22 0 0);
+    border-color: oklch(0.4 0 0);
+    color: oklch(0.9 0 0);
+  }
+  
+  .file-preview {
+    background: oklch(0.2 0 0);
+    border-color: oklch(0.3 0 0);
+    color: oklch(0.6 0 0);
+  }
+  
+  .fishing-shortcut {
+    background: oklch(0.2 0 0);
+    border-color: oklch(0.3 0 0);
+    color: oklch(0.7 0 0);
+  }
+}
+
+/* Animation for file attachment entry */
+@keyframes fileAttachmentSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.file-attachment {
+  animation: fileAttachmentSlideIn 0.3s ease-out;
+}
+
+/* Loading animation for upload progress */
+@keyframes uploadPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.file-attachment.uploading {
+  animation: uploadPulse 2s ease-in-out infinite;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .file-upload-btn,
+  .attachment-action-btn,
+  .fishing-shortcut {
+    border-width: 2px;
+  }
+  
+  .drag-drop-area {
+    border-width: 4px;
+  }
+  
+  .file-attachment {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .file-upload-btn,
+  .quick-upload-btn,
+  .drag-drop-area,
+  .attachment-action-btn,
+  .fishing-shortcut,
+  .file-attachment {
+    transition: none;
+    animation: none;
+  }
+  
+  .upload-icon {
+    transition: none;
+  }
+  
+  @keyframes fileAttachmentSlideIn {
+    from, to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes uploadPulse {
+    from, to {
+      opacity: 1;
+    }
+  }
+}
