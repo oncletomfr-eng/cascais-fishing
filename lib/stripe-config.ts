@@ -55,14 +55,20 @@ export function validateStripeConfig(): StripeConfig {
     if (error instanceof z.ZodError) {
       const missingVars = error.errors.map(err => `❌ ${err.path.join('.')}: ${err.message}`).join('\n');
       
-      console.error('🔧 Stripe Configuration Error:');
-      console.error(missingVars);
-      console.error('\n📝 Required Environment Variables:');
-      console.error('STRIPE_SECRET_KEY=sk_test_... (from Stripe Dashboard)');
-      console.error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_... (from Stripe Dashboard)');
-      console.error('STRIPE_WEBHOOK_SECRET=whsec_... (from Stripe Webhook settings)');
-      console.error('NEXTAUTH_URL=http://localhost:3000 (your app URL)');
-      console.error('\n🔗 Get your keys from: https://dashboard.stripe.com/apikeys');
+      // Only log errors in development or runtime, not during build
+      const isBuilding = process.env.NEXT_PHASE === 'phase-production-build' || 
+                        process.env.VERCEL_ENV === 'production' && process.env.NODE_ENV !== 'production';
+      
+      if (!isBuilding && process.env.NODE_ENV !== 'test') {
+        console.error('🔧 Stripe Configuration Error:');
+        console.error(missingVars);
+        console.error('\n📝 Required Environment Variables:');
+        console.error('STRIPE_SECRET_KEY=sk_test_... (from Stripe Dashboard)');
+        console.error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_... (from Stripe Dashboard)');
+        console.error('STRIPE_WEBHOOK_SECRET=whsec_... (from Stripe Webhook settings)');
+        console.error('NEXTAUTH_URL=http://localhost:3000 (your app URL)');
+        console.error('\n🔗 Get your keys from: https://dashboard.stripe.com/apikeys');
+      }
       
       throw new Error('Invalid Stripe configuration. Check environment variables.');
     }

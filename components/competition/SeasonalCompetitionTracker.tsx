@@ -47,7 +47,7 @@ import {
   TableCell
 } from '@mui/material';
 import {
-  CalendarLucide as CalendarLucide,
+  Event as CalendarIcon,
   EmojiEvents as TrophyIcon,
   AccessTime as TimeIcon,
   TrendingUp as ProgressIcon,
@@ -57,13 +57,12 @@ import {
   History as HistoryIcon,
   Refresh as RefreshIcon,
   Star as StarIcon,
-  MedalLucide as MedalLucide,
+  WorkspacePremium as MedalIcon,
   Timeline as TimelineIcon,
   Notifications as NotificationIcon,
   Archive as ArchiveIcon,
   Info as InfoIcon
-} from '@mui/icons-material'
-import { CalendarLucide as CalendarLucideLucide, MedalLucide as MedalLucideLucide } from 'lucide-react';
+} from '@mui/icons-material';
 import { useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -139,12 +138,12 @@ const getSeasonStatusColor = (status: string) => {
 // Season status icons
 const getSeasonStatusIcon = (status: string) => {
   const icons: Record<string, React.ReactNode> = {
-    'UPCOMING': <CalendarLucide />,
+    'UPCOMING': <CalendarIcon />,
     'ACTIVE': <TrophyIcon />,
     'COMPLETED': <ArchiveIcon />,
     'CANCELLED': <InfoIcon />
   };
-  return icons[status] || <CalendarLucide />;
+  return icons[status] || <CalendarIcon />;
 };
 
 export function SeasonalCompetitionTracker({
@@ -328,7 +327,7 @@ export function SeasonalCompetitionTracker({
       {/* Header */}
       <Card sx={{ mb: 3 }}>
         <CardHeader
-          avatar={<CalendarLucide sx={{ fontSize: 32, color: 'primary.main' }} />}
+          avatar={<CalendarIcon sx={{ fontSize: 32, color: 'primary.main' }} />}
           title="Seasonal Competition Tracker"
           subheader="Participate in time-based fishing competitions and track your progress"
           action={
@@ -658,11 +657,11 @@ export function SeasonalCompetitionTracker({
                               <TableCell>
                                 <Stack direction="row" spacing={1} alignItems="center">
                                   {(participant.overallRank || index + 1) <= 3 ? (
-                                    <MedalLucide 
+                                    <MedalIcon 
                                       sx={{ 
                                         color: (participant.overallRank || index + 1) === 1 ? 'gold' : 
                                                (participant.overallRank || index + 1) === 2 ? 'silver' : '#CD7F32'
-                                      }} 
+                                      }}
                                     />
                                   ) : (
                                     <Typography variant="body2">
@@ -713,7 +712,7 @@ export function SeasonalCompetitionTracker({
           ) : (
             <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <CardContent sx={{ textAlign: 'center' }}>
-                <CalendarLucide sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+                <CalendarIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
                 <Typography variant="h6" color="text.secondary">
                   Select a season to view details
                 </Typography>

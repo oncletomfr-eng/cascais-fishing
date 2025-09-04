@@ -88,12 +88,25 @@ const nextConfig = {
       'lodash-es',
       '@mui/material',
       '@mui/icons-material',
+      '@mui/x-data-grid',
+      '@mui/x-date-pickers',
       'recharts',
       'react-use',
       'react-icons',
       'stream-chat',
-      'stream-chat-react'
+      'stream-chat-react',
+      'framer-motion',
+      '@prisma/client',
+      'stripe'
     ],
+    // Enable Turbo Mode for faster builds
+    turbo: {
+      rules: {
+        '*.tsx': {
+          loaders: ['babel-loader'],
+        },
+      },
+    },
   },
   // On-demand entries optimization for dev server
   onDemandEntries: {
@@ -107,6 +120,58 @@ const nextConfig = {
     fetches: {
       fullUrl: true,
     },
+  },
+  
+  // Webpack optimizations for reducing bundle size
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Bundle analyzer for debugging (only in development)
+    if (!dev && !isServer) {
+      // Optimize for smaller bundle sizes
+      config.optimization.splitChunks = {
+        ...config.optimization.splitChunks,
+        chunks: 'all',
+        cacheGroups: {
+          ...config.optimization.splitChunks.cacheGroups,
+          // Separate vendor bundle for large libraries
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            maxSize: 200000, // 200KB max per chunk
+          },
+          // Separate MUI bundle
+          mui: {
+            test: /[\\/]node_modules[\\/]@mui[\\/]/,
+            name: 'mui',
+            chunks: 'all',
+            priority: 10,
+            maxSize: 200000,
+          },
+          // Separate Prisma bundle
+          prisma: {
+            test: /[\\/]node_modules[\\/]@prisma[\\/]|[\\/]node_modules[\\/]\.prisma[\\/]/,
+            name: 'prisma',
+            chunks: 'all',
+            priority: 15,
+            maxSize: 200000,
+          },
+          // Icons bundle
+          icons: {
+            test: /[\\/]node_modules[\\/](lucide-react|react-icons|@mui\/icons-material)[\\/]/,
+            name: 'icons',
+            chunks: 'all',
+            priority: 12,
+            maxSize: 200000,
+          },
+        },
+      };
+    }
+
+    // Tree shaking improvements
+    config.optimization.usedExports = true;
+    config.optimization.sideEffects = false;
+    
+    return config;
   },
 }
 
