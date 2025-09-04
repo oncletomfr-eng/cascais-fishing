@@ -30,7 +30,7 @@ export default function FishingLandingPage() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url('/hero-fishing-boat-cascais.png')`,
+            backgroundImage: `url('https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11-MwFTIWjDf7ohD6gHEB3bpur6NtqmV2.webp')`,
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
@@ -94,7 +94,7 @@ export default function FishingLandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div className="relative h-64 rounded-lg overflow-hidden">
               <img
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11.jpg-YkeJwO3fS4xdsSjbqkjxZlZ3AMtnau.jpeg"
+                src="/happy-tourist-fish.png"
                 alt="Happy customers with Atlantic tuna catch"
                 className="w-full h-full object-cover"
               />
@@ -120,7 +120,7 @@ export default function FishingLandingPage() {
 
             <div className="relative h-64 rounded-lg overflow-hidden">
               <img
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11.jpg-Ts7k18MOD5GEFaLz5FbRLCHEql6p1B.jpeg"
+                src="/atlantic-fish-catch.png"
                 alt="Fresh Atlantic fish catch"
                 className="w-full h-full object-cover"
               />
@@ -267,7 +267,7 @@ export default function FishingLandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             <div className="relative h-48 rounded-lg overflow-hidden">
               <img
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11.jpg-4JpFA1QGYbSH2UiuahSduaJVfzeCbD.jpeg"
+                src="/captain-joao-casual.png"
                 alt="Captain João in casual attire with TaylorMade baseball cap"
                 className="w-full h-full object-cover"
               />
@@ -280,7 +280,7 @@ export default function FishingLandingPage() {
 
             <div className="relative h-48 rounded-lg overflow-hidden">
               <img
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/11.jpg-pBKYqDOBmsLfkxBdqXKkClI1oaqfTx.jpeg"
+                src="/cascais-marina-sunset.png"
                 alt="Beautiful Cascais Marina with lighthouse and Portuguese architecture"
                 className="w-full h-full object-cover"
               />
