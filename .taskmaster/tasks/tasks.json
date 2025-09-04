@@ -291,7 +291,7 @@
             "title": "Bulk Operations System",
             "description": "Implement bulk operations for efficient management of multiple transactions with safety checks and progress tracking",
             "details": "Add bulk selection functionality with select all/none, filtered selection, and manual row selection. Implement bulk actions: status updates, refunds processing, export selected, add notes, assign tags. Include bulk operation progress tracking with real-time updates. Add confirmation dialogs with impact preview and safety warnings. Implement bulk operation history and rollback capabilities where applicable. Add permissions and role-based access control for bulk operations.",
-            "status": "in-progress",
+            "status": "done",
             "dependencies": [
               "7.1",
               "7.2"
@@ -303,7 +303,7 @@
             "title": "Export Integration & Reporting",
             "description": "Integrate transaction management with existing export system and add transaction-specific reporting features",
             "details": "Connect transaction table to existing DataExportReporting system from Task 6.4. Add transaction-specific export options with filtered data export. Implement scheduled transaction reports with customizable templates. Add quick export buttons for visible data, selected rows, and filtered results. Include transaction summary reports with statistics and charts. Add export format optimization for transaction data (CSV for data analysis, PDF for statements, Excel for accounting).",
-            "status": "pending",
+            "status": "in-progress",
             "dependencies": [
               "7.1",
               "7.2",
@@ -790,7 +790,7 @@
       "budget": "€50,000",
       "expectedROI": "€90k+/month revenue, 2160% ROI over 12 months",
       "created": "2025-09-01T14:28:28.045Z",
-      "updated": "2025-09-04T07:23:09.437Z"
+      "updated": "2025-09-04T08:39:46.217Z"
     }
   }
 }

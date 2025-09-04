@@ -15,7 +15,7 @@ import { format, startOfDay, endOfDay, eachDayOfInterval, eachMonthOfInterval, s
 // Validation schema
 const exportRequestSchema = z.object({
   format: z.enum(['csv', 'pdf', 'excel']),
-  dataType: z.enum(['payments', 'earnings', 'commissions', 'all']),
+  dataType: z.enum(['payments', 'earnings', 'commissions', 'all', 'transactions', 'summary', 'detailed']),
   dateRange: z.object({
     start: z.string().transform(str => new Date(str)),
     end: z.string().transform(str => new Date(str))
@@ -23,13 +23,17 @@ const exportRequestSchema = z.object({
   includeDetails: z.boolean().default(true),
   includeCharts: z.boolean().default(false),
   groupBy: z.enum(['day', 'week', 'month', 'year']).optional().default('day'),
+  selectedTransactionIds: z.array(z.string()).optional(),
+  exportScope: z.enum(['all', 'filtered', 'visible', 'selected']).optional().default('filtered'),
   filters: z.object({
     status: z.array(z.string()).optional(),
     paymentMethods: z.array(z.string()).optional(),
     captainTiers: z.array(z.string()).optional(),
     serviceTypes: z.array(z.string()).optional(),
     minAmount: z.number().optional(),
-    maxAmount: z.number().optional()
+    maxAmount: z.number().optional(),
+    customerSearch: z.string().optional(),
+    transactionIdSearch: z.string().optional()
   }).optional()
 });
 
@@ -166,10 +170,15 @@ export async function POST(request: NextRequest) {
       }
     };
 
+    // Handle export scope and selected transactions
+    if (exportOptions.exportScope === 'selected' && exportOptions.selectedTransactionIds?.length) {
+      whereClause.id = { in: exportOptions.selectedTransactionIds };
+    }
+
     // Apply filters
     if (exportOptions.filters) {
       if (exportOptions.filters.status?.length) {
-        whereClause.status = { in: exportOptions.filters.status };
+        whereClause.status = { in: exportOptions.filters.status.map(s => s.toUpperCase()) };
       }
       
       if (exportOptions.filters.minAmount !== undefined || exportOptions.filters.maxAmount !== undefined) {
@@ -181,22 +190,45 @@ export async function POST(request: NextRequest) {
           whereClause.amount.lte = exportOptions.filters.maxAmount * 100; // Convert to cents
         }
       }
+
+      // Add customer search filter
+      if (exportOptions.filters.customerSearch) {
+        whereClause.trip = {
+          captain: {
+            OR: [
+              { name: { contains: exportOptions.filters.customerSearch, mode: 'insensitive' } },
+              { email: { contains: exportOptions.filters.customerSearch, mode: 'insensitive' } }
+            ]
+          }
+        };
+      }
+
+      // Add transaction ID search filter
+      if (exportOptions.filters.transactionIdSearch) {
+        whereClause.OR = [
+          { id: { contains: exportOptions.filters.transactionIdSearch, mode: 'insensitive' } },
+          { stripePaymentId: { contains: exportOptions.filters.transactionIdSearch, mode: 'insensitive' } }
+        ];
+      }
+
+      // Add payment method filter
+      if (exportOptions.filters.paymentMethods?.length) {
+        whereClause.paymentMethod = {
+          type: { in: exportOptions.filters.paymentMethods }
+        };
+      }
     }
 
     // Fetch payments data
     const payments = await prisma.payment.findMany({
       where: whereClause,
       include: {
-        paymentMethod: true,
-        booking: {
+        trip: {
           include: {
-            trip: {
-              include: {
-                user: true // Captain info
-              }
-            }
+            captain: true // Captain info from GroupTrip
           }
-        }
+        },
+        user: true // Payment creator
       },
       orderBy: {
         createdAt: 'desc'
@@ -218,25 +250,41 @@ export async function POST(request: NextRequest) {
     };
 
     // Process payments data
-    if (exportOptions.dataType === 'all' || exportOptions.dataType === 'payments') {
+    if (exportOptions.dataType === 'all' || 
+        exportOptions.dataType === 'payments' || 
+        exportOptions.dataType === 'transactions' ||
+        exportOptions.dataType === 'detailed') {
       processedData.payments = payments.map(payment => ({
         id: payment.id,
+        transactionId: payment.stripePaymentId || payment.id,
         date: format(payment.createdAt, 'yyyy-MM-dd'),
+        time: format(payment.createdAt, 'HH:mm:ss'),
         timestamp: payment.createdAt,
         amount: (payment.amount || 0) / 100, // Convert from cents
         currency: payment.currency || 'EUR',
         status: payment.status,
-        paymentMethod: payment.paymentMethod?.cardBrand || payment.stripePaymentMethodId,
+        paymentMethod: 'N/A', // TODO: Implement payment method details
+        paymentMethodType: 'N/A', // TODO: Implement payment method type
+        last4: 'N/A', // TODO: Implement last4 digits
         description: payment.description || '',
-        bookingId: payment.bookingId,
-        captainId: payment.booking?.trip?.userId,
-        captainName: payment.booking?.trip?.user?.name || 'Unknown',
+        tripId: payment.tripId,
+        captainId: payment.trip?.captainId,
+        captainName: payment.trip?.captain?.name || 'N/A',
+        captainEmail: payment.trip?.captain?.email || 'N/A',
         fees: ((payment.amount || 0) * 0.029 + 30) / 100, // Stripe fees estimate
+        netAmount: ((payment.amount || 0) - ((payment.amount || 0) * 0.029 + 30)) / 100,
+        type: payment.type,
+        commissionAmount: (payment.commissionAmount || 0) / 100,
+        commissionRate: payment.commissionRate || 0,
         ...(exportOptions.includeDetails && {
-          stripePaymentIntentId: payment.stripePaymentIntentId,
+          stripePaymentId: payment.stripePaymentId,
+          stripeInvoiceId: payment.stripeInvoiceId,
+          subscriptionId: payment.subscriptionId,
           metadata: payment.metadata,
           createdAt: payment.createdAt.toISOString(),
-          updatedAt: payment.updatedAt.toISOString()
+          updatedAt: payment.updatedAt.toISOString(),
+          paidAt: payment.paidAt?.toISOString() || null,
+          paymentCreatedBy: payment.user?.name || 'N/A'
         })
       }));
     }
@@ -277,9 +325,9 @@ export async function POST(request: NextRequest) {
       const commissionData = new Map();
 
       payments.forEach(payment => {
-        const captainId = payment.booking?.trip?.userId || 'unknown';
+        const captainId = payment.trip?.captainId || 'unknown';
         const amount = payment.amount || 0;
-        const commission = amount * 0.15; // 15% commission
+        const commission = payment.commissionAmount || (amount * 0.15); // Use actual commission or default 15%
         const date = format(payment.createdAt, 'yyyy-MM-dd');
 
         const key = `${captainId}-${date}`;
@@ -287,11 +335,11 @@ export async function POST(request: NextRequest) {
           commissionData.set(key, {
             date,
             captainId,
-            captainName: payment.booking?.trip?.user?.name || 'Unknown',
+            captainName: payment.trip?.captain?.name || 'Unknown',
             totalAmount: 0,
             commissionAmount: 0,
             transactionCount: 0,
-            averageCommissionRate: 15
+            averageCommissionRate: payment.commissionRate || 15
           });
         }
 
@@ -328,10 +376,17 @@ export async function POST(request: NextRequest) {
       case 'csv': {
         let csvContent = '';
         
-        if (exportOptions.dataType === 'payments' || exportOptions.dataType === 'all') {
-          const headers = ['id', 'date', 'amount', 'currency', 'status', 'paymentMethod', 'captainName'];
-          csvContent += `PAYMENTS DATA\n`;
-          csvContent += generateCSV(processedData.payments, headers);
+        if (exportOptions.dataType === 'payments' || 
+            exportOptions.dataType === 'transactions' || 
+            exportOptions.dataType === 'detailed' || 
+            exportOptions.dataType === 'all') {
+          const baseHeaders = ['id', 'transactionId', 'date', 'time', 'amount', 'currency', 'status', 'paymentMethod', 'type', 'captainName'];
+          const detailedHeaders = exportOptions.includeDetails 
+            ? [...baseHeaders, 'stripePaymentId', 'captainEmail', 'fees', 'netAmount', 'commissionAmount', 'commissionRate', 'paymentCreatedBy', 'createdAt', 'paidAt']
+            : baseHeaders;
+          
+          csvContent += `TRANSACTION DATA\n`;
+          csvContent += generateCSV(processedData.payments, detailedHeaders);
           csvContent += '\n\n';
         }
 

@@ -80,6 +80,7 @@ import { GlobalSearchBar, SearchQuery, SearchSuggestion } from './GlobalSearchBa
 import { useGlobalSearch } from '@/hooks/useGlobalSearch';
 import { TransactionDetailModal } from './TransactionDetailModal';
 import { BulkOperationsPanel, BulkOperation, BulkOperationProgress } from './BulkOperationsPanel';
+import { TransactionExportPanel, ExportOptions } from './TransactionExportPanel';
 
 // Types for transaction data
 export interface Transaction {
@@ -213,6 +214,9 @@ export function TransactionManagement({
 
   // Bulk operations state
   const [bulkOperationProgress, setBulkOperationProgress] = useState<BulkOperationProgress | null>(null);
+
+  // Export state
+  const [showExportPanel, setShowExportPanel] = useState(false);
 
   // Get selected transactions for bulk operations
   const selectedTransactions = useMemo(() => {
@@ -888,6 +892,23 @@ export function TransactionManagement({
     setRowSelectionModel(newSelection);
   }, []);
 
+  // Handle export functionality
+  const handleExport = useCallback(async (options: ExportOptions) => {
+    try {
+      // Export is handled by the TransactionExportPanel component
+      // This callback can be used for analytics or additional processing
+      console.log('Export initiated with options:', options);
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Export failed');
+    }
+  }, []);
+
+  // Get visible transaction IDs (currently displayed transactions)
+  const visibleTransactionIds = useMemo(() => {
+    return transactions.map(t => t.id);
+  }, [transactions]);
+
   // Custom toolbar component
   const CustomToolbar = () => (
     <Box sx={{ p: 2, pb: 0 }}>
@@ -957,8 +978,30 @@ export function TransactionManagement({
           >
             Refresh
           </Button>
+
+          <Button
+            variant="outlined"
+            startIcon={<DownloadIcon />}
+            onClick={() => setShowExportPanel(!showExportPanel)}
+            color={showExportPanel ? 'primary' : 'inherit'}
+          >
+            Export
+          </Button>
         </Stack>
       </Stack>
+
+      {/* Export Panel */}
+      {showExportPanel && (
+        <Box sx={{ mb: 3 }}>
+          <TransactionExportPanel
+            transactions={transactions}
+            selectedTransactions={selectedTransactions}
+            appliedFilters={advancedFilters}
+            visibleTransactionIds={visibleTransactionIds}
+            onExport={handleExport}
+          />
+        </Box>
+      )}
 
       {/* Bulk Operations Panel */}
       {selectedTransactions.length > 0 && (
