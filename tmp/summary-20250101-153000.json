@@ -1,4 +1,0 @@
-{
-  "summary": "Полностью реализована интеграция Stream Chat SDK с многофазной архитектурой (Task 17.4: Stream Chat SDK Integration). Создана комплексная система включающая StreamChatService для ядра интеграции, React хуки и провайдеры, фазо-специфичные каналы (preparation, fishing, debrief), ролевую систему с правами доступа (captain, co-captain, participant, observer), полную интеграцию с системой переходов фаз. Разработан IntegratedMultiPhaseChat компонент с phase-aware функциональностью, создана демо-страница /test-stream-chat-integration для тестирования всех возможностей. Система полностью готова к использованию и следующей подзадаче Participant Management System.",
-  "current_status": "Task 17.4: Stream Chat SDK Integration успешно завершена и отмечена как 'done' в Task Master. Все компоненты Stream Chat интеграции реализованы, протестированы и готовы к использованию. Следующая доступная подзадача: 17.5 Participant Management System."
-}
