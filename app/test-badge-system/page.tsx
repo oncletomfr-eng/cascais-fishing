@@ -28,9 +28,7 @@ import {
 } from '@/lib/hooks/useBadges'
 import { toast } from 'sonner'
 
-interface BadgeSystemDemoProps {
-  // Will receive these as props from the provider
-}
+// Props interface would be defined here if needed
 
 function BadgeSystemDemo() {
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null)

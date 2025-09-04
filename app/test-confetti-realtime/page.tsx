@@ -47,13 +47,14 @@ const MOCK_TRIP: GroupTripDisplay = {
 };
 
 export default function TestConfettiRealtimePage() {
+  const [tripStatus, setTripStatus] = useState<'almost_full' | 'confirmed'>('almost_full');
+  const [participants, setParticipants] = useState(6);
+  const [isAnimating, setIsAnimating] = useState(false);
+
   // Skip during build to avoid prerendering issues
   if (typeof window === 'undefined') {
     return <div>Loading...</div>;
   }
-  const [tripStatus, setTripStatus] = useState<'almost_full' | 'confirmed'>('almost_full');
-  const [participants, setParticipants] = useState(6);
-  const [isAnimating, setIsAnimating] = useState(false);
 
   // Создаем текущую версию поездки на основе состояния
   const currentTrip: GroupTripDisplay = {
