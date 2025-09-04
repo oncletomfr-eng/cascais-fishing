@@ -79,6 +79,7 @@ import { TransactionFiltersPanel, TransactionFilters, FilterPreset } from './Tra
 import { GlobalSearchBar, SearchQuery, SearchSuggestion } from './GlobalSearchBar';
 import { useGlobalSearch } from '@/hooks/useGlobalSearch';
 import { TransactionDetailModal } from './TransactionDetailModal';
+import { BulkOperationsPanel, BulkOperation, BulkOperationProgress } from './BulkOperationsPanel';
 
 // Types for transaction data
 export interface Transaction {
@@ -209,6 +210,15 @@ export function TransactionManagement({
   // Transaction detail modal state
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+
+  // Bulk operations state
+  const [bulkOperationProgress, setBulkOperationProgress] = useState<BulkOperationProgress | null>(null);
+
+  // Get selected transactions for bulk operations
+  const selectedTransactions = useMemo(() => {
+    const selectedIds = Array.isArray(rowSelectionModel) ? rowSelectionModel : [];
+    return transactions.filter(t => selectedIds.includes(t.id));
+  }, [transactions, rowSelectionModel]);
   
   // Fetch transactions data
   const fetchTransactions = useCallback(async () => {
@@ -319,11 +329,6 @@ export function TransactionManagement({
       globalSearch.addToHistory(globalSearch.searchValue, rowCount);
     }
   }, [rowCount, globalSearch.searchValue, globalSearch.addToHistory]);
-
-  // Handle row selection
-  const handleRowSelectionChange = useCallback((newSelection: GridRowSelectionModel) => {
-    setRowSelectionModel(newSelection);
-  }, []);
 
   // Handle pagination changes
   const handlePaginationChange = useCallback((model: GridPaginationModel) => {
@@ -806,6 +811,83 @@ export function TransactionManagement({
     }
   }, []);
 
+  // Handle bulk operations
+  const handleBulkOperationExecute = useCallback(async (operation: BulkOperation, params?: any) => {
+    try {
+      setBulkOperationProgress({
+        operationId: `${operation.id}_${Date.now()}`,
+        status: 'running',
+        totalItems: selectedTransactions.length,
+        processedItems: 0,
+        successfulItems: 0,
+        failedItems: 0,
+        startedAt: new Date(),
+        errors: []
+      });
+
+      const response = await fetch('/api/transactions/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          operation: operation.type,
+          transactionIds: rowSelectionModel,
+          parameters: params
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Bulk operation failed');
+      }
+
+      const result = await response.json();
+
+      // Update progress with final results
+      setBulkOperationProgress({
+        operationId: result.operationId,
+        status: result.failedItems > 0 ? 'completed' : 'completed',
+        totalItems: result.totalItems,
+        processedItems: result.processedItems,
+        successfulItems: result.successfulItems,
+        failedItems: result.failedItems,
+        startedAt: new Date(),
+        completedAt: new Date(),
+        errors: result.errors || []
+      });
+
+      // Refresh transactions to reflect changes
+      await fetchTransactions();
+
+      // Clear selection after successful operation
+      if (result.successfulItems > 0) {
+        setRowSelectionModel([]);
+      }
+
+    } catch (error) {
+      console.error('Bulk operation failed:', error);
+      toast.error('Bulk operation failed');
+      
+      setBulkOperationProgress(prev => prev ? {
+        ...prev,
+        status: 'failed',
+        completedAt: new Date()
+      } : null);
+    }
+  }, [selectedTransactions, rowSelectionModel, fetchTransactions]);
+
+  const handleBulkProgressUpdate = useCallback((progress: BulkOperationProgress) => {
+    setBulkOperationProgress(progress);
+  }, []);
+
+  const handleBulkSelectionClear = useCallback(() => {
+    setRowSelectionModel([]);
+    setBulkOperationProgress(null);
+  }, []);
+
+  // Handle row selection change for bulk operations
+  const handleRowSelectionChange = useCallback((newSelection: GridRowSelectionModel) => {
+    setRowSelectionModel(newSelection);
+  }, []);
+
   // Custom toolbar component
   const CustomToolbar = () => (
     <Box sx={{ p: 2, pb: 0 }}>
@@ -878,31 +960,16 @@ export function TransactionManagement({
         </Stack>
       </Stack>
 
-      {/* Bulk Actions */}
-      {Array.isArray(rowSelectionModel) && rowSelectionModel.length > 0 && (
-        <Box sx={{ mt: 2, p: 2, backgroundColor: 'primary.main', borderRadius: 1 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <Typography variant="body2" color="primary.contrastText">
-              {rowSelectionModel.length} transaction{rowSelectionModel.length !== 1 ? 's' : ''} selected
-            </Typography>
-            <Button
-              size="small"
-              variant="contained"
-              color="secondary"
-              startIcon={<DownloadIcon />}
-              onClick={() => onExport?.({ selectedIds: rowSelectionModel })}
-            >
-              Export Selected
-            </Button>
-            <Button
-              size="small"
-              variant="outlined"
-              sx={{ color: 'primary.contrastText', borderColor: 'primary.contrastText' }}
-              onClick={() => onBulkAction?.('bulk_action', Array.isArray(rowSelectionModel) ? rowSelectionModel.map(String) : [])}
-            >
-              Bulk Actions
-            </Button>
-          </Stack>
+      {/* Bulk Operations Panel */}
+      {selectedTransactions.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <BulkOperationsPanel
+            selectedTransactions={selectedTransactions}
+            onSelectionClear={handleBulkSelectionClear}
+            onOperationExecute={handleBulkOperationExecute}
+            onProgressUpdate={handleBulkProgressUpdate}
+            isAdmin={session?.user?.role === 'ADMIN'}
+          />
         </Box>
       )}
     </Box>
