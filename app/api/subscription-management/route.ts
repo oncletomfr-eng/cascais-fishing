@@ -140,13 +140,13 @@ async function getSubscriptionAnalytics(captainId: string, includeProjections: b
     const monthlyEarnings = await getMonthlyEarnings(captainId);
     
     // Determine current tier (based on earnings and subscription)
-    const earnings-basedTier = calculateCurrentTier(monthlyEarnings);
+    const earningsBasedTier = calculateCurrentTier(monthlyEarnings);
     const subscriptionTier = subscription ? mapSubscriptionTierToCommissionTier(subscription.tier) : COMMISSION_TIERS[0];
     
     // Use the better of the two (lower commission rate = better)
-    const currentTier = subscriptionTier.commissionRate <= earnings-basedTier.commissionRate 
+    const currentTier = subscriptionTier.commissionRate <= earningsBasedTier.commissionRate 
       ? subscriptionTier 
-      : earnings-basedTier;
+      : earningsBasedTier;
 
     // Calculate tier analytics
     const tiersWithAnalytics = COMMISSION_TIERS.map(tier => {

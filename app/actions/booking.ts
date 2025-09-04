@@ -1,6 +1,5 @@
 'use server';
 
-import { z } from 'zod';
 import { BookingResponse } from '@/lib/types/booking';
 import { 
   privateBookingSchema, 
@@ -19,13 +18,8 @@ import {
   sendGroupBookingConfirmation,
   sendGroupTripConfirmed,
 } from '@/lib/services/email-service';
-import { EMAIL_CONFIG } from '@/lib/config/email';
 
 // Типы для server actions
-interface SubmitBookingParams {
-  formData: FormData;
-  bookingType: 'private' | 'group';
-}
 
 // Конвертер времени в enum
 function timeToEnum(time: string): TimeSlot {
@@ -253,7 +247,7 @@ export async function submitGroupBooking(formData: FormData): Promise<BookingRes
     return {
       success: true,
       tripId: trip.id,
-      status: trip.status.toLowerCase() as any,
+      status: trip.status.toLowerCase() as 'forming' | 'confirmed' | 'cancelled',
       message: statusMessage,
       data: {
         bookingId: groupBooking.id,
@@ -276,7 +270,7 @@ export async function submitGroupBooking(formData: FormData): Promise<BookingRes
  */
 export async function getAvailableGroupTrips(date?: string, time?: string) {
   try {
-    const whereClause: any = {
+    const whereClause = {
       status: {
         in: [GroupTripStatus.FORMING, GroupTripStatus.CONFIRMED],
       },

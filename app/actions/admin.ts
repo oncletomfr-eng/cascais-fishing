@@ -2,8 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { checkAdminAuth } from '@/lib/auth-helpers'
-import { BookingStatus, GroupTripStatus, TimeSlot, Prisma } from '@prisma/client'
-import { format, startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns'
+import { BookingStatus, GroupTripStatus, TimeSlot } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 
 // Note: AdminLogin/Logout is now handled by NextAuth.js
@@ -11,7 +10,7 @@ import { revalidatePath } from 'next/cache'
 /**
  * Admin login (now uses NextAuth.js)
  */
-export async function adminLogin(password: string) {
+export async function adminLogin() {
   // This is a placeholder - actual authentication is handled by NextAuth.js
   console.log('⚠️  Using NextAuth.js for admin authentication')
   

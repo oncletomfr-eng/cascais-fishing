@@ -1,7 +1,7 @@
 'use server'
 
 import { auth } from '@/auth'
-import { PrismaClient, BadgeCategory } from '@prisma/client'
+import { PrismaClient, BadgeCategory, FishingExperience } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { awardBadgesBasedOnActivity } from '@/app/api/badges/route'
 
@@ -33,7 +33,7 @@ export async function createOrUpdateFisherProfile(formData: {
       profile = await prisma.fisherProfile.update({
         where: { userId: session.user.id },
         data: {
-          experience: formData.experience as any,
+          experience: formData.experience as FishingExperience,
           bio: formData.bio || '',
           specialties: formData.specialties || [],
           lastActiveAt: new Date()

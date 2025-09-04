@@ -84,7 +84,7 @@ export async function cancelParticipant(bookingId: string, reason?: string) {
         updatedTrip = await tx.groupTrip.update({
           where: { id: booking.tripId },
           data: { 
-            status: newTripStatus as any,
+            status: newTripStatus,
             updatedAt: new Date()
           }
         })

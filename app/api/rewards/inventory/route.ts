@@ -26,6 +26,11 @@ const UpdateInventorySchema = z.object({
  * GET /api/rewards/inventory - Get user's reward inventory
  */
 export async function GET(request: NextRequest) {
+  // Check if this is a request for distribution history
+  if (new URL(request.url).pathname.endsWith('/history')) {
+    return getDistributionHistory(request);
+  }
+  
   try {
     const session = await getServerSession(authOptions);
     const { searchParams } = new URL(request.url);
@@ -237,15 +242,8 @@ export async function PUT(request: NextRequest) {
 
 /**
  * GET /api/rewards/inventory/history - Get reward distribution history
+ * This is handled by the main GET function with pathname check
  */
-export async function GET(request: NextRequest) {
-  if (new URL(request.url).pathname.endsWith('/history')) {
-    return getDistributionHistory(request);
-  }
-  
-  // Default GET behavior
-  return GET(request);
-}
 
 async function getDistributionHistory(request: NextRequest) {
   try {
