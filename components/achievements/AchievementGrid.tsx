@@ -313,7 +313,7 @@ export default function AchievementGrid({
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              🏆 Система достижений
+              <Trophy className="w-5 h-5 inline mr-2" />Система достижений
             </h1>
             <p className="text-gray-600">
               Прогресс: {overallStats.unlocked} из {overallStats.total} достижений ({overallStats.progress}%)
@@ -545,7 +545,7 @@ function AchievementCard({ achievement, onClick, compact = false, delay = 0 }: A
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className={`text-2xl ${compact ? 'text-lg' : ''}`}>
-                {achievement.icon || '🏆'}
+{achievement.icon ? achievement.icon : <Trophy className="w-6 h-6 text-amber-500" />}
               </div>
               {achievement.unlocked && (
                 <motion.div

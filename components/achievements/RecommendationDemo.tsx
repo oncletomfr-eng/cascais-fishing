@@ -175,31 +175,31 @@ const PROFILE_DESCRIPTIONS = {
   beginner: {
     title: 'New Fisher',
     description: 'Just starting their fishing journey, prefers easy achievements',
-    icon: '🎣',
+    icon: Fish,
     traits: ['New to fishing', 'Prefers short sessions', 'Focuses on basics']
   },
   experienced: {
     title: 'Skilled Angler',
     description: 'Has moderate experience, enjoys medium difficulty challenges',
-    icon: '🐟',
+    icon: Fish,
     traits: ['Balanced approach', 'Social participant', 'Technique focused']
   },
   expert: {
     title: 'Master Fisher',
     description: 'Highly skilled, seeks challenging achievements',
-    icon: '🏆',
+    icon: Trophy,
     traits: ['Seeks challenges', 'Deep expertise', 'Long sessions']
   },
   socializer: {
     title: 'Community Builder',
     description: 'Loves social aspects, organizes group activities',
-    icon: '👥',
+    icon: Users,
     traits: ['Social focused', 'Group organizer', 'Community driven']
   },
   completionist: {
     title: 'Achievement Hunter',
     description: 'Wants to complete everything, including rare achievements',
-    icon: '⭐',
+    icon: Star,
     traits: ['100% completion', 'Rare achievements', 'Systematic approach']
   }
 }
@@ -236,7 +236,7 @@ function ProfileSelector({ currentProfile, onProfileChange }: ProfileSelectorPro
               >
                 <CardContent className="p-4">
                   <div className="text-center">
-                    <div className="text-2xl mb-2">{profile.icon}</div>
+                    <div className="mb-2"><profile.icon className="w-6 h-6" /></div>
                     <h3 className="font-semibold text-sm mb-1">{profile.title}</h3>
                     <p className="text-xs text-muted-foreground mb-2">{profile.description}</p>
                     <div className="flex flex-wrap justify-center gap-1">
@@ -309,7 +309,7 @@ function ProfileAnalytics({ profile, profileKey }: ProfileAnalyticsProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center">
-            <div className="text-4xl mb-2">{profileDesc?.icon}</div>
+            <div className="mb-2">{profileDesc?.icon && <profileDesc.icon className="w-8 h-8" />}</div>
             <h3 className="font-semibold text-lg">{profileDesc?.title}</h3>
             <p className="text-sm text-muted-foreground">{profileDesc?.description}</p>
           </div>

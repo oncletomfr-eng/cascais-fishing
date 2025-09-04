@@ -87,7 +87,11 @@ function RecommendationCard({
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <CardTitle className={`${compact ? 'text-lg' : 'text-xl'} font-semibold flex items-center gap-2`}>
-                <span className="text-2xl">{achievement.icon || '🏆'}</span>
+                {achievement.icon ? (
+                  <span className="text-2xl">{achievement.icon}</span>
+                ) : (
+                  <Trophy className="w-6 h-6 text-amber-500" />
+                )}
                 {achievement.name}
               </CardTitle>
               
@@ -350,7 +354,7 @@ export default function AchievementRecommendations({
   const lowPriorityRecs = getRecommendationsByPriority('low')
 
   const handleStartAchievement = (achievementId: string) => {
-    toast.success('Achievement started! 🎯', {
+    toast.success('Achievement started!', {
       description: 'Track your progress in the achievements tab'
     })
     onAchievementStart?.(achievementId)

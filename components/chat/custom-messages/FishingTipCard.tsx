@@ -280,8 +280,9 @@ export function FishingTipCard({
                       </p>
                       <div className="flex flex-wrap gap-1">
                         {payload.species.map((species, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            🐟 {species}
+                          <Badge key={index} variant="outline" className="text-xs flex items-center gap-1">
+                            <Fish className="w-3 h-3" />
+                            {species}
                           </Badge>
                         ))}
                       </div>

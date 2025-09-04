@@ -96,18 +96,10 @@ export function CatchPhotoCard({
     }
   }
 
-  // Получить эмоджи рыбы по видам
-  const getFishEmoji = (species?: string) => {
-    if (!species) return '🐟'
-    
-    const speciesLower = species.toLowerCase()
-    if (speciesLower.includes('тунец')) return '🐟'
-    if (speciesLower.includes('лосось') || speciesLower.includes('семга')) return '🍣'
-    if (speciesLower.includes('треска')) return '🐠'
-    if (speciesLower.includes('камбала')) return '🐟'
-    if (speciesLower.includes('акула')) return '🦈'
-    
-    return '🐟'
+  // Получить иконку рыбы по видам
+  const getFishIcon = (species?: string) => {
+    // Всегда возвращаем React компонент Fish
+    return <Fish className="w-4 h-4 text-blue-500" />
   }
 
   const formatDepth = (depth?: number) => {
@@ -141,7 +133,7 @@ export function CatchPhotoCard({
                 <Fish className="w-6 h-6 text-blue-600" />
                 <h3 className="font-semibold text-lg">Улов!</h3>
                 {payload.fishSpecies && (
-                  <span className="text-2xl">{getFishEmoji(payload.fishSpecies)}</span>
+                  {getFishIcon(payload.fishSpecies)}
                 )}
               </div>
               <Badge variant="secondary" className="bg-blue-600 text-white">
