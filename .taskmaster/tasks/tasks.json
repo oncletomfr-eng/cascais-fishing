@@ -227,7 +227,7 @@
         "id": 7,
         "title": "Transaction Management System",
         "description": "Implement comprehensive transaction tracking with search, filters, detailed views, pagination, and export capabilities",
-        "status": "in-progress",
+        "status": "done",
         "priority": "high",
         "phase": "Payment System",
         "estimatedHours": 40,
@@ -303,7 +303,7 @@
             "title": "Export Integration & Reporting",
             "description": "Integrate transaction management with existing export system and add transaction-specific reporting features",
             "details": "Connect transaction table to existing DataExportReporting system from Task 6.4. Add transaction-specific export options with filtered data export. Implement scheduled transaction reports with customizable templates. Add quick export buttons for visible data, selected rows, and filtered results. Include transaction summary reports with statistics and charts. Add export format optimization for transaction data (CSV for data analysis, PDF for statements, Excel for accounting).",
-            "status": "in-progress",
+            "status": "done",
             "dependencies": [
               "7.1",
               "7.2",
@@ -317,7 +317,7 @@
         "id": 8,
         "title": "Commission Tracking & Reporting",
         "description": "Build commission calculation system with rate display, history tracking, payout scheduling, and tax reporting preparation",
-        "status": "pending",
+        "status": "in-progress",
         "priority": "high",
         "phase": "Payment System",
         "estimatedHours": 35,
@@ -332,7 +332,54 @@
           "reporting",
           "financials"
         ],
-        "details": "Create dynamic commission rate display (15-20%). Build commission history with trend analysis. Implement payout schedule management interface. Add tax reporting data preparation. Include commission calculator tools. Integrate with captain subscription tiers using existing commission calculation logic from payment API."
+        "details": "Create dynamic commission rate display (15-20%). Build commission history with trend analysis. Implement payout schedule management interface. Add tax reporting data preparation. Include commission calculator tools. Integrate with captain subscription tiers using existing commission calculation logic from payment API.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Commission Rate Display & Calculator",
+            "description": "Create dynamic commission rate display system with interactive calculator tools for commission calculations",
+            "details": "Build commission rate display showing current rates (15-20%) based on captain subscription tiers. Create interactive commission calculator for preview calculations. Add rate history tracking and tier-based rate visualization. Include commission breakdown components showing platform fees, net earnings, and payout amounts. Integrate with existing payment system commission logic.",
+            "status": "in-progress",
+            "dependencies": [],
+            "parentTaskId": 8
+          },
+          {
+            "id": 2,
+            "title": "Commission History & Trend Analysis",
+            "description": "Build comprehensive commission history tracking with trend analysis and reporting capabilities",
+            "details": "Create commission history dashboard showing historical commission data with time-series visualization. Add trend analysis with month-over-month, quarter-over-quarter growth metrics. Build commission reports with filtering by date ranges, captains, and transaction types. Include statistical analysis showing average commissions, peak periods, and performance metrics. Add export functionality for commission history data.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 8
+          },
+          {
+            "id": 3,
+            "title": "Payout Schedule Management",
+            "description": "Implement payout schedule management interface for captain commission payments",
+            "details": "Build payout schedule dashboard showing upcoming and past payouts. Create payout calendar with customizable schedule settings (weekly, bi-weekly, monthly). Add payout processing workflow with approval and confirmation systems. Include payout history tracking with status updates. Build payment method management for captains (bank accounts, payment preferences). Add automated payout notifications and reminders.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 8
+          },
+          {
+            "id": 4,
+            "title": "Tax Reporting Data Preparation",
+            "description": "Add tax reporting data preparation and export capabilities for commission payments",
+            "details": "Create tax reporting module for commission income tracking. Build 1099-MISC form data preparation for captain commissions. Add tax year summary reports with commission totals and deductions. Include tax document generation and export capabilities. Build tax reporting dashboard with annual and quarterly views. Add tax-compliant record keeping with proper documentation and audit trails.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 8
+          },
+          {
+            "id": 5,
+            "title": "Captain Subscription Tier Integration",
+            "description": "Integrate commission system with captain subscription tiers and tier-based rate calculations",
+            "details": "Build subscription tier management interface showing captain tier levels and benefits. Create tier-based commission rate logic with automatic rate adjustments. Add tier upgrade/downgrade workflows with commission rate changes. Include tier analytics showing tier distribution and commission optimization recommendations. Build tier comparison tools for captains to understand commission benefits. Integrate with existing payment system and subscription management.",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 8
+          }
+        ]
       },
       {
         "id": 9,
@@ -790,7 +837,7 @@
       "budget": "€50,000",
       "expectedROI": "€90k+/month revenue, 2160% ROI over 12 months",
       "created": "2025-09-01T14:28:28.045Z",
-      "updated": "2025-09-04T08:39:46.217Z"
+      "updated": "2025-09-04T08:56:23.467Z"
     }
   }
 }

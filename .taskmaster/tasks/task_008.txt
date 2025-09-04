@@ -1,6 +1,6 @@
 # Task ID: 8
 # Title: Commission Tracking & Reporting
-# Status: pending
+# Status: in-progress
 # Dependencies: 6, 7
 # Priority: high
 # Description: Build commission calculation system with rate display, history tracking, payout scheduling, and tax reporting preparation
@@ -8,4 +8,36 @@
 Create dynamic commission rate display (15-20%). Build commission history with trend analysis. Implement payout schedule management interface. Add tax reporting data preparation. Include commission calculator tools. Integrate with captain subscription tiers using existing commission calculation logic from payment API.
 
 # Test Strategy:
+
+
+# Subtasks:
+## 1. Commission Rate Display & Calculator [pending]
+### Dependencies: None
+### Description: Create dynamic commission rate display system with interactive calculator tools for commission calculations
+### Details:
+Build commission rate display showing current rates (15-20%) based on captain subscription tiers. Create interactive commission calculator for preview calculations. Add rate history tracking and tier-based rate visualization. Include commission breakdown components showing platform fees, net earnings, and payout amounts. Integrate with existing payment system commission logic.
+
+## 2. Commission History & Trend Analysis [pending]
+### Dependencies: None
+### Description: Build comprehensive commission history tracking with trend analysis and reporting capabilities
+### Details:
+Create commission history dashboard showing historical commission data with time-series visualization. Add trend analysis with month-over-month, quarter-over-quarter growth metrics. Build commission reports with filtering by date ranges, captains, and transaction types. Include statistical analysis showing average commissions, peak periods, and performance metrics. Add export functionality for commission history data.
+
+## 3. Payout Schedule Management [pending]
+### Dependencies: None
+### Description: Implement payout schedule management interface for captain commission payments
+### Details:
+Build payout schedule dashboard showing upcoming and past payouts. Create payout calendar with customizable schedule settings (weekly, bi-weekly, monthly). Add payout processing workflow with approval and confirmation systems. Include payout history tracking with status updates. Build payment method management for captains (bank accounts, payment preferences). Add automated payout notifications and reminders.
+
+## 4. Tax Reporting Data Preparation [pending]
+### Dependencies: None
+### Description: Add tax reporting data preparation and export capabilities for commission payments
+### Details:
+Create tax reporting module for commission income tracking. Build 1099-MISC form data preparation for captain commissions. Add tax year summary reports with commission totals and deductions. Include tax document generation and export capabilities. Build tax reporting dashboard with annual and quarterly views. Add tax-compliant record keeping with proper documentation and audit trails.
+
+## 5. Captain Subscription Tier Integration [pending]
+### Dependencies: None
+### Description: Integrate commission system with captain subscription tiers and tier-based rate calculations
+### Details:
+Build subscription tier management interface showing captain tier levels and benefits. Create tier-based commission rate logic with automatic rate adjustments. Add tier upgrade/downgrade workflows with commission rate changes. Include tier analytics showing tier distribution and commission optimization recommendations. Build tier comparison tools for captains to understand commission benefits. Integrate with existing payment system and subscription management.
 
