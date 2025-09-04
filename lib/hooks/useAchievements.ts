@@ -329,35 +329,35 @@ export function useRealtimeAchievements(userId: string) {
 export function getAchievementIcon(achievementType: string): string {
   const iconMap: Record<string, string> = {
     // Fish species
-    'TUNA_MASTER': '🐟',
-    'DORADO_HUNTER': '🐠', 
-    'SEABASS_EXPERT': '🐟',
-    'MARLIN_LEGEND': '🦈',
-    'SPECIES_COLLECTOR': '🐠',
+    'TUNA_MASTER': 'Fish',
+    'DORADO_HUNTER': 'Fish', 
+    'SEABASS_EXPERT': 'Fish',
+    'MARLIN_LEGEND': 'Fish',
+    'SPECIES_COLLECTOR': 'Fish',
     
     // Techniques
-    'TROLLING_EXPERT': '🎣',
-    'JIGGING_MASTER': '🪝',
-    'BOTTOM_FISHING_PRO': '⚓',
-    'FLY_FISHING_ARTIST': '🎣',
-    'TECHNIQUE_VERSATILE': '🛠️',
+    'TROLLING_EXPERT': 'Fish',
+    'JIGGING_MASTER': 'Target',
+    'BOTTOM_FISHING_PRO': 'Target',
+    'FLY_FISHING_ARTIST': 'Fish',
+    'TECHNIQUE_VERSATILE': 'Target',
     
     // Social
-    'NEWBIE_MENTOR': '👨‍🏫',
-    'GROUP_ORGANIZER': '👥',
-    'COMMUNITY_BUILDER': '🏘️',
-    'REVIEW_MASTER': '⭐',
-    'RELIABLE_FISHER': '💯',
+    'NEWBIE_MENTOR': 'Users',
+    'GROUP_ORGANIZER': 'Users',
+    'COMMUNITY_BUILDER': 'Users',
+    'REVIEW_MASTER': 'Star',
+    'RELIABLE_FISHER': 'Trophy',
     
     // Geography  
-    'REEF_EXPLORER': '🏝️',
-    'DEEP_SEA_ADVENTURER': '🌊',
-    'COASTAL_SPECIALIST': '🏖️',
-    'WORLD_TRAVELER': '🌍',
-    'LOCAL_EXPERT': '📍'
+    'REEF_EXPLORER': 'MapPin',
+    'DEEP_SEA_ADVENTURER': 'MapPin',
+    'COASTAL_SPECIALIST': 'MapPin',
+    'WORLD_TRAVELER': 'MapPin',
+    'LOCAL_EXPERT': 'MapPin'
   }
 
-  return iconMap[achievementType] || '🏆'
+  return iconMap[achievementType] || 'Trophy'
 }
 
 /**

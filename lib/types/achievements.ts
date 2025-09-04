@@ -14,6 +14,7 @@ import {
   FishingExperience
 } from '@prisma/client';
 
+
 // ============================================================================
 // ОСНОВНЫЕ ИНТЕРФЕЙСЫ ДЛЯ ДОСТИЖЕНИЙ
 // ============================================================================
@@ -436,49 +437,49 @@ export const EXPERIENCE_LEVELS = {
 export const CATEGORY_CONFIG = {
   FISH_SPECIES: {
     label: 'Виды рыб',
-    icon: '🐟',
+    icon: 'Fish',
     color: '#3B82F6',
     description: 'Достижения за ловлю различных видов рыб'
   },
   TECHNIQUE: {
     label: 'Техники',
-    icon: '🎣',
+    icon: 'Fish',
     color: '#10B981',
     description: 'Мастерство в различных техниках рыбалки'
   },
   SOCIAL: {
     label: 'Социальные',
-    icon: '👥',
+    icon: 'Users',
     color: '#F59E0B',
     description: 'Взаимодействие с сообществом рыболовов'
   },
   GEOGRAPHY: {
     label: 'География',
-    icon: '🗺️',
+    icon: 'MapPin',
     color: '#EF4444',
     description: 'Исследование различных рыболовных мест'
   },
   ACHIEVEMENT: {
     label: 'Достижения',
-    icon: '🏆',
+    icon: 'Trophy',
     color: '#8B5CF6',
     description: 'Общие игровые достижения'
   },
   MILESTONE: {
     label: 'Вехи',
-    icon: '🎯',
+    icon: 'Target',
     color: '#06B6D4',
     description: 'Важные этапы прогресса'
   },
   SPECIAL: {
     label: 'Особые',
-    icon: '⭐',
+    icon: 'Star',
     color: '#F97316',
     description: 'Уникальные и эксклюзивные достижения'
   },
   SEASONAL: {
     label: 'Сезонные',
-    icon: '🎃',
+    icon: 'Calendar',
     color: '#84CC16',
     description: 'Сезонные события и достижения'
   },
@@ -487,7 +488,7 @@ export const CATEGORY_CONFIG = {
 export const RARITY_CONFIG = {
   COMMON: {
     label: 'Обычное',
-    icon: '🥉',
+    icon: 'Medal',
     color: '#6B7280',
     bgColor: '#F9FAFB',
     borderColor: '#D1D5DB',
@@ -496,7 +497,7 @@ export const RARITY_CONFIG = {
   },
   UNCOMMON: {
     label: 'Необычное',
-    icon: '🥈',
+    icon: 'Medal',
     color: '#10B981',
     bgColor: '#ECFDF5',
     borderColor: '#D1FAE5',
@@ -505,7 +506,7 @@ export const RARITY_CONFIG = {
   },
   RARE: {
     label: 'Редкое',
-    icon: '🥇',
+    icon: 'Medal',
     color: '#3B82F6',
     bgColor: '#EFF6FF',
     borderColor: '#DBEAFE',
@@ -514,7 +515,7 @@ export const RARITY_CONFIG = {
   },
   EPIC: {
     label: 'Эпическое',
-    icon: '💎',
+    icon: 'Gem',
     color: '#8B5CF6',
     bgColor: '#F5F3FF',
     borderColor: '#E9D5FF',
@@ -523,7 +524,7 @@ export const RARITY_CONFIG = {
   },
   LEGENDARY: {
     label: 'Легендарное',
-    icon: '👑',
+    icon: 'Crown',
     color: '#F59E0B',
     bgColor: '#FFFBEB',
     borderColor: '#FED7AA',
@@ -532,7 +533,7 @@ export const RARITY_CONFIG = {
   },
   MYTHIC: {
     label: 'Мифическое',
-    icon: '⭐',
+    icon: 'Star',
     color: '#EF4444',
     bgColor: '#FEF2F2',
     borderColor: '#FECACA',

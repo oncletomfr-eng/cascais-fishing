@@ -41,6 +41,8 @@ import {
   AchievementRarity 
 } from '@/lib/types/achievements';
 
+import { getIconComponent } from '@/lib/utils/icon-mapper';
+
 // Types for comparison
 interface UserAchievementProfile {
   userId: string;
@@ -378,7 +380,7 @@ export function AchievementComparison({
                   {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
                     <SelectItem key={key} value={key}>
                       <div className="flex items-center gap-2">
-                        {React.createElement(config.icon, { className: 'w-4 h-4' })}
+                        {React.createElement(getIconComponent(config.icon), { className: 'w-4 h-4' })}
                         {config.label}
                       </div>
                     </SelectItem>
@@ -456,7 +458,7 @@ export function AchievementComparison({
                     <div key={category} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          {React.createElement(config.icon, { className: 'w-4 h-4 text-gray-600' })}
+                          {React.createElement(getIconComponent(config.icon), { className: 'w-4 h-4 text-gray-600' })}
                           <span className="font-medium">{config.label}</span>
                         </div>
                         <div className="flex items-center gap-4 text-sm">
@@ -490,7 +492,7 @@ export function AchievementComparison({
                   return (
                     <div key={rarity} className={`p-3 rounded-lg border ${config.bgColor}`}>
                       <div className="flex items-center justify-center mb-2">
-                        {React.createElement(config.icon, { className: `w-6 h-6 ${config.textColor}` })}
+                        {React.createElement(getIconComponent(config.icon), { className: `w-6 h-6 ${config.textColor}` })}
                       </div>
                       <div className="text-center">
                         <div className="text-xs font-medium text-gray-600 mb-1">{config.label}</div>
@@ -533,7 +535,7 @@ export function AchievementComparison({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 ${config.color} rounded-lg flex items-center justify-center text-white`}>
-                          {React.createElement(config.icon, { className: 'w-5 h-5' })}
+                          {React.createElement(getIconComponent(config.icon), { className: 'w-5 h-5' })}
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-900">{achievement.name}</h4>
@@ -543,7 +545,7 @@ export function AchievementComparison({
                       
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className={rarityConfig.textColor}>
-                          {React.createElement(rarityConfig.icon, { className: 'w-3 h-3 mr-1' })}
+                          {React.createElement(getIconComponent(rarityConfig.icon), { className: 'w-3 h-3 mr-1' })}
                           {rarityConfig.label}
                         </Badge>
                         {enableChallenges && user1HasIt !== user2HasIt && (
@@ -741,7 +743,7 @@ export function AchievementComparison({
                         className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200"
                       >
                         <div className={`w-8 h-8 ${config.color} rounded-lg flex items-center justify-center text-white flex-shrink-0`}>
-                          {React.createElement(config.icon, { className: 'w-4 h-4' })}
+                          {React.createElement(getIconComponent(config.icon), { className: 'w-4 h-4' })}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
@@ -803,7 +805,7 @@ export function AchievementComparison({
                         className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg border border-purple-200"
                       >
                         <div className={`w-8 h-8 ${config.color} rounded-lg flex items-center justify-center text-white flex-shrink-0`}>
-                          {React.createElement(config.icon, { className: 'w-4 h-4' })}
+                          {React.createElement(getIconComponent(config.icon), { className: 'w-4 h-4' })}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
@@ -870,7 +872,7 @@ export function AchievementComparison({
                         >
                           <div className="flex items-center gap-2 mb-2">
                             <div className={`w-6 h-6 ${config.color} rounded flex items-center justify-center text-white`}>
-                              {React.createElement(config.icon, { className: 'w-3 h-3' })}
+                              {React.createElement(getIconComponent(config.icon), { className: 'w-3 h-3' })}
                             </div>
                             <h4 className="font-medium text-sm truncate">{gap.achievement.name}</h4>
                           </div>
@@ -888,7 +890,7 @@ export function AchievementComparison({
                           </div>
                           
                           <Badge variant="outline" className={`${rarityConfig.textColor} text-xs`}>
-                            {React.createElement(rarityConfig.icon, { className: 'w-3 h-3 mr-1' })}
+                            {React.createElement(getIconComponent(rarityConfig.icon), { className: 'w-3 h-3 mr-1' })}
                             {rarityConfig.label}
                           </Badge>
                         </motion.div>
@@ -937,7 +939,7 @@ export function AchievementComparison({
                             className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200"
                           >
                             <div className={`w-6 h-6 ${config.color} rounded flex items-center justify-center text-white`}>
-                              {React.createElement(config.icon, { className: 'w-3 h-3' })}
+                              {React.createElement(getIconComponent(config.icon), { className: 'w-3 h-3' })}
                             </div>
                             <div className="flex-1">
                               <p className="font-medium text-sm">{achievement.name}</p>
@@ -977,7 +979,7 @@ export function AchievementComparison({
                             className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg border border-purple-200"
                           >
                             <div className={`w-6 h-6 ${config.color} rounded flex items-center justify-center text-white`}>
-                              {React.createElement(config.icon, { className: 'w-3 h-3' })}
+                              {React.createElement(getIconComponent(config.icon), { className: 'w-3 h-3' })}
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
@@ -1022,7 +1024,7 @@ export function AchievementComparison({
                             className={`p-3 ${config.lightColor} rounded-lg border ${config.borderColor}`}
                           >
                             <div className="flex items-center gap-2 mb-1">
-                              {React.createElement(config.icon, { className: 'w-4 h-4 text-gray-600' })}
+                              {React.createElement(getIconComponent(config.icon), { className: 'w-4 h-4 text-gray-600' })}
                               <span className="text-xs font-medium">{config.label}</span>
                             </div>
                             <div className="text-xs text-gray-600">
@@ -1069,7 +1071,7 @@ export function AchievementComparison({
                             className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200"
                           >
                             <div className={`w-6 h-6 ${config.color} rounded flex items-center justify-center text-white`}>
-                              {React.createElement(config.icon, { className: 'w-3 h-3' })}
+                              {React.createElement(getIconComponent(config.icon), { className: 'w-3 h-3' })}
                             </div>
                             <div className="flex-1">
                               <p className="font-medium text-sm">{achievement.name}</p>
@@ -1109,7 +1111,7 @@ export function AchievementComparison({
                             className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200"
                           >
                             <div className={`w-6 h-6 ${config.color} rounded flex items-center justify-center text-white`}>
-                              {React.createElement(config.icon, { className: 'w-3 h-3' })}
+                              {React.createElement(getIconComponent(config.icon), { className: 'w-3 h-3' })}
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
@@ -1154,7 +1156,7 @@ export function AchievementComparison({
                             className={`p-3 ${config.lightColor} rounded-lg border ${config.borderColor}`}
                           >
                             <div className="flex items-center gap-2 mb-1">
-                              {React.createElement(config.icon, { className: 'w-4 h-4 text-gray-600' })}
+                              {React.createElement(getIconComponent(config.icon), { className: 'w-4 h-4 text-gray-600' })}
                               <span className="text-xs font-medium">{config.label}</span>
                             </div>
                             <div className="text-xs text-gray-600">
@@ -1207,7 +1209,7 @@ export function AchievementComparison({
                         >
                           <div className="flex items-center gap-2 mb-3">
                             <div className={`w-8 h-8 ${config.color} rounded-lg flex items-center justify-center text-white`}>
-                              {React.createElement(config.icon, { className: 'w-4 h-4' })}
+                              {React.createElement(getIconComponent(config.icon), { className: 'w-4 h-4' })}
                             </div>
                             <div className="flex-1">
                               <h4 className="font-medium text-sm">{achievement.name}</h4>

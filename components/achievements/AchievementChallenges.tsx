@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
+import { getIconComponent } from '@/lib/utils/icon-mapper';
 
 import { useAchievementComparison } from '@/hooks/useAchievementComparison';
 import { AchievementWithProgress, CATEGORY_CONFIG, RARITY_CONFIG } from '@/lib/types/achievements';
@@ -117,12 +118,12 @@ function CreateChallengeModal({
           <div className="mb-4 p-3 bg-gray-50 rounded-lg">
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 ${config.color} rounded-lg flex items-center justify-center text-white`}>
-                {React.createElement(config.icon, { className: 'w-5 h-5' })}
+                {React.createElement(getIconComponent(config.icon), { className: 'w-5 h-5' })}
               </div>
               <div className="flex-1">
                 <h4 className="font-medium text-sm">{achievement.name}</h4>
                 <Badge variant="outline" className={`${rarityConfig.textColor} text-xs mt-1`}>
-                  {React.createElement(rarityConfig.icon, { className: 'w-3 h-3 mr-1' })}
+                  {React.createElement(getIconComponent(rarityConfig.icon), { className: 'w-3 h-3 mr-1' })}
                   {rarityConfig.label}
                 </Badge>
               </div>
@@ -231,7 +232,7 @@ function ChallengeCard({
           </div>
           
           <Badge className={status.color}>
-            {React.createElement(status.icon, { className: 'w-3 h-3 mr-1' })}
+            {React.createElement(getIconComponent(status.icon), { className: 'w-3 h-3 mr-1' })}
             {status.label}
           </Badge>
         </div>
@@ -241,13 +242,13 @@ function ChallengeCard({
       <div className="p-4">
         <div className="flex items-center gap-3 mb-3">
           <div className={`w-12 h-12 ${config.color} rounded-lg flex items-center justify-center text-white`}>
-            {React.createElement(config.icon, { className: 'w-6 h-6' })}
+            {React.createElement(getIconComponent(config.icon), { className: 'w-6 h-6' })}
           </div>
           <div className="flex-1">
             <h3 className="font-medium">{challenge.achievement.name}</h3>
             <p className="text-sm text-gray-600 line-clamp-2">{challenge.achievement.description}</p>
             <Badge variant="outline" className={`${rarityConfig.textColor} text-xs mt-2`}>
-              {React.createElement(rarityConfig.icon, { className: 'w-3 h-3 mr-1' })}
+              {React.createElement(getIconComponent(rarityConfig.icon), { className: 'w-3 h-3 mr-1' })}
               {rarityConfig.label}
             </Badge>
           </div>
