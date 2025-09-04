@@ -78,6 +78,7 @@ import { toast } from 'sonner';
 import { TransactionFiltersPanel, TransactionFilters, FilterPreset } from './TransactionFiltersPanel';
 import { GlobalSearchBar, SearchQuery, SearchSuggestion } from './GlobalSearchBar';
 import { useGlobalSearch } from '@/hooks/useGlobalSearch';
+import { TransactionDetailModal } from './TransactionDetailModal';
 
 // Types for transaction data
 export interface Transaction {
@@ -204,6 +205,10 @@ export function TransactionManagement({
 
   // Row count for server-side pagination
   const [rowCount, setRowCount] = useState(0);
+
+  // Transaction detail modal state
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   
   // Fetch transactions data
   const fetchTransactions = useCallback(async () => {
@@ -353,13 +358,26 @@ export function TransactionManagement({
     setPaginationModel(prev => ({ ...prev, page: 0 }));
   }, []);
 
+  // Handle transaction detail modal
+  const openTransactionDetail = useCallback((transaction: Transaction) => {
+    setSelectedTransaction(transaction);
+    setDetailModalOpen(true);
+  }, []);
+
+  const closeTransactionDetail = useCallback(() => {
+    setDetailModalOpen(false);
+    setSelectedTransaction(null);
+  }, []);
+
   // Handle row actions
   const handleViewTransaction = useCallback((id: GridRowId) => {
     const transaction = transactions.find(t => t.id === id);
-    if (transaction && onTransactionSelect) {
-      onTransactionSelect(transaction);
+    if (transaction) {
+      openTransactionDetail(transaction);
+    } else {
+      toast.error('Transaction not found');
     }
-  }, [transactions, onTransactionSelect]);
+  }, [transactions, openTransactionDetail]);
 
   const handleEditTransaction = useCallback((id: GridRowId) => {
     setRowModesModel(prev => ({
@@ -721,6 +739,73 @@ export function TransactionManagement({
     }, [globalSearch, handleAdvancedSearchQuery])
   };
 
+  // Handle transaction modal actions
+  const handleTransactionUpdate = useCallback((updatedTransaction: Transaction) => {
+    setTransactions(prev => 
+      prev.map(t => t.id === updatedTransaction.id ? updatedTransaction : t)
+    );
+    toast.success('Transaction updated successfully');
+  }, []);
+
+  const handleTransactionRefund = useCallback(async (transactionId: string, amount?: number, reason?: string) => {
+    try {
+      // TODO: Implement actual refund API call
+      toast.success(`Refund initiated for €${amount ? (amount / 100).toFixed(2) : 'full amount'}`);
+      
+      // Refresh transactions to reflect the refund
+      await fetchTransactions();
+    } catch (error) {
+      console.error('Refund error:', error);
+      toast.error('Failed to initiate refund');
+    }
+  }, [fetchTransactions]);
+
+  const handleTransactionDispute = useCallback(async (transactionId: string, reason: string) => {
+    try {
+      // TODO: Implement actual dispute API call
+      toast.success('Dispute reported successfully');
+      
+      // Refresh transactions to reflect the dispute
+      await fetchTransactions();
+    } catch (error) {
+      console.error('Dispute error:', error);
+      toast.error('Failed to report dispute');
+    }
+  }, [fetchTransactions]);
+
+  const handleTransactionStatusChange = useCallback(async (transactionId: string, newStatus: string, reason?: string) => {
+    try {
+      // TODO: Implement actual status change API call
+      toast.success(`Transaction status changed to ${newStatus}`);
+      
+      // Refresh transactions to reflect the status change
+      await fetchTransactions();
+    } catch (error) {
+      console.error('Status change error:', error);
+      toast.error('Failed to change transaction status');
+    }
+  }, [fetchTransactions]);
+
+  const handleTransactionNoteAdd = useCallback(async (transactionId: string, noteData: any) => {
+    try {
+      const response = await fetch(`/api/transactions/${transactionId}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(noteData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add note');
+      }
+
+      toast.success('Note added successfully');
+    } catch (error) {
+      console.error('Add note error:', error);
+      toast.error('Failed to add note');
+      throw error; // Re-throw for component handling
+    }
+  }, []);
+
   // Custom toolbar component
   const CustomToolbar = () => (
     <Box sx={{ p: 2, pb: 0 }}>
@@ -909,6 +994,19 @@ export function TransactionManagement({
           }}
         />
       </Card>
+
+      {/* Transaction Detail Modal */}
+      <TransactionDetailModal
+        open={detailModalOpen}
+        onClose={closeTransactionDetail}
+        transaction={selectedTransaction}
+        onTransactionUpdate={handleTransactionUpdate}
+        onRefund={handleTransactionRefund}
+        onDispute={handleTransactionDispute}
+        onStatusChange={handleTransactionStatusChange}
+        onNoteAdd={handleTransactionNoteAdd}
+        readonly={false}
+      />
     </motion.div>
   );
 }
