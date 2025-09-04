@@ -428,3 +428,115 @@ export const EXPERIENCE_LEVELS = {
   INTERMEDIATE: { min: 1000, max: 4999, name: 'Опытный', icon: '🎯' },
   EXPERT: { min: 5000, max: Number.MAX_VALUE, name: 'Эксперт', icon: '👑' },
 } as const;
+
+// ============================================================================
+// КОНФИГУРАЦИЯ КАТЕГОРИЙ И РЕДКОСТИ (ДЛЯ ИМПОРТА В КОМПОНЕНТЫ)
+// ============================================================================
+
+export const CATEGORY_CONFIG = {
+  FISH_SPECIES: {
+    label: 'Виды рыб',
+    icon: '🐟',
+    color: '#3B82F6',
+    description: 'Достижения за ловлю различных видов рыб'
+  },
+  TECHNIQUE: {
+    label: 'Техники',
+    icon: '🎣',
+    color: '#10B981',
+    description: 'Мастерство в различных техниках рыбалки'
+  },
+  SOCIAL: {
+    label: 'Социальные',
+    icon: '👥',
+    color: '#F59E0B',
+    description: 'Взаимодействие с сообществом рыболовов'
+  },
+  GEOGRAPHY: {
+    label: 'География',
+    icon: '🗺️',
+    color: '#EF4444',
+    description: 'Исследование различных рыболовных мест'
+  },
+  ACHIEVEMENT: {
+    label: 'Достижения',
+    icon: '🏆',
+    color: '#8B5CF6',
+    description: 'Общие игровые достижения'
+  },
+  MILESTONE: {
+    label: 'Вехи',
+    icon: '🎯',
+    color: '#06B6D4',
+    description: 'Важные этапы прогресса'
+  },
+  SPECIAL: {
+    label: 'Особые',
+    icon: '⭐',
+    color: '#F97316',
+    description: 'Уникальные и эксклюзивные достижения'
+  },
+  SEASONAL: {
+    label: 'Сезонные',
+    icon: '🎃',
+    color: '#84CC16',
+    description: 'Сезонные события и достижения'
+  },
+} as const;
+
+export const RARITY_CONFIG = {
+  COMMON: {
+    label: 'Обычное',
+    icon: '🥉',
+    color: '#6B7280',
+    bgColor: '#F9FAFB',
+    borderColor: '#D1D5DB',
+    textColor: '#374151',
+    order: 1
+  },
+  UNCOMMON: {
+    label: 'Необычное',
+    icon: '🥈',
+    color: '#10B981',
+    bgColor: '#ECFDF5',
+    borderColor: '#D1FAE5',
+    textColor: '#065F46',
+    order: 2
+  },
+  RARE: {
+    label: 'Редкое',
+    icon: '🥇',
+    color: '#3B82F6',
+    bgColor: '#EFF6FF',
+    borderColor: '#DBEAFE',
+    textColor: '#1E40AF',
+    order: 3
+  },
+  EPIC: {
+    label: 'Эпическое',
+    icon: '💎',
+    color: '#8B5CF6',
+    bgColor: '#F5F3FF',
+    borderColor: '#E9D5FF',
+    textColor: '#6B21A8',
+    order: 4
+  },
+  LEGENDARY: {
+    label: 'Легендарное',
+    icon: '👑',
+    color: '#F59E0B',
+    bgColor: '#FFFBEB',
+    borderColor: '#FED7AA',
+    textColor: '#92400E',
+    order: 5
+  },
+  MYTHIC: {
+    label: 'Мифическое',
+    icon: '⭐',
+    color: '#EF4444',
+    bgColor: '#FEF2F2',
+    borderColor: '#FECACA',
+    textColor: '#991B1B',
+    order: 6
+  },
+} as const;
