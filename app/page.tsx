@@ -293,41 +293,44 @@ export default function FishingLandingPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <Card>
+            <Card className="shadow-lg border-2 border-border/20">
               <CardContent className="p-8">
                 <h3 className="font-sans font-semibold text-xl mb-6">Book Your Trip</h3>
-                <form onSubmit={handleContactSubmit} className="space-y-4">
+                <form onSubmit={handleContactSubmit} className="space-y-6">
                   <div>
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="name" className="text-sm font-medium text-foreground mb-2 block">Full Name</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Your name"
+                      placeholder="Enter your full name"
+                      className="border-border focus:border-primary"
                       required
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="phone">Phone / WhatsApp</Label>
+                    <Label htmlFor="phone" className="text-sm font-medium text-foreground mb-2 block">Phone / WhatsApp</Label>
                     <Input
                       id="phone"
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+380 97 101 8913, +351 934 027 852"
+                      placeholder="Enter your phone number"
+                      className="border-border focus:border-primary"
                       required
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="preferred-date">Preferred Date</Label>
+                    <Label htmlFor="preferred-date" className="text-sm font-medium text-foreground mb-2 block">Preferred Date</Label>
                     <Input
                       id="preferred-date"
                       type="date"
                       value={formData.preferredDate}
                       onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
                       min={new Date().toISOString().split("T")[0]}
+                      className="border-border focus:border-primary"
                       required
                     />
                   </div>
