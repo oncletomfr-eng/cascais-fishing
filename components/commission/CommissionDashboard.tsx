@@ -20,7 +20,6 @@ import {
   Typography,
   Button,
   IconButton,
-  Grid,
   Stack,
   Chip,
   Alert,
@@ -48,7 +47,8 @@ import {
   TableRow,
   Tooltip,
   CircularProgress,
-  Skeleton
+  Skeleton,
+  Grid
 } from '@mui/material';
 import {
   Calculate as CalculateIcon,
@@ -68,6 +68,7 @@ import {
 } from '@mui/icons-material';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
+import { CommissionAnalytics } from './CommissionAnalytics';
 
 // Commission interfaces
 export interface CommissionTier {
@@ -455,6 +456,7 @@ export function CommissionDashboard({ captainId, className = '' }: CommissionDas
                   <Tab label="Current Tier" />
                   <Tab label="All Tiers" />
                   <Tab label="Recent Activity" />
+                  <Tab label="Analytics" />
                 </Tabs>
               </Box>
 
@@ -638,8 +640,10 @@ export function CommissionDashboard({ captainId, className = '' }: CommissionDas
                           </TableCell>
                           <TableCell>{formatCurrency(item.amount)}</TableCell>
                           <TableCell>{formatPercentage(item.commissionRate)}</TableCell>
-                          <TableCell fontWeight="medium">
-                            {formatCurrency(item.commissionAmount)}
+                          <TableCell>
+                            <Typography fontWeight="medium">
+                              {formatCurrency(item.commissionAmount)}
+                            </Typography>
                           </TableCell>
                           <TableCell>
                             <Chip 
@@ -656,6 +660,11 @@ export function CommissionDashboard({ captainId, className = '' }: CommissionDas
                     </TableBody>
                   </Table>
                 </TableContainer>
+              </TabPanel>
+
+              {/* Analytics Tab */}
+              <TabPanel value={activeTab} index={3}>
+                <CommissionAnalytics />
               </TabPanel>
             </CardContent>
           </Card>
