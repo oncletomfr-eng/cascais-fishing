@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireChatPermissions } from '@/lib/middleware/chat-auth';
-import { SecureFileUploadService } from '@/lib/services/secure-file-upload';
-import { ChatSecurityManager } from '@/lib/security/chat-permissions';
-import { getStreamChatServerClient } from '@/lib/config/stream-chat';
+
+// Dynamic imports to reduce bundle size
+const loadChatAuth = () => import('@/lib/middleware/chat-auth');
+const loadFileUploadService = () => import('@/lib/services/secure-file-upload');
+const loadChatSecurity = () => import('@/lib/security/chat-permissions');
+const loadStreamChat = () => import('@/lib/config/stream-chat');
 
 /**
  * Secure Chat File Upload API
@@ -31,8 +33,13 @@ interface UploadRequest {
 /**
  * POST /api/chat/upload - Upload files with comprehensive security
  */
-export const POST = requireChatPermissions.uploadFile()(
-  async (request: NextRequest, context) => {
+export const POST = async (request: NextRequest) => {
+  // Load authentication middleware dynamically
+  const { requireChatPermissions } = await loadChatAuth();
+  
+  // Create the authenticated handler
+  const handler = requireChatPermissions.uploadFile()(
+    async (request: NextRequest, context) => {
     try {
       const { user, securityContext } = context;
       
@@ -69,6 +76,7 @@ export const POST = requireChatPermissions.uploadFile()(
       if (channelId) {
         const hasChannelAccess = await validateChannelAccess(user.id, channelId, user.role);
         if (!hasChannelAccess) {
+          const { ChatSecurityManager } = await loadChatSecurity();
           await ChatSecurityManager.auditUserAction(
             user.id,
             'file_upload_channel_access_denied',
@@ -90,6 +98,7 @@ export const POST = requireChatPermissions.uploadFile()(
       }
       
       // Get user-specific upload configuration
+      const { SecureFileUploadService } = await loadFileUploadService();
       const userUploadConfig = SecureFileUploadService.getUploadConfig(user.role, {
         // Custom config based on upload type
         ...(uploadType === 'profile_image' && {
@@ -122,6 +131,7 @@ export const POST = requireChatPermissions.uploadFile()(
           console.log(`📎 Processing file ${i + 1}/${files.length}: ${file.name}`);
           
           // Upload file with security checks
+          const { SecureFileUploadService } = await loadFileUploadService();
           const uploadResult = await SecureFileUploadService.uploadFile(
             file,
             file.name,
@@ -235,13 +245,21 @@ export const POST = requireChatPermissions.uploadFile()(
         timestamp: new Date().toISOString()
       }, { status: 500 });
     }
-  }
-);
+  });
+  
+  // Execute the handler
+  return handler(request);
+};
 
 /**
  * GET /api/chat/upload - Get upload status and file information
  */
-export const GET = requireChatPermissions.uploadFile()(
+export const GET = async (request: NextRequest) => {
+  // Load authentication middleware dynamically
+  const { requireChatPermissions } = await loadChatAuth();
+  
+  // Create the authenticated handler
+  const handler = requireChatPermissions.uploadFile()(
   async (request: NextRequest, context) => {
     try {
       const { user, securityContext } = context;
@@ -263,6 +281,7 @@ export const GET = requireChatPermissions.uploadFile()(
             }, { status: 400 });
           }
           
+          const { SecureFileUploadService } = await loadFileUploadService();
           const fileInfoResult = await SecureFileUploadService.getFileInfo(
             fileId,
             user.id,
@@ -284,6 +303,7 @@ export const GET = requireChatPermissions.uploadFile()(
           });
           
         case 'config':
+          const { SecureFileUploadService } = await loadFileUploadService();
           const uploadConfig = SecureFileUploadService.getUploadConfig(user.role);
           return NextResponse.json({
             success: true,
@@ -307,8 +327,10 @@ export const GET = requireChatPermissions.uploadFile()(
             }, { status: 403 });
           }
           
+          const { SecureFileUploadService } = await loadFileUploadService();
           const cleanupResult = await SecureFileUploadService.cleanupOldFiles();
           
+          const { ChatSecurityManager } = await loadChatSecurity();
           await ChatSecurityManager.auditUserAction(
             user.id,
             'file_cleanup_triggered',
@@ -345,13 +367,21 @@ export const GET = requireChatPermissions.uploadFile()(
         timestamp: new Date().toISOString()
       }, { status: 500 });
     }
-  }
-);
+  });
+  
+  // Execute the handler
+  return handler(request);
+};
 
 /**
  * DELETE /api/chat/upload - Delete uploaded files
  */
-export const DELETE = requireChatPermissions.uploadFile()(
+export const DELETE = async (request: NextRequest) => {
+  // Load authentication middleware dynamically
+  const { requireChatPermissions } = await loadChatAuth();
+  
+  // Create the authenticated handler
+  const handler = requireChatPermissions.uploadFile()(
   async (request: NextRequest, context) => {
     try {
       const { user, securityContext } = context;
@@ -370,6 +400,7 @@ export const DELETE = requireChatPermissions.uploadFile()(
       console.log(`🗑️ File deletion request from user ${user.id} for file ${fileId}`);
       
       // Delete file with access control
+      const { SecureFileUploadService } = await loadFileUploadService();
       const deleteResult = await SecureFileUploadService.deleteFile(
         fileId,
         user.id,
@@ -426,13 +457,17 @@ export const DELETE = requireChatPermissions.uploadFile()(
         timestamp: new Date().toISOString()
       }, { status: 500 });
     }
-  }
-);
+  });
+  
+  // Execute the handler
+  return handler(request);
+};
 
 // Helper functions
 
 async function validateChannelAccess(userId: string, channelId: string, userRole: string): Promise<boolean> {
   try {
+    const { getStreamChatServerClient } = await loadStreamChat();
     const client = getStreamChatServerClient();
     const channel = client.channel('messaging', channelId);
     

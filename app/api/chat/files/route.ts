@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireChatAuth } from '@/lib/middleware/chat-auth';
-import { ChatSecurityManager } from '@/lib/security/chat-permissions';
-import { SecureFileUploadService } from '@/lib/services/secure-file-upload';
 import { readFile, stat } from 'fs/promises';
 import { join } from 'path';
+
+// Dynamic imports to reduce bundle size
+const loadChatAuth = () => import('@/lib/middleware/chat-auth');
+const loadChatSecurity = () => import('@/lib/security/chat-permissions');
+const loadFileUploadService = () => import('@/lib/services/secure-file-upload');
 
 /**
  * Secure File Management API
@@ -33,8 +35,12 @@ interface FileRequest {
 /**
  * GET /api/chat/files - File operations with access control
  */
-export const GET = requireChatAuth()(
-  async (request: NextRequest, context) => {
+export const GET = async (request: NextRequest) => {
+  // Load authentication middleware dynamically
+  const { requireChatAuth } = await loadChatAuth();
+  
+  // Create the authenticated handler
+  const handler = requireChatAuth()(async (request: NextRequest, context) => {
     try {
       const { user, securityContext } = context;
       const { searchParams } = new URL(request.url);
@@ -73,17 +79,24 @@ export const GET = requireChatAuth()(
     } catch (error) {
       console.error('❌ File management API error:', error);
       
-      const { user, securityContext } = context;
-      await ChatSecurityManager.auditUserAction(
-        user?.id || 'unknown',
-        'file_management_error',
-        'unknown',
-        {
-          error: error instanceof Error ? error.message : 'Unknown error',
-          ...securityContext
-        },
-        false
-      );
+      try {
+        const { ChatSecurityManager } = await loadChatSecurity();
+        const { user, securityContext } = context;
+        const { ChatSecurityManager } = await loadChatSecurity();
+        const { ChatSecurityManager } = await loadChatSecurity();
+  await ChatSecurityManager.auditUserAction(
+          user?.id || 'unknown',
+          'file_management_error',
+          'unknown',
+          {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            ...securityContext
+          },
+          false
+        );
+      } catch (auditError) {
+        console.error('Failed to audit error:', auditError);
+      }
       
       return NextResponse.json({
         success: false,
@@ -92,13 +105,21 @@ export const GET = requireChatAuth()(
         timestamp: new Date().toISOString()
       }, { status: 500 });
     }
-  }
-);
+  });
+  
+  // Execute the handler
+  return handler(request);
+};
 
 /**
  * POST /api/chat/files - Update file settings and permissions
  */
-export const POST = requireChatAuth()(
+export const POST = async (request: NextRequest) => {
+  // Load authentication middleware dynamically
+  const { requireChatAuth } = await loadChatAuth();
+  
+  // Create the authenticated handler
+  const handler = requireChatAuth()(
   async (request: NextRequest, context) => {
     try {
       const { user, securityContext } = context;
@@ -117,7 +138,9 @@ export const POST = requireChatAuth()(
       console.log(`📝 File update request: ${action} for file ${fileId} by user ${user.id}`);
       
       // Get file info to check permissions
-      const fileInfoResult = await SecureFileUploadService.getFileInfo(
+      const { SecureFileUploadService } = await loadFileUploadService();
+      const { SecureFileUploadService } = await loadFileUploadService();
+    const fileInfoResult = await SecureFileUploadService.getFileInfo(
         fileId,
         user.id,
         user.role
@@ -138,7 +161,9 @@ export const POST = requireChatAuth()(
                        ['admin', 'super_admin', 'moderator'].includes(user.role);
       
       if (!canModify) {
-        await ChatSecurityManager.auditUserAction(
+        const { ChatSecurityManager } = await loadChatSecurity();
+        const { ChatSecurityManager } = await loadChatSecurity();
+  await ChatSecurityManager.auditUserAction(
           user.id,
           'file_modification_denied',
           fileId,
@@ -181,7 +206,8 @@ export const POST = requireChatAuth()(
       }
       
       // Audit file update
-      await ChatSecurityManager.auditUserAction(
+      const { ChatSecurityManager } = await loadChatSecurity();
+  await ChatSecurityManager.auditUserAction(
         user.id,
         `file_${action}`,
         fileId,
@@ -210,8 +236,11 @@ export const POST = requireChatAuth()(
         timestamp: new Date().toISOString()
       }, { status: 500 });
     }
-  }
-);
+  });
+  
+  // Execute the handler
+  return handler(request);
+};
 
 // Handler functions
 
@@ -230,6 +259,7 @@ async function handleFileDownload(
   
   try {
     // Get file info with access control
+    const { SecureFileUploadService } = await loadFileUploadService();
     const fileInfoResult = await SecureFileUploadService.getFileInfo(
       fileId,
       user.id,
@@ -237,7 +267,8 @@ async function handleFileDownload(
     );
     
     if (!fileInfoResult.success) {
-      await ChatSecurityManager.auditUserAction(
+      const { ChatSecurityManager } = await loadChatSecurity();
+  await ChatSecurityManager.auditUserAction(
         user.id,
         'file_download_denied',
         fileId,
@@ -258,6 +289,7 @@ async function handleFileDownload(
     const fileInfo = fileInfoResult.fileInfo!;
     
     // Build file path
+    const { SecureFileUploadService } = await loadFileUploadService();
     const config = SecureFileUploadService.getUploadConfig(user.role);
     const filePath = join(process.cwd(), config.uploadPath, fileInfo.secureFileName);
     
@@ -272,7 +304,8 @@ async function handleFileDownload(
       await trackFileDownload(fileId, user.id, securityContext);
       
       // Audit successful download
-      await ChatSecurityManager.auditUserAction(
+      const { ChatSecurityManager } = await loadChatSecurity();
+  await ChatSecurityManager.auditUserAction(
         user.id,
         'file_downloaded',
         fileId,
@@ -348,6 +381,7 @@ async function handleFileInfo(
   }
   
   // Audit file info access
+  const { ChatSecurityManager } = await loadChatSecurity();
   await ChatSecurityManager.auditUserAction(
     user.id,
     'file_info_accessed',
@@ -397,7 +431,8 @@ async function handleFileList(
     });
     
     // Audit file list access
-    await ChatSecurityManager.auditUserAction(
+    const { ChatSecurityManager } = await loadChatSecurity();
+  await ChatSecurityManager.auditUserAction(
       user.id,
       'file_list_accessed',
       channelId || targetUserId || 'user_files',
@@ -473,6 +508,7 @@ async function handleFileShare(
   };
   
   // Audit file sharing
+  const { ChatSecurityManager } = await loadChatSecurity();
   await ChatSecurityManager.auditUserAction(
     user.id,
     'file_shared',
@@ -501,7 +537,9 @@ async function handleFileAnalytics(
   // Only allow analytics for file owners and admins/moderators
   if (!['admin', 'super_admin', 'moderator'].includes(user.role)) {
     if (fileId) {
-      const fileInfoResult = await SecureFileUploadService.getFileInfo(
+      const { SecureFileUploadService } = await loadFileUploadService();
+      const { SecureFileUploadService } = await loadFileUploadService();
+    const fileInfoResult = await SecureFileUploadService.getFileInfo(
         fileId,
         user.id,
         user.role
@@ -521,6 +559,7 @@ async function handleFileAnalytics(
   const analytics = await getFileAnalytics(fileId, channelId, user.role);
   
   // Audit analytics access
+  const { ChatSecurityManager } = await loadChatSecurity();
   await ChatSecurityManager.auditUserAction(
     user.id,
     'file_analytics_accessed',

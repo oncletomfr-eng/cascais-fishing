@@ -1,0 +1,18 @@
+{
+  "functions": {
+    "app/api/chat/files/route.ts": {
+      "maxDuration": 30,
+      "memory": 512
+    },
+    "app/api/chat/upload/route.ts": {
+      "maxDuration": 30,
+      "memory": 512
+    }
+  },
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "regions": ["iad1"],
+  "framework": "nextjs"
+}

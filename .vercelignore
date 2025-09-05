@@ -1,6 +1,8 @@
 # Build cache and artifacts that shouldn't be in serverless functions
 .next/cache/
 .next/trace
+.next/static/chunks/webpack*
+.next/server/webpack-runtime.js
 build.log
 
 # Development and testing files
@@ -22,6 +24,10 @@ tmp/
 docs/
 README.md
 UI_INTEGRATION_SPEC.md
+CHAT_SECURITY_GUIDE.md
+FILE_UPLOAD_SYSTEM_GUIDE.md
+MODERATION_SYSTEM_GUIDE.md
+STREAM_CHAT_PRODUCTION_SETUP.md
 
 # Large images that aren't needed in functions
 public/*.png
@@ -31,6 +37,7 @@ public/*.gif
 
 # Git files
 .git/
+.gitignore
 
 # Development dependencies in node_modules that might be large
 node_modules/@types/
@@ -39,6 +46,22 @@ node_modules/playwright/
 node_modules/@playwright/
 node_modules/webpack/
 node_modules/.cache/
+node_modules/eslint*
+node_modules/@next/eslint*
+node_modules/typescript/
 
 # Scripts that aren't needed in functions
 scripts/
+
+# Email templates (not needed in chat APIs)
+emails/
+
+# Development configs
+.eslintrc.json
+tsconfig.json
+tailwind.config.js
+postcss.config.mjs
+
+# Prisma files not needed in serverless functions
+prisma/migrations/
+prisma/*.sql
