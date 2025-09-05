@@ -1,5 +1,5 @@
 import { render } from '@react-email/render';
-import { resend, isEmailConfigured, validateEmail, getFromAddress, logEmailAttempt } from '@/lib/resend';
+import { resend, isEmailConfigured, validateEmail, getFromAddress, logEmailAttempt } from '../resend';
 import {
   EmailTemplate,
   EmailResponse,
@@ -7,7 +7,7 @@ import {
   PrivateBookingConfirmationEmailProps,
   GroupBookingConfirmationEmailProps,
   GroupTripConfirmedEmailProps,
-} from '@/lib/types/email';
+} from '../types/email';
 
 // Import email templates
 import {

@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 import { render } from '@react-email/components';
-import ParticipantApprovalNotification from '@/emails/ParticipantApprovalNotification';
-import BadgeAwardedNotification from '@/emails/BadgeAwardedNotification';
+import ParticipantApprovalNotification from '../emails/ParticipantApprovalNotification';
+import BadgeAwardedNotification from '../emails/BadgeAwardedNotification';
 
 // Инициализируем Resend только в production или с валидным API ключом
 const resend = process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 're_development_key_placeholder' 
