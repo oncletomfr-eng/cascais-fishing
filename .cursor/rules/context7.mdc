@@ -1,36 +1,22 @@
 ---
-description: Before executing any task, study all necessary documentation and implement solutions with real-world testing and verification 
-globs: ["**/*"] 
+description: Complete research, implementation, and testing before reporting
+globs: ["**/*"]
 alwaysApply: true
 ---
-Documentation Research and Real Implementation Rule
-Core Requirements
 
-Before proceeding with any individual task execution, you must:
+**Before any task execution:**
+1. **Research**: Study complete documentation via context7 or relevant sources
+2. **Implement**: Execute full solution in reality (no simulation/speculation)
+3. **Test**: Verify functionality online via browsermcp or testing tools
+4. **Report**: Only after verified testing completion
 
-    Study Complete Documentation: Research and study all necessary documentation for the given topic on context7 or relevant sources
-    Full Implementation: Execute the task completely and comprehensively in reality
-    Real-World Verification: All actions must be performed in reality and verified in reality
-    Online Testing: Test the implementation and verify its correct operation online through browsermcp or appropriate testing tools
+**Prohibited:**
+- Speculation or invented data
+- Simulation of functionality
+- Assumptions without verification
 
-Prohibited Actions
-
-    NO Speculation: Do not invent, imagine, or synthesize data
-    NO Simulation: Do not simulate or imitate functionality
-    NO Assumptions: Do not make assumptions about functionality without verification
-
-Reporting Standards
-
-You may only write a task completion report when you have:
-
-    Actually tested the implementation in reality
-    Verified the correct operation online through browsermcp
-    Confirmed all functionality works as expected
-
-Implementation Workflow
-
-    Documentation Phase: Thoroughly research all relevant documentation
-    Implementation Phase: Build/execute the complete solution
-    Testing Phase: Test all functionality in real conditions
-    Verification Phase: Confirm correct operation through online testing
-    Reporting Phase: Document verified results only
+**Testing Cycle:**
+- Wait for ALL tests to complete
+- Analyze all results
+- Declare success ONLY after all tests pass
+- Provide detailed execution report

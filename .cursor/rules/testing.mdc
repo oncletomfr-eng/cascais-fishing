@@ -1,25 +1,20 @@
 ---
-description: "Wait for the complete testing cycle to finish before declaring success and only then provide an execution report"
-globs:
-  - "**/*"
+description: Multi-context task organization with tags
+globs: **/*
 alwaysApply: true
 ---
 
-# Complete Testing Cycle Rule
+**Tag Strategy:**
+- `master`: High-value deliverables, major milestones
+- `feature-*`: Dedicated feature development
+- `experiment-*`: Risky/experimental work
+- `refactor-*`: Code improvement initiatives
 
-## Description
-This rule ensures that the AI assistant will wait for all tests to complete before declaring successful task execution.
+**Migration:** Existing projects auto-migrate to `master` tag
 
-## Application
-- **Scope**: All project files (`**/*`)
-- **Mode**: Always active (`alwaysApply: true`)
+**Commands support `--tag <name>` flag for context switching**
 
-## Behavior
-1. Run all necessary tests
-2. Wait for complete testing cycle to finish
-3. Analyze results of all tests
-4. Only declare success after all tests pass successfully
-5. Provide detailed execution report
-
-## Notes
-This rule prevents premature success declarations and ensures quality verification of work results.
+**Workflow Transitions:**
+- Simple → Team-based: Separate contexts for collaboration
+- Simple → PRD-driven: Comprehensive planning for major features
+- Existing project → Strategic: Research-based improvement planning

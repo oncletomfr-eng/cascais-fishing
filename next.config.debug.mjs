@@ -1,0 +1,241 @@
+/** @type {import('next').NextConfig} */
+// Note: ModuleResolutionDebugPlugin must be required inline due to Next.js config constraints
+
+const nextConfig = {
+  // Production Environment Variables for WebSocket and API URLs
+  env: {
+    NEXT_PUBLIC_WS_URL_PRODUCTION: 'wss://www.cascaisfishing.com/api/group-trips/ws',
+    NEXT_PUBLIC_API_URL_PRODUCTION: 'https://www.cascaisfishing.com',
+  },
+  // Content Security Policy Headers for Stripe Integration
+  // Task 5.1: Implement CSP headers for security
+  async headers() {
+    return [
+      {
+        // Apply security headers to all routes
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              // Default sources
+              "default-src 'self'",
+              // Scripts: self, Stripe, and inline scripts (needed for Next.js)
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://hooks.stripe.com",
+              // Styles: self, inline styles, and Stripe
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              // Images: self, data, blob, and common image CDNs
+              "img-src 'self' data: blob: https://images.unsplash.com https://res.cloudinary.com https://avatars.githubusercontent.com",
+              // Fonts: self and Google Fonts
+              "font-src 'self' https://fonts.gstatic.com data:",
+              // Connections: self, Stripe APIs, and WebSocket connections
+              "connect-src 'self' https://api.stripe.com https://checkout.stripe.com wss:",
+              // Frames: Stripe checkout and payment pages
+              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com https://pay.stripe.com",
+              // Child sources for Stripe embedded components
+              "child-src 'self' https://js.stripe.com",
+              // Form actions: self and Stripe
+              "form-action 'self' https://checkout.stripe.com",
+              // Media: self
+              "media-src 'self'",
+              // Workers: self
+              "worker-src 'self' blob:",
+              // Manifest: self
+              "manifest-src 'self'",
+              // Base URI: self
+              "base-uri 'self'",
+            ].join('; ')
+          },
+          // Additional security headers
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(self), payment=(self)'
+          }
+        ]
+      }
+    ]
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  images: {
+    unoptimized: true,
+  },
+  // Disable preloading to reduce memory usage
+  experimental: {
+    preloadEntriesOnStart: false,
+    // Enable Webpack memory optimizations (Next.js v15.0.0+)
+    webpackMemoryOptimizations: true,
+    // Enable server components HMR cache for local development
+    serverComponentsHmrCache: true,
+    // Optimize package imports
+    optimizePackageImports: [
+      'lucide-react',
+      'date-fns',
+      'lodash-es',
+      '@mui/material',
+      '@mui/icons-material',
+      '@mui/x-data-grid',
+      '@mui/x-date-pickers',
+      'recharts',
+      'react-use',
+      'react-icons',
+      'stream-chat',
+      'stream-chat-react',
+      'framer-motion',
+      '@prisma/client',
+      'stripe'
+    ],
+  },
+  // On-demand entries optimization for dev server
+  onDemandEntries: {
+    // period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 25 * 1000,
+    // number of pages that should be kept simultaneously without being disposed
+    pagesBufferLength: 2,
+  },
+  // Enhanced logging for debugging
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
+  
+  // ENHANCED WEBPACK CONFIGURATION FOR MODULE RESOLUTION DEBUGGING
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    
+    console.log('\n🔧 ENHANCED WEBPACK DEBUG CONFIGURATION');
+    console.log('=========================================');
+    console.log(`Build ID: ${buildId}`);
+    console.log(`Development: ${dev}`);
+    console.log(`Server: ${isServer}`);
+    console.log(`Node ENV: ${process.env.NODE_ENV}`);
+    console.log(`Vercel: ${process.env.VERCEL || 'false'}`);
+    
+    // Add Module Resolution Debug Plugin (loaded dynamically)
+    const { ModuleResolutionDebugPlugin } = require('./debug-webpack-resolution.js');
+    const debugPlugin = new ModuleResolutionDebugPlugin({
+      logLevel: 'verbose',
+      targetModules: [
+        'components/emails',
+        '@/components/emails',
+        '../../components/emails',
+        '../../../components/emails',
+        './components/emails'
+      ],
+      outputFile: `./debug-resolution-${isServer ? 'server' : 'client'}-${buildId || 'unknown'}.log`
+    });
+    
+    config.plugins.push(debugPlugin);
+    
+    // Enhanced resolution debugging
+    config.resolve = {
+      ...config.resolve,
+      // Disable symlink resolution for clarity
+      symlinks: false,
+    };
+    
+    // Enable detailed webpack logging
+    config.infrastructureLogging = {
+      level: 'verbose',
+      debug: [
+        'enhanced-resolve',
+        'ModuleResolutionDebugPlugin'
+      ]
+    };
+    
+    // Log current resolve configuration
+    console.log('\n📋 CURRENT RESOLVE CONFIGURATION');
+    console.log('=================================');
+    console.log('Alias:', JSON.stringify(config.resolve.alias, null, 2));
+    console.log('Modules:', config.resolve.modules);
+    console.log('Extensions:', config.resolve.extensions);
+    console.log('Main Fields:', config.resolve.mainFields);
+    
+    // Bundle analyzer for debugging (only in development)
+    if (!dev && !isServer) {
+      // Optimize for smaller bundle sizes
+      config.optimization.splitChunks = {
+        ...config.optimization.splitChunks,
+        chunks: 'all',
+        cacheGroups: {
+          ...config.optimization.splitChunks.cacheGroups,
+          // Separate vendor bundle for large libraries
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            maxSize: 200000, // 200KB max per chunk
+          },
+          // Separate MUI bundle
+          mui: {
+            test: /[\\/]node_modules[\\/]@mui[\\/]/,
+            name: 'mui',
+            chunks: 'all',
+            priority: 10,
+            maxSize: 200000,
+          },
+          // Separate Prisma bundle
+          prisma: {
+            test: /[\\/]node_modules[\\/]@prisma[\\/]|[\\/]node_modules[\\/]\.prisma[\\/]/,
+            name: 'prisma',
+            chunks: 'all',
+            priority: 15,
+            maxSize: 200000,
+          },
+          // Icons bundle
+          icons: {
+            test: /[\\/]node_modules[\\/](lucide-react|react-icons|@mui\/icons-material)[\\/]/,
+            name: 'icons',
+            chunks: 'all',
+            priority: 12,
+            maxSize: 200000,
+          },
+        },
+      };
+    }
+
+    // Exclude development and build artifacts from serverless functions
+    if (!dev && isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        // Exclude test files
+        '__tests__': false,
+        'e2e-tests': false,
+      };
+      
+      // Ignore patterns for serverless functions
+      config.module.rules.push({
+        test: /\.(test|spec)\.(js|ts|tsx)$/,
+        loader: 'ignore-loader',
+      });
+    }
+
+    // Tree shaking improvements
+    config.optimization.usedExports = true;
+    config.optimization.sideEffects = false;
+    
+    // Log final configuration summary
+    console.log('\n✅ WEBPACK CONFIGURATION ENHANCED');
+    console.log('==================================');
+    
+    return config;
+  },
+}
+
+export default nextConfig

@@ -1,50 +1,17 @@
 ---
-description: "Specialist Role Definition Rule - Determine appropriate specialist before task execution"
-globs:
-  - "**/*"
+description: Guidelines for creating effective Cursor rules
+globs: .cursor/rules/*.mdc
 alwaysApply: true
 ---
 
-# Specialist Role Definition Rule
+**Structure:**
+```markdown
+---
+description: Clear one-line description
+globs: path/to/files/*.ext
+alwaysApply: boolean
+---
 
-## Core Requirement
-Before executing each individual task, you must:
-
-1. **Identify the appropriate specialist** for the specific task domain
-2. **Assume the role** of that specialist
-3. **Execute the task** with full consideration of the project context
-
-## Implementation Guidelines
-
-### Step 1: Specialist Identification
-Determine which type of specialist would be most qualified to handle the current task:
-- Frontend Developer
-- Backend Developer
-- DevOps Engineer
-- Database Administrator
-- UI/UX Designer
-- Business Analyst
-- Quality Assurance Engineer
-- Security Specialist
-- Performance Engineer
-- Technical Writer
-- Project Manager
-- etc.
-
-### Step 2: Role Assumption
-Explicitly state: "Taking the role of [Specialist Type]" and approach the task with that specialist's expertise, knowledge, and perspective.
-
-### Step 3: Contextual Execution
-Execute the task while maintaining awareness of:
-- Overall project goals
-- Technical constraints
-- Business requirements
-- Team standards
-- Best practices for the specialist domain
-
-## Benefits
-- Ensures specialized expertise for each task
-- Maintains high quality standards
-- Promotes comprehensive problem-solving
-- Reduces oversight and technical debt
-- Improves code and deliverable quality
+**Main Points**
+- Sub-points with details
+- Examples and explanations

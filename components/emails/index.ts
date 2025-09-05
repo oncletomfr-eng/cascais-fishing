@@ -1,4 +1,4 @@
-// Email Templates - Only export React components
+// Email Templates - Only export React components  
 export { BaseEmailTemplate } from './BaseEmailTemplate';
 export { PrivateBookingConfirmationEmail } from './PrivateBookingConfirmationEmail';
 export { GroupBookingConfirmationEmail } from './GroupBookingConfirmationEmail';
