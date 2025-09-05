@@ -518,10 +518,10 @@ class SeasonalRewardDistributor {
         rewards: rewards.map(r => ({
           name: r.rewardName,
           type: r.rewardType,
-          value: r.rewardValue
+          value: r.rewardValue,
         })),
         totalRewards: rewards.length,
-        totalValue: totalValue
+        totalValue: totalValue,
       });
       
       console.log(`📧 Reward email sent to ${user.email}`);
