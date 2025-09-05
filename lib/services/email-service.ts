@@ -11,14 +11,15 @@ import {
   BadgeAwardedNotificationEmailProps,
 } from '../types/email';
 
-// Import email templates
+// Import email templates - TEMPORARY FIX: Using direct relative paths instead of @ alias
+// TODO: Fix @ alias resolution on Vercel
 import {
   PrivateBookingConfirmationEmail,
   GroupBookingConfirmationEmail,
   GroupTripConfirmedEmail,
   ParticipantApprovalNotificationEmail,
   BadgeAwardedNotificationEmail,
-} from '@/components/emails';
+} from '../../components/emails';
 
 // Email subjects mapping
 const EMAIL_SUBJECTS: Record<EmailTemplate, string> = {
