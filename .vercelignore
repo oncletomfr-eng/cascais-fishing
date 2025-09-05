@@ -1,8 +1,12 @@
-# SURGICAL exclusions - big files but KEEP routing essentials
+# ULTRA-AGGRESSIVE - exclude ALL test pages and heavy dependencies
 
 # Safe Next.js cache (keep manifests, server chunks!)
 .next/cache/
 .next/trace/
+
+# ALL TEST PAGES - HUGE SIZE REDUCTION!
+app/test-*/
+public/test-*
 
 # Test files (safe to exclude)
 __tests__/
@@ -17,7 +21,7 @@ debug-*.mjs
 *.log
 tmp/
 
-# Large node_modules subdirs (keep core!)
+# MASSIVE node_modules exclusions
 node_modules/@types/
 node_modules/typescript/
 node_modules/.cache/
@@ -25,6 +29,12 @@ node_modules/jest/
 node_modules/playwright/
 node_modules/@playwright/
 node_modules/webpack/
+node_modules/@babel/
+node_modules/@mui/x-data-grid-pro/
+node_modules/date-fns/
+node_modules/date-fns-jalali/
+node_modules/effect/
+node_modules/pdf-lib/
 
 # Documentation (safe)
 *.md
