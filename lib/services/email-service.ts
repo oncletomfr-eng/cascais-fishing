@@ -11,12 +11,13 @@ import {
   BadgeAwardedNotificationEmailProps,
 } from '../types/email';
 
-// Import email templates - USING lib/components/emails (short paths for Vercel compatibility)
-import { PrivateBookingConfirmationEmail } from '../components/emails/PrivateBookingConfirmationEmail';
-import { GroupBookingConfirmationEmail } from '../components/emails/GroupBookingConfirmationEmail';
-import { GroupTripConfirmedEmail } from '../components/emails/GroupTripConfirmedEmail';
-import { ParticipantApprovalNotificationEmail } from '../components/emails/ParticipantApprovalNotificationEmail';
-import { BadgeAwardedNotificationEmail } from '../components/emails/BadgeAwardedNotificationEmail';
+// TEMPORARY: Import email templates disabled due to Vercel module resolution issues
+// TODO: Fix Vercel email component resolution
+// import { PrivateBookingConfirmationEmail } from '../components/emails/PrivateBookingConfirmationEmail';
+// import { GroupBookingConfirmationEmail } from '../components/emails/GroupBookingConfirmationEmail';
+// import { GroupTripConfirmedEmail } from '../components/emails/GroupTripConfirmedEmail';
+// import { ParticipantApprovalNotificationEmail } from '../components/emails/ParticipantApprovalNotificationEmail';
+// import { BadgeAwardedNotificationEmail } from '../components/emails/BadgeAwardedNotificationEmail';
 
 // Email subjects mapping
 const EMAIL_SUBJECTS: Record<EmailTemplate, string> = {
@@ -29,40 +30,28 @@ const EMAIL_SUBJECTS: Record<EmailTemplate, string> = {
   'cancellation': '😔 Trip Cancellation Notice',
 };
 
-// Template renderer function
+// Template renderer function - STUB VERSION due to Vercel module resolution issues
 const renderEmailTemplate = async (
   template: EmailTemplate,
   data: any
 ): Promise<{ html: string; subject: string }> => {
-  let emailComponent;
+  console.log('📧 [STUB] Email template would be rendered:', template);
+  console.log('🚨 [STUB] Email rendering disabled due to Vercel module resolution issues');
   
-  switch (template) {
-    case 'private-booking-confirmation':
-      emailComponent = PrivateBookingConfirmationEmail(data as PrivateBookingConfirmationEmailProps);
-      break;
-      
-    case 'group-booking-confirmation':
-      emailComponent = GroupBookingConfirmationEmail(data as GroupBookingConfirmationEmailProps);
-      break;
-      
-    case 'group-trip-confirmed':
-      emailComponent = GroupTripConfirmedEmail(data as GroupTripConfirmedEmailProps);
-      break;
-      
-    case 'participant-approval':
-      emailComponent = ParticipantApprovalNotificationEmail(data as ParticipantApprovalNotificationEmailProps);
-      break;
-      
-    case 'badge-awarded':
-      emailComponent = BadgeAwardedNotificationEmail(data as BadgeAwardedNotificationEmailProps);
-      break;
-      
-    default:
-      throw new Error(`Unknown email template: ${template}`);
-  }
-
-  const html = await render(emailComponent);
+  // Return simple HTML stub
   const subject = EMAIL_SUBJECTS[template];
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head><title>${subject}</title></head>
+      <body>
+        <h1>Email Service Temporarily Disabled</h1>
+        <p>Template: ${template}</p>
+        <p>Subject: ${subject}</p>
+        <p>This email functionality is temporarily disabled due to Vercel module resolution issues.</p>
+      </body>
+    </html>
+  `;
 
   return { html, subject };
 };
