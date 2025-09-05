@@ -1,8 +1,8 @@
 'use client'
 
 import { Suspense } from 'react'
-import { BookingsTable } from '@/components/admin/BookingsTable'
-import { Badge } from '@/components/ui/badge'
+import BookingsTable from '@/components/admin/BookingsTable'
+import Badge from '@/components/ui/badge'
 
 export default function BookingsPage() {
   return (

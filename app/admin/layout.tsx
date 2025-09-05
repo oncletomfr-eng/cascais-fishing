@@ -2,9 +2,9 @@
 
 import { usePathname } from 'next/navigation'
 import { SessionProvider } from 'next-auth/react'
-import { AdminProvider } from '@/components/admin/AdminProvider'
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
-import { Toaster } from '@/components/ui/toaster'
+import AdminProvider from '@/components/admin/AdminProvider'
+import AdminSidebar from '@/components/admin/AdminSidebar'
+import Toaster from '@/components/ui/toaster'
 
 export default function AdminLayout({
   children,
