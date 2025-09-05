@@ -515,13 +515,14 @@ class SeasonalRewardDistributor {
         data: {
           userName: user.name || 'Fisher',
           seasonName: seasonData.displayName,
-        rewards: rewards.map(r => ({
-          name: r.rewardName,
-          type: r.rewardType,
-          value: r.rewardValue,
-        })),
-        totalRewards: rewards.length,
-        totalValue: totalValue,
+          rewards: rewards.map(r => ({
+            name: r.rewardName,
+            type: r.rewardType,
+            value: r.rewardValue,
+          })),
+          totalRewards: rewards.length,
+          totalValue: totalValue,
+        }
       });
       
       console.log(`📧 Reward email sent to ${user.email}`);
