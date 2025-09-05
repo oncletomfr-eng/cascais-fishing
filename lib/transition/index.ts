@@ -17,10 +17,10 @@ export {
 } from './usePhaseTransition'
 
 // UI Components
-export { PhaseTransitionContainer, PhaseAnimationWrapper, TransitionControls } from '@/components/transition/PhaseTransitionContainer'
-export { IntegratedPhaseSystem } from '@/components/transition/IntegratedPhaseSystem'
-export { CaptainOverridePanel } from '@/components/transition/CaptainOverridePanel'
-export { PhaseHistoryTracker } from '@/components/transition/PhaseHistoryTracker'
+export { PhaseTransitionContainer, PhaseAnimationWrapper, TransitionControls } from '../../components/transition/PhaseTransitionContainer'
+export { IntegratedPhaseSystem } from '../../components/transition/IntegratedPhaseSystem'
+export { CaptainOverridePanel } from '../../components/transition/CaptainOverridePanel'
+export { PhaseHistoryTracker } from '../../components/transition/PhaseHistoryTracker'
 
 // Types and interfaces
 export type {

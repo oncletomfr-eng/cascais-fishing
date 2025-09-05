@@ -18,7 +18,7 @@ import {
   GroupTripConfirmedEmail,
   ParticipantApprovalNotificationEmail,
   BadgeAwardedNotificationEmail,
-} from '@/components/emails';
+} from '../../components/emails';
 
 // Email subjects mapping
 const EMAIL_SUBJECTS: Record<EmailTemplate, string> = {

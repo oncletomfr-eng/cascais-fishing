@@ -32,6 +32,6 @@ export type {
   ChatSSEEvent,
   ChatSSEOptions,
   ChatSSEHookReturn
-} from '@/hooks/useChatSSE'
+} from '../../../hooks/useChatSSE'
 
 export type { MessageReceipt } from './ReadReceipts'

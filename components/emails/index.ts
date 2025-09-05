@@ -16,7 +16,7 @@ export type {
   EmailOptions,
   EmailResponse,
   SendEmailProps,
-} from '@/lib/types/email';
+} from '../../lib/types/email';
 
 // Export new template types
 export type { ParticipantApprovalNotificationEmailProps } from './ParticipantApprovalNotificationEmail';

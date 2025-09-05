@@ -32,7 +32,7 @@ export type {
 } from './StreamChatService'
 
 // UI Components
-export { IntegratedMultiPhaseChat } from '@/components/chat/IntegratedMultiPhaseChat'
+export { IntegratedMultiPhaseChat } from '../../components/chat/IntegratedMultiPhaseChat'
 
 // Utility functions
 export const createStreamChatUser = (
