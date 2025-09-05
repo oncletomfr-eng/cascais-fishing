@@ -339,6 +339,45 @@ export async function streamChatHealthCheck(): Promise<{
   }
 }
 
+/**
+ * Check if Stream Chat is properly configured
+ */
+export function isStreamChatConfigured(): boolean {
+  try {
+    const apiKey = process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY;
+    const apiSecret = process.env.STREAM_CHAT_API_SECRET;
+    
+    return !!(apiKey && apiKey !== 'demo-key' && apiKey !== 'demo-key-please-configure' && apiKey.length > 10);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get setup instructions for Stream Chat
+ */
+export function getStreamChatSetupInstructions(): string {
+  return `Stream Chat Setup Instructions:
+
+1. Create a Stream Chat app at https://getstream.io/chat/
+2. Copy your API Key and API Secret
+3. Add the following environment variables:
+
+For development (.env.local):
+NEXT_PUBLIC_STREAM_CHAT_API_KEY=your_api_key_here
+STREAM_CHAT_API_SECRET=your_api_secret_here
+
+For production (Vercel):
+- Go to your project settings
+- Add environment variables:
+  * NEXT_PUBLIC_STREAM_CHAT_API_KEY
+  * STREAM_CHAT_API_SECRET
+
+4. Redeploy your application
+
+Current status: ${isStreamChatConfigured() ? 'Configured ✅' : 'Not configured ❌'}`;
+}
+
 // Export configuration for external access
 export const streamChatConfig = {
   getServerClient: getStreamChatServerClient,
@@ -346,5 +385,7 @@ export const streamChatConfig = {
   testConnection: testStreamChatConnection,
   generateToken: generateUserToken,
   createTripChannel,
-  healthCheck: streamChatHealthCheck
+  healthCheck: streamChatHealthCheck,
+  isConfigured: isStreamChatConfigured,
+  getSetupInstructions: getStreamChatSetupInstructions
 };

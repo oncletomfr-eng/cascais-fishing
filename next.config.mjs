@@ -167,6 +167,22 @@ const nextConfig = {
       };
     }
 
+    // Exclude development and build artifacts from serverless functions
+    if (!dev && isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        // Exclude test files
+        '__tests__': false,
+        'e2e-tests': false,
+      };
+      
+      // Ignore patterns for serverless functions
+      config.module.rules.push({
+        test: /\.(test|spec)\.(js|ts|tsx)$/,
+        loader: 'ignore-loader',
+      });
+    }
+
     // Tree shaking improvements
     config.optimization.usedExports = true;
     config.optimization.sideEffects = false;

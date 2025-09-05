@@ -1,0 +1,44 @@
+# Build cache and artifacts that shouldn't be in serverless functions
+.next/cache/
+.next/trace
+build.log
+
+# Development and testing files
+__tests__/
+e2e-tests/
+test-results/
+*.test.ts
+*.spec.ts
+jest.config.js
+jest.setup.js
+playwright.config.ts
+
+# Temporary files
+tmp/
+*.tmp
+*.log
+
+# Documentation
+docs/
+README.md
+UI_INTEGRATION_SPEC.md
+
+# Large images that aren't needed in functions
+public/*.png
+public/*.jpg
+public/*.jpeg
+public/*.gif
+
+# Git files
+.git/
+
+# Development dependencies in node_modules that might be large
+node_modules/@types/
+node_modules/jest/
+node_modules/playwright/
+node_modules/@playwright/
+node_modules/webpack/
+node_modules/.cache/
+
+# Scripts that aren't needed in functions
+scripts/
