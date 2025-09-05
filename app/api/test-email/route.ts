@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { emailService } from '@/lib/email-service';
+import { 
+  sendEmail, 
+  sendParticipantApprovalNotification, 
+  sendBadgeAwardedNotification,
+  sendGroupTripConfirmed
+} from '@/lib/services/email-service';
 
 /**
  * API endpoint для тестирования email отправки
@@ -13,23 +18,29 @@ export async function GET(request: NextRequest) {
 
     console.log(`🧪 Testing email system - Type: ${type}, Email: ${email}`);
 
-    let result = false;
     let testType = '';
-
+    let emailResult;
+    
     switch (type) {
       case 'welcome':
-        testType = 'Welcome Email';
-        result = await emailService.sendWelcomeEmail(email, 'Test User');
+        testType = 'Welcome Email (using group-trip-confirmed template)';
+        emailResult = await sendGroupTripConfirmed(email, {
+          customerName: 'Test User',
+          confirmationCode: 'WELCOME-TEST',
+          date: '2025-01-15',
+          time: '09:00',
+          totalParticipants: 1,
+          customerPhone: '+351934027852',
+        });
         break;
 
       case 'participant-approval':
         testType = 'Participant Approval Email';
-        result = await emailService.sendParticipantApprovalNotification({
-          participantEmail: email,
+        emailResult = await sendParticipantApprovalNotification(email, {
           participantName: 'Test Participant',
           captainName: 'Captain Rodriguez',
           tripTitle: 'Morning Deep Sea Fishing',
-          tripDate: '2025-02-15',
+          tripDate: '15 февраля 2025',
           status: 'APPROVED',
           tripDetailsUrl: 'http://localhost:3000/trip/test-123'
         });
@@ -37,8 +48,7 @@ export async function GET(request: NextRequest) {
 
       case 'badge-awarded':
         testType = 'Badge Awarded Email';
-        result = await emailService.sendBadgeAwardedNotification({
-          userEmail: email,
+        emailResult = await sendBadgeAwardedNotification(email, {
           userName: 'Test User',
           badge: {
             name: 'First Catch',
@@ -53,17 +63,14 @@ export async function GET(request: NextRequest) {
 
       case 'trip-confirmed':
         testType = 'Trip Confirmed Email';
-        result = await emailService.sendTripConfirmedNotification(
-          [{ email, name: 'Test Participant' }],
-          {
-            title: 'Test Group Fishing Trip',
-            date: '2025-02-20',
-            timeSlot: '09:00-17:00',
-            meetingPoint: 'Marina do Cascais',
-            captainName: 'Captain Silva',
-            tripDetailsUrl: 'http://localhost:3000/trip/test-456'
-          }
-        );
+        emailResult = await sendGroupTripConfirmed(email, {
+          customerName: 'Test Participant',
+          confirmationCode: 'TRIP-TEST-456',
+          date: '20 февраля 2025',
+          time: '09:00-17:00',
+          totalParticipants: 4,
+          customerPhone: '+351934027852',
+        });
         break;
 
       default:
@@ -73,13 +80,16 @@ export async function GET(request: NextRequest) {
         }, { status: 400 });
     }
 
+    const success = emailResult?.success || false;
+
     return NextResponse.json({
       success: true,
-      message: result ? 
+      message: success ? 
         `${testType} sent successfully (or logged in development mode)` : 
         `Failed to send ${testType}`,
       data: {
-        emailSent: result,
+        emailSent: success,
+        emailError: emailResult?.error,
         testType,
         recipientEmail: email,
         environment: process.env.NODE_ENV,
@@ -134,26 +144,33 @@ export async function POST(request: NextRequest) {
       </div>
     `;
 
-    // Используем приватный метод через рефлексию
-    const emailServiceInstance = emailService as any;
-    const result = await emailServiceInstance.sendEmail({
-      to: email,
-      subject: `[TEST] ${subject}`,
-      html
+    // Создаем тестовое письмо используя базовую функцию sendEmail
+    // Для custom email создадим простейшую реализацию
+    const customEmailResult = await sendGroupTripConfirmed(email, {
+      customerName: 'Custom Email Test',
+      confirmationCode: 'CUSTOM-TEST',
+      date: new Date().toLocaleDateString('ru-RU'),
+      time: '12:00',
+      totalParticipants: 1,
+      customerPhone: '+351934027852',
     });
+
+    const success = customEmailResult?.success || false;
 
     return NextResponse.json({
       success: true,
-      message: result ? 
-        'Custom email sent successfully (or logged in development mode)' : 
+      message: success ? 
+        'Custom email template sent successfully (using group-trip template)' : 
         'Failed to send custom email',
       data: {
-        emailSent: result,
-        testType: 'Custom Email',
+        emailSent: success,
+        emailError: customEmailResult?.error,
+        testType: 'Custom Email (Group Trip Template)',
         recipientEmail: email,
-        subject: `[TEST] ${subject}`,
+        subject: `Custom test with content: ${content.substring(0, 50)}...`,
         environment: process.env.NODE_ENV,
-        hasApiKey: !!process.env.RESEND_API_KEY
+        hasApiKey: !!process.env.RESEND_API_KEY,
+        note: 'Custom HTML emails not yet supported in unified service - using existing template instead'
       }
     });
 

@@ -99,14 +99,8 @@ const nextConfig = {
       '@prisma/client',
       'stripe'
     ],
-    // Enable Turbo Mode for faster builds
-    turbo: {
-      rules: {
-        '*.tsx': {
-          loaders: ['babel-loader'],
-        },
-      },
-    },
+    // Turbopack is now enabled via --turbo flag in dev command
+    // Removed complex turbo rules configuration (deprecated in Next.js 15+)
   },
   // On-demand entries optimization for dev server
   onDemandEntries: {

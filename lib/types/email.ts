@@ -63,13 +63,42 @@ export type EmailTemplate =
   | 'private-booking-confirmation'
   | 'group-booking-confirmation'
   | 'group-trip-confirmed'
+  | 'participant-approval'
+  | 'badge-awarded'
   | 'reminder'
   | 'cancellation';
+
+// Import new template props
+export interface ParticipantApprovalNotificationEmailProps {
+  participantName: string;
+  captainName: string;
+  tripTitle: string;
+  tripDate: string;
+  status: 'APPROVED' | 'REJECTED';
+  rejectedReason?: string;
+  tripDetailsUrl: string;
+}
+
+export interface BadgeAwardedNotificationEmailProps {
+  userName: string;
+  badge: {
+    name: string;
+    description: string;
+    icon: string;
+    category: string;
+  };
+  totalBadges: number;
+  profileUrl: string;
+}
 
 export interface SendEmailProps {
   template: EmailTemplate;
   to: string;
-  data: PrivateBookingConfirmationEmailProps | GroupBookingConfirmationEmailProps | GroupTripConfirmedEmailProps;
+  data: PrivateBookingConfirmationEmailProps 
+      | GroupBookingConfirmationEmailProps 
+      | GroupTripConfirmedEmailProps
+      | ParticipantApprovalNotificationEmailProps
+      | BadgeAwardedNotificationEmailProps;
   subject?: string;
 }
 

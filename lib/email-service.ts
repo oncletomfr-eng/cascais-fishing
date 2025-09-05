@@ -1,7 +1,16 @@
+/**
+ * @deprecated This email service is deprecated. Use lib/services/email-service.ts instead.
+ * This file will be removed after migration is complete.
+ * 
+ * Migration plan:
+ * - All imports should use @/lib/services/email-service
+ * - Templates should be moved to components/emails/
+ * - Methods should be replaced with unified service functions
+ */
 import { Resend } from 'resend';
 import { render } from '@react-email/components';
-import ParticipantApprovalNotification from '../emails/ParticipantApprovalNotification';
-import BadgeAwardedNotification from '../emails/BadgeAwardedNotification';
+import ParticipantApprovalNotification from './ParticipantApprovalNotification';
+import BadgeAwardedNotification from './BadgeAwardedNotification';
 
 // Инициализируем Resend только в production или с валидным API ключом
 const resend = process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 're_development_key_placeholder' 

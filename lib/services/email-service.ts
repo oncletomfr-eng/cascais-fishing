@@ -7,6 +7,8 @@ import {
   PrivateBookingConfirmationEmailProps,
   GroupBookingConfirmationEmailProps,
   GroupTripConfirmedEmailProps,
+  ParticipantApprovalNotificationEmailProps,
+  BadgeAwardedNotificationEmailProps,
 } from '../types/email';
 
 // Import email templates
@@ -14,6 +16,8 @@ import {
   PrivateBookingConfirmationEmail,
   GroupBookingConfirmationEmail,
   GroupTripConfirmedEmail,
+  ParticipantApprovalNotificationEmail,
+  BadgeAwardedNotificationEmail,
 } from '../../components/emails';
 
 // Email subjects mapping
@@ -21,6 +25,8 @@ const EMAIL_SUBJECTS: Record<EmailTemplate, string> = {
   'private-booking-confirmation': '🎣 Your Private Fishing Charter is Confirmed!',
   'group-booking-confirmation': '🎣 You\'ve Joined the Fishing Crew!',
   'group-trip-confirmed': '🎉 Great News - Your Group Trip is Confirmed!',
+  'participant-approval': '📋 Update on Your Trip Application',
+  'badge-awarded': '🏆 New Achievement Unlocked!',
   'reminder': '📅 Reminder: Your Fishing Trip Tomorrow',
   'cancellation': '😔 Trip Cancellation Notice',
 };
@@ -43,6 +49,14 @@ const renderEmailTemplate = async (
       
     case 'group-trip-confirmed':
       emailComponent = GroupTripConfirmedEmail(data as GroupTripConfirmedEmailProps);
+      break;
+      
+    case 'participant-approval':
+      emailComponent = ParticipantApprovalNotificationEmail(data as ParticipantApprovalNotificationEmailProps);
+      break;
+      
+    case 'badge-awarded':
+      emailComponent = BadgeAwardedNotificationEmail(data as BadgeAwardedNotificationEmailProps);
       break;
       
     default:
@@ -156,6 +170,28 @@ export async function sendGroupTripConfirmed(
 ): Promise<EmailResponse> {
   return sendEmail({
     template: 'group-trip-confirmed',
+    to,
+    data,
+  });
+}
+
+export async function sendParticipantApprovalNotification(
+  to: string,
+  data: ParticipantApprovalNotificationEmailProps
+): Promise<EmailResponse> {
+  return sendEmail({
+    template: 'participant-approval',
+    to,
+    data,
+  });
+}
+
+export async function sendBadgeAwardedNotification(
+  to: string,
+  data: BadgeAwardedNotificationEmailProps
+): Promise<EmailResponse> {
+  return sendEmail({
+    template: 'badge-awarded',
     to,
     data,
   });

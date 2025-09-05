@@ -3,7 +3,7 @@ import { auth } from '@/auth'
 import { PrismaClient, ApprovalStatus } from '@prisma/client'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { emailService } from '@/lib/email-service'
+import { sendParticipantApprovalNotification } from '@/lib/services/email-service'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
@@ -405,16 +405,22 @@ async function sendApprovalEmailNotification(
     const tripDate = format(new Date(approval.trip.date), 'dd MMMM yyyy', { locale: ru });
     const tripDetailsUrl = `${process.env.NEXTAUTH_URL}/trip/${approval.tripId}`;
 
-    await emailService.sendParticipantApprovalNotification({
-      participantEmail: approval.participant.email,
-      participantName: approval.participant.name || 'Участник',
-      captainName: approval.trip.captain?.name || 'Капитан',
-      tripTitle: approval.trip.description || 'Рыболовная поездка',
-      tripDate,
-      status,
-      rejectedReason,
-      tripDetailsUrl
-    });
+    const emailResult = await sendParticipantApprovalNotification(
+      approval.participant.email,
+      {
+        participantName: approval.participant.name || 'Участник',
+        captainName: approval.trip.captain?.name || 'Капитан',
+        tripTitle: approval.trip.description || 'Рыболовная поездка',
+        tripDate,
+        status,
+        rejectedReason,
+        tripDetailsUrl
+      }
+    );
+
+    if (!emailResult.success) {
+      console.warn('Failed to send participant approval notification:', emailResult.error);
+    }
 
     console.log(`📧 Approval notification sent to ${approval.participant.email} (${status})`);
 

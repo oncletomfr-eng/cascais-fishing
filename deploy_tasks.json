@@ -1,0 +1,289 @@
+{
+  "version": "1.0",
+  "owner": "devops-backend",
+  "summary": "Unify email service, fix imports and .vercelignore impacts, resolve Next/Vercel build errors, and perform safe redeploy.",
+  "goals": [
+    "Eliminate 'Module not found' during Vercel build",
+    "Standardize on single email service and template location",
+    "Remove dead/legacy code paths that import from ignored directories",
+    "Address minor deprecations (Prisma config, Next experimental.turbo)",
+    "Verify end-to-end in production"
+  ],
+  "tasks": [
+    {
+      "id": "T1",
+      "title": "Decide and lock email service strategy",
+      "status": "pending",
+      "description": "Adopt single source of truth for email sending and templates.",
+      "subtasks": [
+        {
+          "id": "T1.1",
+          "title": "Adopt lib/services/email-service.ts as the only email service",
+          "status": "pending",
+          "notes": "This service already integrates @react-email/render and templates under components/emails."
+        },
+        {
+          "id": "T1.2",
+          "title": "Deprecate lib/email-service.ts and stop importing it anywhere",
+          "status": "pending",
+          "dependsOn": ["T1.1"]
+        }
+      ]
+    },
+    {
+      "id": "T2",
+      "title": "Migrate participant approval route to the unified email service",
+      "status": "pending",
+      "files": [
+        "app/api/participant-approvals/[id]/route.ts"
+      ],
+      "subtasks": [
+        {
+          "id": "T2.1",
+          "title": "Replace import from '@/lib/email-service' to unified helpers in '@/lib/services/email-service'",
+          "status": "pending"
+        },
+        {
+          "id": "T2.2",
+          "title": "Implement email send using unified service (participant approval)",
+          "status": "pending",
+          "notes": "Either add dedicated template or send minimal styled HTML. Prefer template for consistency."
+        }
+      ]
+    },
+    {
+      "id": "T3",
+      "title": "Add/align email templates in components/emails",
+      "status": "pending",
+      "files": [
+        "components/emails/",
+        "components/emails/index.ts",
+        "lib/types/email.ts",
+        "lib/services/email-service.ts"
+      ],
+      "subtasks": [
+        {
+          "id": "T3.1",
+          "title": "Create ParticipantApprovalNotificationEmail.tsx",
+          "status": "pending",
+          "notes": "Props: participantName, captainName, tripTitle, tripDate, status ('APPROVED'|'REJECTED'), rejectedReason?, tripDetailsUrl"
+        },
+        {
+          "id": "T3.2",
+          "title": "Create BadgeAwardedNotificationEmail.tsx",
+          "status": "pending",
+          "notes": "Props: userName, badge { name, description, icon, category }, totalBadges, profileUrl"
+        },
+        {
+          "id": "T3.3",
+          "title": "Export new templates from components/emails/index.ts",
+          "status": "pending"
+        },
+        {
+          "id": "T3.4",
+          "title": "Extend EmailTemplate union and types to include 'participant-approval' and 'badge-awarded'",
+          "status": "pending",
+          "files": ["lib/types/email.ts"]
+        },
+        {
+          "id": "T3.5",
+          "title": "Add render cases + subjects mapping for new templates",
+          "status": "pending",
+          "files": ["lib/services/email-service.ts"]
+        }
+      ]
+    },
+    {
+      "id": "T4",
+      "title": "Remove or relocate legacy template imports to avoid .vercelignore mismatch",
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": "T4.1",
+          "title": "Delete or stop referencing lib/ParticipantApprovalNotification.tsx and lib/BadgeAwardedNotification.tsx",
+          "status": "pending"
+        },
+        {
+          "id": "T4.2",
+          "title": "Ensure no code imports from 'emails/' root folder",
+          "status": "pending",
+          "notes": "'.vercelignore' currently excludes 'emails/'. Keep exclusion if folder becomes unused."
+        },
+        {
+          "id": "T4.3",
+          "title": "If keeping 'emails/' folder, remove it from .vercelignore (only if needed)",
+          "status": "pending",
+          "files": [".vercelignore"]
+        }
+      ]
+    },
+    {
+      "id": "T5",
+      "title": "Codebase import hygiene",
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": "T5.1",
+          "title": "rg/grep and fix imports to '@/lib/email-service' → '@/lib/services/email-service'",
+          "status": "pending"
+        },
+        {
+          "id": "T5.2",
+          "title": "Remove any '../emails/...' or '@/emails/...' imports",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "T6",
+      "title": "Minor deprecations clean-up (non-blocking)",
+      "status": "pending",
+      "subtasks": [
+        {
+          "id": "T6.1",
+          "title": "Migrate Prisma config from package.json#prisma to prisma.config.ts",
+          "status": "pending",
+          "docs": ["https://pris.ly/prisma-config"]
+        },
+        {
+          "id": "T6.2",
+          "title": "Replace experimental.turbo with config.turbopack in next config (or use codemod)",
+          "status": "pending",
+          "docs": [
+            "https://github.com/vercel/next.js/blob/canary/docs/01-app/03-api-reference/05-config/02-typescript.mdx",
+            "https://github.com/vercel/next.js/blob/canary/docs/01-app/01-getting-started/01-installation.mdx"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "T7",
+      "title": "Local verification",
+      "status": "pending",
+      "subtasks": [
+        { "id": "T7.1", "title": "npm ci", "status": "pending" },
+        { "id": "T7.2", "title": "npx prisma generate", "status": "pending" },
+        { "id": "T7.3", "title": "npm run build (Next 15)", "status": "pending" },
+        { "id": "T7.4", "title": "Run unit/e2e critical paths if available", "status": "pending" }
+      ]
+    },
+    {
+      "id": "T8",
+      "title": "Vercel deployment and monitoring",
+      "status": "pending",
+      "subtasks": [
+        { "id": "T8.1", "title": "Trigger redeploy on main", "status": "pending" },
+        { "id": "T8.2", "title": "Watch Build Logs for regressions", "status": "pending", "docs": ["https://vercel.com/docs/deployments/vercel-ignore"] },
+        { "id": "T8.3", "title": "Verify runtime logs in critical API routes", "status": "pending" }
+      ]
+    },
+    {
+      "id": "T9",
+      "title": "Post-deploy functional checks",
+      "status": "pending",
+      "subtasks": [
+        { "id": "T9.1", "title": "Participant approval flow sends email successfully", "status": "pending" },
+        { "id": "T9.2", "title": "Private booking confirmation email path works", "status": "pending" },
+        { "id": "T9.3", "title": "Group booking confirmation + group trip confirmed emails", "status": "pending" }
+      ]
+    }
+  ],
+  "risks": [
+    "Template prop shape mismatches causing runtime render errors",
+    "Lingering imports to legacy service causing build to include ignored paths",
+    "Accidental removal of needed files during cleanup"
+  ],
+  "rollback_plan": [
+    "Revert to last green commit on main",
+    "Restore previous email service temporarily while keeping .vercelignore unchanged",
+    "Disable problematic route email sends behind a feature flag until fixed"
+  ],
+  "verification": {
+    "success_criteria": [
+      "Vercel build succeeds without 'Module not found'",
+      "No imports reference 'emails/' root or '@/lib/email-service'",
+      "Approval and booking routes send emails (dev-mode logs or Resend sandbox)"
+    ],
+    "manual_checks": [
+      "Call PATCH /api/participant-approvals/[id] and confirm email send path",
+      "Run 'npm run build' locally to ensure consistent outcomes"
+    ]
+  },
+  "work_breakdown": {
+    "T1": {
+      "steps": [
+        { "id": "T1.S1", "description": "Audit codebase for usages of '@/lib/email-service' and direct template imports", "files": ["**/*"] },
+        { "id": "T1.S2", "description": "Confirm adoption of 'lib/services/email-service.ts' as single service" },
+        { "id": "T1.S3", "description": "Mark 'lib/email-service.ts' as deprecated or remove after migration", "dependsOn": ["T2"] },
+        { "id": "T1.S4", "description": "Create short ADR note in PR describing the decision" }
+      ]
+    },
+    "T2": {
+      "steps": [
+        { "id": "T2.S1", "description": "Update import in 'app/api/participant-approvals/[id]/route.ts' from '@/lib/email-service' to '@/lib/services/email-service'", "files": ["app/api/participant-approvals/[id]/route.ts"] },
+        { "id": "T2.S2", "description": "Choose notification strategy: dedicated template vs minimal HTML (prefer template)", "dependsOn": ["T3"] },
+        { "id": "T2.S3", "description": "Map route data → template props and call unified send helper", "files": ["app/api/participant-approvals/[id]/route.ts"] },
+        { "id": "T2.S4", "description": "Type-check and ensure no unused imports remain" },
+        { "id": "T2.S5", "description": "Local build to verify route compiles: npm run build" }
+      ]
+    },
+    "T3": {
+      "steps": [
+        { "id": "T3.S1", "description": "Scaffold 'ParticipantApprovalNotificationEmail.tsx' in 'components/emails'", "files": ["components/emails/ParticipantApprovalNotificationEmail.tsx"] },
+        { "id": "T3.S2", "description": "Scaffold 'BadgeAwardedNotificationEmail.tsx' in 'components/emails'", "files": ["components/emails/BadgeAwardedNotificationEmail.tsx"] },
+        { "id": "T3.S3", "description": "Export both from 'components/emails/index.ts'", "files": ["components/emails/index.ts"] },
+        { "id": "T3.S4", "description": "Extend 'EmailTemplate' union with 'participant-approval' and 'badge-awarded'", "files": ["lib/types/email.ts"] },
+        { "id": "T3.S5", "description": "Add template render cases + subjects mapping in unified email service", "files": ["lib/services/email-service.ts"] },
+        { "id": "T3.S6", "description": "Implement responsive markup using @react-email/components with minimal inline styles" },
+        { "id": "T3.S7", "description": "Validate props types and ensure no any-casts" }
+      ]
+    },
+    "T4": {
+      "steps": [
+        { "id": "T4.S1", "description": "Remove or stop referencing 'lib/ParticipantApprovalNotification.tsx' and 'lib/BadgeAwardedNotification.tsx' if unused", "files": ["lib/ParticipantApprovalNotification.tsx", "lib/BadgeAwardedNotification.tsx"] },
+        { "id": "T4.S2", "description": "Search and remove imports from 'emails/' root folder", "files": ["**/*"] },
+        { "id": "T4.S3", "description": "Keep '.vercelignore' exclusion for 'emails/' since unused; otherwise adjust if required", "files": [".vercelignore"] }
+      ]
+    },
+    "T5": {
+      "steps": [
+        { "id": "T5.S1", "description": "rg replace: '@/lib/email-service' → '@/lib/services/email-service'", "files": ["**/*"] },
+        { "id": "T5.S2", "description": "Remove '../emails/...' and '@/emails/...' imports", "files": ["**/*"] },
+        { "id": "T5.S3", "description": "Run TypeScript project-wide check: tsc -p tsconfig.json --noEmit" }
+      ]
+    },
+    "T6": {
+      "steps": [
+        { "id": "T6.S1", "description": "Create prisma.config.ts and move config from package.json#prisma", "files": ["prisma.config.ts", "package.json"] },
+        { "id": "T6.S2", "description": "Update Next config: replace experimental.turbo with config.turbopack (or run codemod)", "files": ["next.config.mjs"] },
+        { "id": "T6.S3", "description": "Commit deprecation clean-ups separately (low risk)" }
+      ]
+    },
+    "T7": {
+      "steps": [
+        { "id": "T7.S1", "description": "npm ci" },
+        { "id": "T7.S2", "description": "npx prisma generate" },
+        { "id": "T7.S3", "description": "npm run typecheck (if script exists) or tsc --noEmit" },
+        { "id": "T7.S4", "description": "npm run build" },
+        { "id": "T7.S5", "description": "Run unit/e2e critical paths if available" }
+      ]
+    },
+    "T8": {
+      "steps": [
+        { "id": "T8.S1", "description": "Push changes to main and trigger Vercel redeploy" },
+        { "id": "T8.S2", "description": "Monitor Build Logs for regressions" },
+        { "id": "T8.S3", "description": "Optionally clear cache and redeploy if caching suspected" },
+        { "id": "T8.S4", "description": "Check Runtime Logs on approval/booking routes" }
+      ]
+    },
+    "T9": {
+      "steps": [
+        { "id": "T9.S1", "description": "PATCH /api/participant-approvals/[id] happy/reject paths; verify email send" },
+        { "id": "T9.S2", "description": "Create private booking; verify confirmation email path" },
+        { "id": "T9.S3", "description": "Confirm group booking threshold → notify all participants" }
+      ]
+    }
+  }
+}
+
+
