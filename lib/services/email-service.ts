@@ -11,13 +11,40 @@ import {
   BadgeAwardedNotificationEmailProps,
 } from '../types/email';
 
-// TEMPORARY: Import email templates disabled due to Vercel module resolution issues
-// TODO: Fix Vercel email component resolution
-// import { PrivateBookingConfirmationEmail } from '../components/emails/PrivateBookingConfirmationEmail';
-// import { GroupBookingConfirmationEmail } from '../components/emails/GroupBookingConfirmationEmail';
-// import { GroupTripConfirmedEmail } from '../components/emails/GroupTripConfirmedEmail';
-// import { ParticipantApprovalNotificationEmail } from '../components/emails/ParticipantApprovalNotificationEmail';
-// import { BadgeAwardedNotificationEmail } from '../components/emails/BadgeAwardedNotificationEmail';
+// Dynamic imports to solve Vercel module resolution issues
+// This approach loads components only when needed and avoids build-time resolution problems
+
+async function loadEmailComponent(template: EmailTemplate) {
+  try {
+    switch (template) {
+      case 'private-booking-confirmation':
+        const { PrivateBookingConfirmationEmail } = await import('../../components/emails/PrivateBookingConfirmationEmail');
+        return PrivateBookingConfirmationEmail;
+        
+      case 'group-booking-confirmation':
+        const { GroupBookingConfirmationEmail } = await import('../../components/emails/GroupBookingConfirmationEmail');
+        return GroupBookingConfirmationEmail;
+        
+      case 'group-trip-confirmed':
+        const { GroupTripConfirmedEmail } = await import('../../components/emails/GroupTripConfirmedEmail');
+        return GroupTripConfirmedEmail;
+        
+      case 'participant-approval':
+        const { ParticipantApprovalNotificationEmail } = await import('../../components/emails/ParticipantApprovalNotificationEmail');
+        return ParticipantApprovalNotificationEmail;
+        
+      case 'badge-awarded':
+        const { BadgeAwardedNotificationEmail } = await import('../../components/emails/BadgeAwardedNotificationEmail');
+        return BadgeAwardedNotificationEmail;
+        
+      default:
+        throw new Error(`Unknown email template: ${template}`);
+    }
+  } catch (error) {
+    console.error(`Failed to load email component for template ${template}:`, error);
+    throw new Error(`Email component loading failed: ${template}`);
+  }
+}
 
 // Email subjects mapping
 const EMAIL_SUBJECTS: Record<EmailTemplate, string> = {
@@ -30,30 +57,50 @@ const EMAIL_SUBJECTS: Record<EmailTemplate, string> = {
   'cancellation': '😔 Trip Cancellation Notice',
 };
 
-// Template renderer function - STUB VERSION due to Vercel module resolution issues
+// Template renderer function - RESTORED with dynamic imports
 const renderEmailTemplate = async (
   template: EmailTemplate,
   data: any
 ): Promise<{ html: string; subject: string }> => {
-  console.log('📧 [STUB] Email template would be rendered:', template);
-  console.log('🚨 [STUB] Email rendering disabled due to Vercel module resolution issues');
-  
-  // Return simple HTML stub
-  const subject = EMAIL_SUBJECTS[template];
-  const html = `
-    <!DOCTYPE html>
-    <html>
-      <head><title>${subject}</title></head>
-      <body>
-        <h1>Email Service Temporarily Disabled</h1>
-        <p>Template: ${template}</p>
-        <p>Subject: ${subject}</p>
-        <p>This email functionality is temporarily disabled due to Vercel module resolution issues.</p>
-      </body>
-    </html>
-  `;
-
-  return { html, subject };
+  try {
+    console.log('📧 Rendering email template:', template);
+    
+    // Load the email component dynamically
+    const EmailComponent = await loadEmailComponent(template);
+    
+    // Render the React component to HTML
+    const html = render(EmailComponent(data));
+    const subject = EMAIL_SUBJECTS[template];
+    
+    console.log('✅ Email template rendered successfully:', template);
+    return { html, subject };
+    
+  } catch (error) {
+    console.error('❌ Email template rendering failed:', error);
+    
+    // Fallback to basic HTML if component loading fails
+    const subject = EMAIL_SUBJECTS[template];
+    const fallbackHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head><title>${subject}</title></head>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #0066cc;">🎣 Cascais Fishing</h1>
+          <h2>${subject}</h2>
+          <p>Hello!</p>
+          <p>We're processing your request. Due to a temporary technical issue, this email is being sent in simplified format.</p>
+          <p>For any questions, please contact us at +351 934 027 852 or reply to this email.</p>
+          <hr style="margin: 20px 0;">
+          <p style="color: #666; font-size: 12px;">
+            Template: ${template}<br>
+            Error: ${error instanceof Error ? error.message : 'Unknown error'}
+          </p>
+        </body>
+      </html>
+    `;
+    
+    return { html: fallbackHtml, subject };
+  }
 };
 
 // Main email sending function

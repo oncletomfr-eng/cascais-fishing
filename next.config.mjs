@@ -175,16 +175,7 @@ const nextConfig = {
         'run-debug-analysis': false,
       };
       
-      // Ignore patterns for serverless functions - ENHANCED
-      config.module.rules.push({
-        test: /\.(test|spec)\.(js|ts|tsx)$/,
-        loader: 'ignore-loader',
-      });
-      
-      config.module.rules.push({
-        test: /debug-.*\.(js|ts|tsx|mjs)$/,
-        loader: 'ignore-loader',
-      });
+      // Ignore patterns handled by .vercelignore for better compatibility
     }
 
     // Tree shaking improvements
