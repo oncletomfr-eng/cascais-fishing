@@ -3,6 +3,10 @@
     "app/api/chat/files/route.ts": {
       "memory": 1024,
       "maxDuration": 30
+    },
+    "app/api/email-service/route.ts": {
+      "memory": 512,
+      "maxDuration": 15
     }
   },
   "build": {

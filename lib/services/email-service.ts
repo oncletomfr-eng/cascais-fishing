@@ -11,40 +11,8 @@ import {
   BadgeAwardedNotificationEmailProps,
 } from '../types/email';
 
-// Dynamic imports to solve Vercel module resolution issues
-// This approach loads components only when needed and avoids build-time resolution problems
-
-async function loadEmailComponent(template: EmailTemplate) {
-  try {
-    switch (template) {
-      case 'private-booking-confirmation':
-        const { PrivateBookingConfirmationEmail } = await import('../../components/emails/PrivateBookingConfirmationEmail');
-        return PrivateBookingConfirmationEmail;
-        
-      case 'group-booking-confirmation':
-        const { GroupBookingConfirmationEmail } = await import('../../components/emails/GroupBookingConfirmationEmail');
-        return GroupBookingConfirmationEmail;
-        
-      case 'group-trip-confirmed':
-        const { GroupTripConfirmedEmail } = await import('../../components/emails/GroupTripConfirmedEmail');
-        return GroupTripConfirmedEmail;
-        
-      case 'participant-approval':
-        const { ParticipantApprovalNotificationEmail } = await import('../../components/emails/ParticipantApprovalNotificationEmail');
-        return ParticipantApprovalNotificationEmail;
-        
-      case 'badge-awarded':
-        const { BadgeAwardedNotificationEmail } = await import('../../components/emails/BadgeAwardedNotificationEmail');
-        return BadgeAwardedNotificationEmail;
-        
-      default:
-        throw new Error(`Unknown email template: ${template}`);
-    }
-  } catch (error) {
-    console.error(`Failed to load email component for template ${template}:`, error);
-    throw new Error(`Email component loading failed: ${template}`);
-  }
-}
+// API Route approach - delegate email rendering to isolated serverless function
+// This minimizes main bundle size by moving email components to dedicated API route
 
 // Email subjects mapping
 const EMAIL_SUBJECTS: Record<EmailTemplate, string> = {
@@ -57,53 +25,51 @@ const EMAIL_SUBJECTS: Record<EmailTemplate, string> = {
   'cancellation': '😔 Trip Cancellation Notice',
 };
 
-// Template renderer function - RESTORED with dynamic imports
-const renderEmailTemplate = async (
-  template: EmailTemplate,
-  data: any
-): Promise<{ html: string; subject: string }> => {
+// Email sending via dedicated API route - reduces main serverless function size
+async function callEmailAPI(emailData: {
+  template: EmailTemplate;
+  to: string;
+  data: any;
+  subject?: string;
+}): Promise<EmailResponse> {
   try {
-    console.log('📧 Rendering email template:', template);
+    // Get the base URL for API calls
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : process.env.NEXT_PUBLIC_API_URL_PRODUCTION 
+      ? process.env.NEXT_PUBLIC_API_URL_PRODUCTION
+      : 'http://localhost:3000';
+
+    console.log('📧 Calling email API:', emailData.template);
     
-    // Load the email component dynamically
-    const EmailComponent = await loadEmailComponent(template);
+    const response = await fetch(`${baseUrl}/api/email-service`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(emailData),
+    });
+
+    const result = await response.json();
     
-    // Render the React component to HTML
-    const html = render(EmailComponent(data));
-    const subject = EMAIL_SUBJECTS[template];
-    
-    console.log('✅ Email template rendered successfully:', template);
-    return { html, subject };
+    if (!response.ok) {
+      console.error('❌ Email API error:', result);
+      return { success: false, error: result.error || 'Email API call failed' };
+    }
+
+    console.log('✅ Email sent via API:', emailData.template);
+    return result;
     
   } catch (error) {
-    console.error('❌ Email template rendering failed:', error);
-    
-    // Fallback to basic HTML if component loading fails
-    const subject = EMAIL_SUBJECTS[template];
-    const fallbackHtml = `
-      <!DOCTYPE html>
-      <html>
-        <head><title>${subject}</title></head>
-        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #0066cc;">🎣 Cascais Fishing</h1>
-          <h2>${subject}</h2>
-          <p>Hello!</p>
-          <p>We're processing your request. Due to a temporary technical issue, this email is being sent in simplified format.</p>
-          <p>For any questions, please contact us at +351 934 027 852 or reply to this email.</p>
-          <hr style="margin: 20px 0;">
-          <p style="color: #666; font-size: 12px;">
-            Template: ${template}<br>
-            Error: ${error instanceof Error ? error.message : 'Unknown error'}
-          </p>
-        </body>
-      </html>
-    `;
-    
-    return { html: fallbackHtml, subject };
+    console.error('❌ Email API call failed:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Email API call failed' 
+    };
   }
-};
+}
 
-// Main email sending function
+// Main email sending function - now uses dedicated API route
 export async function sendEmail({
   template,
   to,
@@ -111,66 +77,25 @@ export async function sendEmail({
   subject: customSubject,
 }: SendEmailProps): Promise<EmailResponse> {
   try {
-    // Validate email configuration
-    if (!isEmailConfigured()) {
-      const error = 'Email service is not configured. Check environment variables.';
-      logEmailAttempt(to, customSubject || 'Unknown', template, false, error);
-      
-      // В development режиме просто логируем, в production это критичная ошибка
-      if (process.env.NODE_ENV === 'development') {
-        console.log('📧 [DEV MODE] Email would be sent:', { template, to, data });
-        return { success: true, messageId: 'dev-mode-mock-id' };
-      }
-      
-      return { success: false, error };
-    }
-
-    // Validate recipient email
-    const emailValidation = validateEmail(to);
-    if (!emailValidation.isValid) {
-      const error = `Invalid recipient email: ${emailValidation.error}`;
-      logEmailAttempt(to, customSubject || 'Unknown', template, false, error);
-      return { success: false, error };
-    }
-
-    // Render email template
-    const { html, subject } = await renderEmailTemplate(template, data);
-    const finalSubject = customSubject || subject;
-
-    // Send email via Resend
-    if (!resend) {
-      const error = 'Resend client is not initialized. Check API key configuration.';
-      logEmailAttempt(to, finalSubject, template, false, error);
-      return { success: false, error };
-    }
-
-    const response = await resend.emails.send({
-      from: getFromAddress(),
-      to: [to],
-      subject: finalSubject,
-      html,
-      replyTo: process.env.RESEND_REPLY_TO || undefined,
+    console.log('📧 Sending email via API route:', { template, to });
+    
+    // Call the isolated email API route
+    const result = await callEmailAPI({
+      template,
+      to,
+      data,
+      subject: customSubject,
     });
 
-    // Check for errors in Resend response
-    if (response.error) {
-      const error = `Resend API error: ${response.error.message || JSON.stringify(response.error)}`;
-      logEmailAttempt(to, finalSubject, template, false, error);
-      return { success: false, error };
-    }
-
-    // Success
-    logEmailAttempt(to, finalSubject, template, true);
-    return { 
-      success: true, 
-      messageId: response.data?.id 
-    };
+    return result;
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    console.error('📧 Email sending failed:', error);
+    
+    // Log the attempt as failed
     logEmailAttempt(to, customSubject || 'Unknown', template, false, errorMessage);
     
-    console.error('📧 Email sending failed:', error);
     return { success: false, error: errorMessage };
   }
 }
