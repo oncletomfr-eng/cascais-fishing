@@ -183,14 +183,7 @@ const nextConfig = {
         'typescript': false,
       };
 
-      // Add webpack rules to ignore large files
-      config.module.rules.push({
-        test: /\.(md|txt|log|map)$/,
-        type: 'asset/resource',
-        generator: {
-          emit: false,
-        },
-      });
+      // Remove aggressive webpack rules that might break builds
       
       // Optimize chunk size limits
       if (config.optimization) {

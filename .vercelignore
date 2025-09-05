@@ -1,20 +1,14 @@
-# ULTRA-AGGRESSIVE EXCLUSION for Vercel Size Optimization
+# SAFE exclusion - keep essential Next.js files
 
-# Complete Next.js build artifacts exclusion
+# Cache and trace files (safe to exclude)
 .next/cache/
 .next/cache/**
 .next/trace
 .next/trace/**
-.next/static/chunks/webpack*
-.next/server/webpack-runtime.js
-.next/server/chunks/**
-.next/build-manifest.json
-.next/app-build-manifest.json
-.next/export-marker.json
-.next/prerender-manifest.json
-.next/routes-manifest.json
-.next/server/middleware-manifest.json
 build.log
+
+# Webpack artifacts that can be excluded
+.next/static/chunks/webpack*
 
 # ALL test and development files - AGGRESSIVE
 __tests__/
@@ -94,11 +88,7 @@ FILE_UPLOAD_SYSTEM_GUIDE.md
 MODERATION_SYSTEM_GUIDE.md
 STREAM_CHAT_PRODUCTION_SETUP.md
 
-# Large images that aren't needed in functions
-public/*.png
-public/*.jpg
-public/*.jpeg
-public/*.gif
+# Keep public images for UI
 
 # Git files
 .git/
@@ -127,6 +117,4 @@ emails/
 # tailwind.config.js - Needed for Tailwind CSS compilation
 # postcss.config.mjs - Needed for PostCSS processing
 
-# Prisma files not needed in serverless functions
-prisma/migrations/
-prisma/*.sql
+# Keep Prisma files - may be needed
