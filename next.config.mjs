@@ -161,21 +161,58 @@ const nextConfig = {
       };
     }
 
-    // Exclude development and build artifacts from serverless functions - ENHANCED
+    // ULTRA-AGGRESSIVE exclusion for serverless functions
     if (!dev && isServer) {
+      // Exclude ALL non-essential paths from serverless bundles
       config.resolve.alias = {
         ...config.resolve.alias,
-        // Exclude test files
+        // Test and development files
         '__tests__': false,
         'e2e-tests': false,
-        // Exclude debug files from serverless functions
+        'test-results': false,
+        'scripts': false,
+        'docs': false,
+        'tmp': false,
+        // Debug files
         'debug-module-resolution': false,
-        'debug-filesystem': false,
+        'debug-filesystem': false, 
         'debug-webpack-resolution': false,
         'run-debug-analysis': false,
+        // Large development dependencies
+        '@types/node': false,
+        'typescript': false,
       };
+
+      // Add webpack rules to ignore large files
+      config.module.rules.push({
+        test: /\.(md|txt|log|map)$/,
+        type: 'asset/resource',
+        generator: {
+          emit: false,
+        },
+      });
       
-      // Ignore patterns handled by .vercelignore for better compatibility
+      // Optimize chunk size limits
+      if (config.optimization) {
+        config.optimization.splitChunks = {
+          ...config.optimization.splitChunks,
+          maxSize: 200000, // 200KB max per chunk
+          minChunks: 2,
+          cacheGroups: {
+            ...config.optimization.splitChunks.cacheGroups,
+            default: false,
+            vendors: false,
+            // More aggressive chunking
+            react: {
+              test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+              name: 'react',
+              chunks: 'all',
+              priority: 20,
+              maxSize: 150000,
+            },
+          },
+        };
+      }
     }
 
     // Tree shaking improvements

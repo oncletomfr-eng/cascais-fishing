@@ -1,4 +1,6 @@
-# Build cache and artifacts that shouldn't be in serverless functions - AGGRESSIVE EXCLUSION
+# ULTRA-AGGRESSIVE EXCLUSION for Vercel Size Optimization
+
+# Complete Next.js build artifacts exclusion
 .next/cache/
 .next/cache/**
 .next/trace
@@ -6,32 +8,46 @@
 .next/static/chunks/webpack*
 .next/server/webpack-runtime.js
 .next/server/chunks/**
-build.log
-
-# Additional webpack and build artifacts
 .next/build-manifest.json
 .next/app-build-manifest.json
 .next/export-marker.json
 .next/prerender-manifest.json
 .next/routes-manifest.json
 .next/server/middleware-manifest.json
+build.log
 
-# Development and testing files
+# ALL test and development files - AGGRESSIVE
 __tests__/
 e2e-tests/
 test-results/
 *.test.ts
+*.test.tsx
+*.test.js
 *.spec.ts
+*.spec.tsx
+*.spec.js
 jest.config.js
 jest.setup.js
 playwright.config.ts
+cypress/
+cypress.config.js
 
-# Temporary files and debug artifacts  
+# Non-essential documentation and config
+docs/
+README.md
+*.md
+LICENSE
+.github/
+.git/
+.gitignore
+.env.example
+.env.local
+.env.development
+
+# Temporary files and logs
 tmp/
 *.tmp
 *.log
-
-# Debug investigation files (not needed in production)
 debug-*.js
 debug-*.mjs
 *debug-analysis*
@@ -40,6 +56,34 @@ debug-*.mjs
 MODULE_RESOLUTION_DEBUG_REPORT.md
 INVESTIGATION_FINDINGS.md
 run-debug-analysis.js
+
+# Non-production scripts
+scripts/
+deploy_tasks.json
+
+# Large libraries sources (if any)
+node_modules/@types/
+node_modules/typescript/
+*.d.ts.map
+*.js.map
+
+# Style source files (keep compiled only)
+*.scss
+*.sass
+*.less
+
+# Backup and version files  
+*.bak
+*.backup
+*~
+.DS_Store
+Thumbs.db
+
+# Non-essential UI integration
+UI_INTEGRATION_SPEC.md
+
+# Development tsconfig
+tsconfig.tsbuildinfo
 
 # Documentation
 docs/

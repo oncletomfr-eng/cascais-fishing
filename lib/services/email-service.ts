@@ -41,7 +41,7 @@ async function callEmailAPI(emailData: {
 
     console.log('📧 Calling email API:', emailData.template);
     
-    const response = await fetch(`${baseUrl}/api/email-service`, {
+    const response = await fetch(`${baseUrl}/api/email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
