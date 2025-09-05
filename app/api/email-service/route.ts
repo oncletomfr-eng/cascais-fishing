@@ -17,23 +17,23 @@ const EMAIL_SUBJECTS: Record<EmailTemplate, string> = {
   'cancellation': '😔 Trip Cancellation Notice',
 };
 
-// Dynamic component loader - isolated to this function
+// Dynamic component loader - using LOCAL components to avoid Vercel path issues
 async function loadEmailComponent(template: EmailTemplate) {
   switch (template) {
     case 'private-booking-confirmation':
-      const { PrivateBookingConfirmationEmail } = await import('../../../components/emails/PrivateBookingConfirmationEmail');
+      const { PrivateBookingConfirmationEmail } = await import('./components/PrivateBookingConfirmationEmail');
       return PrivateBookingConfirmationEmail;
     case 'group-booking-confirmation':
-      const { GroupBookingConfirmationEmail } = await import('../../../components/emails/GroupBookingConfirmationEmail');
+      const { GroupBookingConfirmationEmail } = await import('./components/GroupBookingConfirmationEmail');
       return GroupBookingConfirmationEmail;
     case 'group-trip-confirmed':
-      const { GroupTripConfirmedEmail } = await import('../../../components/emails/GroupTripConfirmedEmail');
+      const { GroupTripConfirmedEmail } = await import('./components/GroupTripConfirmedEmail');
       return GroupTripConfirmedEmail;
     case 'participant-approval':
-      const { ParticipantApprovalNotificationEmail } = await import('../../../components/emails/ParticipantApprovalNotificationEmail');
+      const { ParticipantApprovalNotificationEmail } = await import('./components/ParticipantApprovalNotificationEmail');
       return ParticipantApprovalNotificationEmail;
     case 'badge-awarded':
-      const { BadgeAwardedNotificationEmail } = await import('../../../components/emails/BadgeAwardedNotificationEmail');
+      const { BadgeAwardedNotificationEmail } = await import('./components/BadgeAwardedNotificationEmail');
       return BadgeAwardedNotificationEmail;
     default:
       throw new Error(`Unknown email template: ${template}`);
