@@ -1,4 +1,3 @@
-import { render } from '@react-email/render';
 import { resend, isEmailConfigured, validateEmail, getFromAddress, logEmailAttempt } from '../resend';
 import {
   EmailTemplate,
