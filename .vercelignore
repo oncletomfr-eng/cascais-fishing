@@ -58,9 +58,9 @@ emails/
 
 # Development configs
 .eslintrc.json
-tsconfig.json
-tailwind.config.js
-postcss.config.mjs
+# tsconfig.json - Needed for @/ path resolution during build
+# tailwind.config.js - Needed for Tailwind CSS compilation
+# postcss.config.mjs - Needed for PostCSS processing
 
 # Prisma files not needed in serverless functions
 prisma/migrations/
