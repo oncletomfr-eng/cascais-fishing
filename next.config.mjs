@@ -161,18 +161,28 @@ const nextConfig = {
       };
     }
 
-    // Exclude development and build artifacts from serverless functions
+    // Exclude development and build artifacts from serverless functions - ENHANCED
     if (!dev && isServer) {
       config.resolve.alias = {
         ...config.resolve.alias,
         // Exclude test files
         '__tests__': false,
         'e2e-tests': false,
+        // Exclude debug files from serverless functions
+        'debug-module-resolution': false,
+        'debug-filesystem': false,
+        'debug-webpack-resolution': false,
+        'run-debug-analysis': false,
       };
       
-      // Ignore patterns for serverless functions
+      // Ignore patterns for serverless functions - ENHANCED
       config.module.rules.push({
         test: /\.(test|spec)\.(js|ts|tsx)$/,
+        loader: 'ignore-loader',
+      });
+      
+      config.module.rules.push({
+        test: /debug-.*\.(js|ts|tsx|mjs)$/,
         loader: 'ignore-loader',
       });
     }

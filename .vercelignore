@@ -1,9 +1,20 @@
-# Build cache and artifacts that shouldn't be in serverless functions
+# Build cache and artifacts that shouldn't be in serverless functions - AGGRESSIVE EXCLUSION
 .next/cache/
+.next/cache/**
 .next/trace
+.next/trace/**
 .next/static/chunks/webpack*
 .next/server/webpack-runtime.js
+.next/server/chunks/**
 build.log
+
+# Additional webpack and build artifacts
+.next/build-manifest.json
+.next/app-build-manifest.json
+.next/export-marker.json
+.next/prerender-manifest.json
+.next/routes-manifest.json
+.next/server/middleware-manifest.json
 
 # Development and testing files
 __tests__/
@@ -15,10 +26,20 @@ jest.config.js
 jest.setup.js
 playwright.config.ts
 
-# Temporary files
+# Temporary files and debug artifacts  
 tmp/
 *.tmp
 *.log
+
+# Debug investigation files (not needed in production)
+debug-*.js
+debug-*.mjs
+*debug-analysis*
+*INVESTIGATION*
+*DEBUG_REPORT*
+MODULE_RESOLUTION_DEBUG_REPORT.md
+INVESTIGATION_FINDINGS.md
+run-debug-analysis.js
 
 # Documentation
 docs/
