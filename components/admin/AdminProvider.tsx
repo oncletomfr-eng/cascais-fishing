@@ -106,3 +106,5 @@ export function AdminProvider({ children }: AdminProviderProps) {
     </AdminContext.Provider>
   )
 }
+
+export default AdminProvider

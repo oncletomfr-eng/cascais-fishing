@@ -130,9 +130,9 @@ export const POST = async (request: NextRequest) => {
         try {
           console.log(`📎 Processing file ${i + 1}/${files.length}: ${file.name}`);
           
-          // Upload file with security checks
-          const { SecureFileUploadService } = await loadFileUploadService();
-          const uploadResult = await SecureFileUploadService.uploadFile(
+          // Upload file with security checks  
+          const { SecureFileUploadService: FileUploadService } = await loadFileUploadService();
+          const uploadResult = await FileUploadService.uploadFile(
             file,
             file.name,
             user.id,
@@ -303,8 +303,8 @@ export const GET = async (request: NextRequest) => {
           });
           
         case 'config':
-          const { SecureFileUploadService } = await loadFileUploadService();
-          const uploadConfig = SecureFileUploadService.getUploadConfig(user.role);
+          const { SecureFileUploadService: ConfigService } = await loadFileUploadService();
+          const uploadConfig = ConfigService.getUploadConfig(user.role);
           return NextResponse.json({
             success: true,
             uploadConfig: {
@@ -327,8 +327,8 @@ export const GET = async (request: NextRequest) => {
             }, { status: 403 });
           }
           
-          const { SecureFileUploadService } = await loadFileUploadService();
-          const cleanupResult = await SecureFileUploadService.cleanupOldFiles();
+          const { SecureFileUploadService: CleanupService } = await loadFileUploadService();
+          const cleanupResult = await CleanupService.cleanupOldFiles();
           
           const { ChatSecurityManager } = await loadChatSecurity();
           await ChatSecurityManager.auditUserAction(

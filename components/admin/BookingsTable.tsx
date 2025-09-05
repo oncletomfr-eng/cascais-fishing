@@ -507,3 +507,5 @@ export function BookingsTable() {
     </div>
   )
 }
+
+export default BookingsTable

@@ -82,9 +82,7 @@ export const GET = async (request: NextRequest) => {
       try {
         const { ChatSecurityManager } = await loadChatSecurity();
         const { user, securityContext } = context;
-        const { ChatSecurityManager } = await loadChatSecurity();
-        const { ChatSecurityManager } = await loadChatSecurity();
-  await ChatSecurityManager.auditUserAction(
+        await ChatSecurityManager.auditUserAction(
           user?.id || 'unknown',
           'file_management_error',
           'unknown',
@@ -139,8 +137,7 @@ export const POST = async (request: NextRequest) => {
       
       // Get file info to check permissions
       const { SecureFileUploadService } = await loadFileUploadService();
-      const { SecureFileUploadService } = await loadFileUploadService();
-    const fileInfoResult = await SecureFileUploadService.getFileInfo(
+      const fileInfoResult = await SecureFileUploadService.getFileInfo(
         fileId,
         user.id,
         user.role
@@ -162,8 +159,7 @@ export const POST = async (request: NextRequest) => {
       
       if (!canModify) {
         const { ChatSecurityManager } = await loadChatSecurity();
-        const { ChatSecurityManager } = await loadChatSecurity();
-  await ChatSecurityManager.auditUserAction(
+        await ChatSecurityManager.auditUserAction(
           user.id,
           'file_modification_denied',
           fileId,
@@ -289,8 +285,8 @@ async function handleFileDownload(
     const fileInfo = fileInfoResult.fileInfo!;
     
     // Build file path
-    const { SecureFileUploadService } = await loadFileUploadService();
-    const config = SecureFileUploadService.getUploadConfig(user.role);
+    const { SecureFileUploadService: FileService } = await loadFileUploadService();
+    const config = FileService.getUploadConfig(user.role);
     const filePath = join(process.cwd(), config.uploadPath, fileInfo.secureFileName);
     
     try {
@@ -366,6 +362,7 @@ async function handleFileInfo(
     }, { status: 400 });
   }
   
+  const { SecureFileUploadService } = await loadFileUploadService();
   const fileInfoResult = await SecureFileUploadService.getFileInfo(
     fileId,
     user.id,
@@ -482,6 +479,7 @@ async function handleFileShare(
   }
   
   // Get file info to check permissions
+  const { SecureFileUploadService } = await loadFileUploadService();
   const fileInfoResult = await SecureFileUploadService.getFileInfo(
     fileId,
     user.id,
@@ -538,8 +536,7 @@ async function handleFileAnalytics(
   if (!['admin', 'super_admin', 'moderator'].includes(user.role)) {
     if (fileId) {
       const { SecureFileUploadService } = await loadFileUploadService();
-      const { SecureFileUploadService } = await loadFileUploadService();
-    const fileInfoResult = await SecureFileUploadService.getFileInfo(
+      const fileInfoResult = await SecureFileUploadService.getFileInfo(
         fileId,
         user.id,
         user.role
