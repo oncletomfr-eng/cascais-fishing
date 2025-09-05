@@ -1,5 +1,5 @@
 import { render } from '@react-email/render';
-import { resend, isEmailConfigured, validateEmail, getFromAddress, logEmailAttempt } from '../resend';
+import { resend, isEmailConfigured, validateEmail, getFromAddress, logEmailAttempt } from '@/lib/resend';
 import {
   EmailTemplate,
   EmailResponse,
@@ -7,14 +7,14 @@ import {
   PrivateBookingConfirmationEmailProps,
   GroupBookingConfirmationEmailProps,
   GroupTripConfirmedEmailProps,
-} from '../types/email';
+} from '@/lib/types/email';
 
 // Import email templates
 import {
   PrivateBookingConfirmationEmail,
   GroupBookingConfirmationEmail,
   GroupTripConfirmedEmail,
-} from '../../components/emails/index';
+} from '@/components/emails';
 
 // Email subjects mapping
 const EMAIL_SUBJECTS: Record<EmailTemplate, string> = {
