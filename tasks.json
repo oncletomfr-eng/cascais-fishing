@@ -1,0 +1,148 @@
+{
+  "projectInfo": {
+    "name": "Cascais Fishing - Vercel Deploy Errors Fix",
+    "description": "Ультраглубокий анализ и исправление всех ошибок Vercel deployment с изучением документации",
+    "version": "1.0.0",
+    "created": "2025-01-05",
+    "tags": ["vercel", "nextjs", "module-resolution", "deployment", "build-errors"]
+  },
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Глубокий анализ различий локальной и Vercel среды",
+      "description": "Изучить точные различия в разрешении модулей между локальной средой и Vercel deployment",
+      "status": "pending",
+      "priority": "high",
+      "dependencies": [],
+      "details": "Изучить документацию Next.js по module resolution, path aliases (@/), baseUrl/paths настройки, различия в Turbopack vs Webpack, проверить как Vercel обрабатывает tsconfig.json paths, изучить кейс-чувствительность файловой системы",
+      "testStrategy": "Сравнить поведение локального build vs Vercel build, проверить резолюцию @ aliases",
+      "subtasks": []
+    },
+    {
+      "id": 2,
+      "title": "Аудит текущей структуры проекта и модулей",
+      "description": "Провести полную инвентаризацию всех модулей, импортов и структуры файлов",
+      "status": "pending", 
+      "priority": "high",
+      "dependencies": [1],
+      "details": "Найти все файлы с @ aliases, проверить существование всех импортируемых файлов, проверить регистр файлов, найти все относительные импорты, проверить index.ts файлы экспортов",
+      "testStrategy": "Запустить grep поиск по всем @ импортам, проверить файловую структуру",
+      "subtasks": []
+    },
+    {
+      "id": 3,
+      "title": "Проверка и исправление tsconfig.json конфигурации",
+      "description": "Убедиться что baseUrl и paths настроены корректно согласно документации Next.js",
+      "status": "pending",
+      "priority": "high", 
+      "dependencies": [1, 2],
+      "details": "Проверить baseUrl: './' vs 'src/', проверить paths mapping для @/*, убедиться что все пути корректные, проверить moduleResolution: 'bundler', добавить explicit includes для всех директорий",
+      "testStrategy": "Локальный build должен проходить с теми же настройками что и на Vercel",
+      "subtasks": []
+    },
+    {
+      "id": 4,
+      "title": "Исправление импортов в lib/email-service.ts",
+      "description": "Решить проблемы с '@/emails/ParticipantApprovalNotification' и '@/emails/BadgeAwardedNotification'",
+      "status": "pending",
+      "priority": "critical",
+      "dependencies": [2, 3],
+      "details": "Проверить существование файлов emails/ParticipantApprovalNotification.tsx и BadgeAwardedNotification.tsx, убедиться в правильных экспортах (default vs named), попробовать относительные пути '../emails/', проверить регистр файлов, добавить расширения .tsx если нужно",
+      "testStrategy": "npm run build должен проходить без ошибок модулей",
+      "subtasks": []
+    },
+    {
+      "id": 5, 
+      "title": "Исправление импортов в lib/services/email-service.ts",
+      "description": "Решить проблему с '../../components/emails' import",
+      "status": "pending",
+      "priority": "critical",
+      "dependencies": [2, 3],
+      "details": "Проверить components/emails/index.ts exports, убедиться что все компоненты правильно экспортированы, исправить относительные пути если нужно, проверить что @ aliases работают для components",
+      "testStrategy": "Import должен разрешаться без ошибок в production build",
+      "subtasks": []
+    },
+    {
+      "id": 6,
+      "title": "Исправление всех других @ alias импортов", 
+      "description": "Найти и исправить все остальные проблемные @ imports в проекте",
+      "status": "pending",
+      "priority": "high",
+      "dependencies": [2, 4, 5],
+      "details": "Запустить поиск всех '@/' импортов в проекте, проверить каждый на разрешимость, заменить проблемные на относительные пути, убедиться что все exports корректные",
+      "testStrategy": "Полная сборка проекта без единой ошибки модулей",
+      "subtasks": []
+    },
+    {
+      "id": 7,
+      "title": "Проверка компонентов email templates",
+      "description": "Убедиться что все email компоненты корректно экспортированы и импортированы", 
+      "status": "pending",
+      "priority": "medium",
+      "dependencies": [4, 5],
+      "details": "Проверить каждый файл в emails/ и components/emails/, убедиться в правильных default/named exports, проверить React компоненты на корректность, проверить TypeScript интерфейсы",
+      "testStrategy": "Каждый компонент должен импортироваться без ошибок",
+      "subtasks": []
+    },
+    {
+      "id": 8,
+      "title": "Настройка Vercel-специфических конфигураций",
+      "description": "Добавить конфигурации специфичные для Vercel окружения если нужно",
+      "status": "pending", 
+      "priority": "medium",
+      "dependencies": [3, 6],
+      "details": "Проверить need для vercel.json настроек, проверить next.config.mjs на Vercel-совместимость, добавить environment-specific настройки если нужно, проверить что Node.js версия корректная",
+      "testStrategy": "Vercel build должен использовать те же настройки что и локальный",
+      "subtasks": []
+    },
+    {
+      "id": 9,
+      "title": "Комплексная проверка сборки",
+      "description": "Убедиться что исправления работают и локально и на Vercel",
+      "status": "pending",
+      "priority": "critical", 
+      "dependencies": [4, 5, 6, 7, 8],
+      "details": "Запустить npm run build локально, убедиться что 0 ошибок, проверить что все 190 страниц генерируются, коммитить изменения, проверить Vercel deployment, мониторить build logs",
+      "testStrategy": "И локальная и Vercel сборки должны проходить успешно за ~1-3 минуты без ошибок",
+      "subtasks": []
+    },
+    {
+      "id": 10,
+      "title": "Тестирование и валидация исправлений", 
+      "description": "Протестировать функциональность email системы после исправлений",
+      "status": "pending",
+      "priority": "medium",
+      "dependencies": [9],
+      "details": "Проверить что email отправка работает, проверить что все компоненты отрендериваются, проверить API endpoints связанные с email, запустить manual тесты критических путей",
+      "testStrategy": "Функциональное тестирование email системы на deployed версии",
+      "subtasks": []
+    },
+    {
+      "id": 11,
+      "title": "Документация решения и prevention",
+      "description": "Задокументировать найденное решение и создать guidelines для предотвращения",
+      "status": "pending",
+      "priority": "low", 
+      "dependencies": [10],
+      "details": "Создать документ с найденными проблемами и решениями, описать различия локальной vs Vercel среды, создать guidelines для правильного использования @ aliases, добавить pre-commit hooks если нужно",
+      "testStrategy": "Документация должна быть достаточной для воспроизведения решения",
+      "subtasks": []
+    }
+  ],
+  "metadata": {
+    "totalTasks": 11,
+    "estimatedHours": "6-8 часов",
+    "complexity": "Высокая - требует глубокого понимания Next.js module resolution",
+    "riskFactors": [
+      "Различия в поведении локальной vs production среды",
+      "Сложность отладки Vercel build процесса", 
+      "Множественные взаимосвязанные модули"
+    ],
+    "successCriteria": [
+      "Все Vercel deployments проходят успешно", 
+      "0 module resolution ошибок",
+      "Функциональность email системы работает корректно",
+      "Build время в пределах нормы (1-3 минуты)"
+    ]
+  }
+}
