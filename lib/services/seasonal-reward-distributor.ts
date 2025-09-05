@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { emailService } from '@/lib/services/email-service';
+import { sendEmail } from '@/lib/services/email-service';
 
 /**
  * Seasonal Competition Reward Distribution System
@@ -509,10 +509,12 @@ class SeasonalRewardDistributor {
       
       const totalValue = rewards.reduce((sum, r) => sum + r.rewardValue, 0);
       
-      await emailService.sendSeasonRewardsEmail({
+      await sendEmail({
         to: user.email,
-        userName: user.name || 'Fisher',
-        seasonName: seasonData.displayName,
+        template: 'season_rewards',
+        data: {
+          userName: user.name || 'Fisher',
+          seasonName: seasonData.displayName,
         rewards: rewards.map(r => ({
           name: r.rewardName,
           type: r.rewardType,
