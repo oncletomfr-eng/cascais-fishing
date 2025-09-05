@@ -521,7 +521,7 @@ class SeasonalRewardDistributor {
           value: r.rewardValue
         })),
         totalRewards: rewards.length,
-        totalValue
+        totalValue: totalValue
       });
       
       console.log(`📧 Reward email sent to ${user.email}`);
