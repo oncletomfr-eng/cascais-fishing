@@ -4,7 +4,7 @@ import {
   sendParticipantApprovalNotification, 
   sendBadgeAwardedNotification,
   sendGroupTripConfirmed
-} from '@/lib/services/email-service';
+} from '../../../lib/services/email-service';
 
 /**
  * API endpoint для тестирования email отправки

@@ -1,5 +1,5 @@
-import { prisma } from '@/lib/prisma';
-import { sendEmail } from '@/lib/services/email-service';
+import { prisma } from '../prisma';
+import { sendEmail } from './email-service';
 
 /**
  * Seasonal Competition Reward Distribution System

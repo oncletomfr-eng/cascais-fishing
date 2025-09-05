@@ -3,7 +3,7 @@ import { auth } from '@/auth'
 import { PrismaClient, ApprovalStatus } from '@prisma/client'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { sendParticipantApprovalNotification } from '@/lib/services/email-service'
+import { sendParticipantApprovalNotification } from '../../../../lib/services/email-service'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
