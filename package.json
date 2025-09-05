@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "20.19.4",
-    "npm": "10.8.2"
+    "node": ">=20.19.0 <21.0.0",
+    "npm": ">=10.8.0"
   },
   "scripts": {
     "build": "next build",
@@ -110,7 +110,7 @@
     "resend": "^6.0.1",
     "sonner": "^1.7.4",
     "stream-chat": "^9.17.0",
-    "stream-chat-react": "^13.5.1",
+    "stream-chat-react": "^13.6.1",
     "stripe": "^18.5.0",
     "tailwind-merge": "^2.5.5",
     "uuid": "^11.1.0",
@@ -142,6 +142,28 @@
     "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.20.4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "react-image-gallery": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    },
+    "react-popper": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    },
+    "stream-chat-react": {
+      "react": "$react",
+      "react-dom": "$react-dom",
+      "react-image-gallery": {
+        "react": "$react",
+        "react-dom": "$react-dom"
+      },
+      "react-popper": {
+        "react": "$react",
+        "react-dom": "$react-dom"
+      }
+    }
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

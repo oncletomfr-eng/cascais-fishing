@@ -14,7 +14,7 @@ import {
   PrivateBookingConfirmationEmail,
   GroupBookingConfirmationEmail,
   GroupTripConfirmedEmail,
-} from '../../components/emails';
+} from '../../components/emails/index';
 
 // Email subjects mapping
 const EMAIL_SUBJECTS: Record<EmailTemplate, string> = {
