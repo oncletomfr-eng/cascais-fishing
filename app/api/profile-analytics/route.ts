@@ -1,9 +1,8 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { addMonths, format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 
-const prisma = new PrismaClient();
 
 interface MonthlyData {
   month: string;

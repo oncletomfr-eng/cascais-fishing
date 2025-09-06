@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { PrismaClient, ApprovalStatus } from '@prisma/client'
+import prisma from '@/lib/prisma'
+import { ApprovalStatus } from '@prisma/client'
 import { z } from 'zod'
 
-const prisma = new PrismaClient()
 
 // Schema для создания заявки на одобрение
 const createApprovalSchema = z.object({
