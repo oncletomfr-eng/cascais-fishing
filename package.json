@@ -7,7 +7,7 @@
     "npm": ">=10.8.0"
   },
   "scripts": {
-    "build": "rm -rf node_modules/.prisma && rm -rf node_modules/@prisma/engines && prisma generate && next build",
+    "build": "rm -rf node_modules/.prisma && prisma generate && next build",
     "dev": "next dev --turbo",
     "lint": "next lint",
     "start": "next start",
