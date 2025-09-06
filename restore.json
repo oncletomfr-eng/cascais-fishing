@@ -1,0 +1,492 @@
+{
+  "title": "📋 План поэтапного восстановления Cascais Fishing",
+  "description": "Систематическое восстановление функциональности после решения критических проблем с 401 и 250MB лимитом",
+  "currentStatus": {
+    "deployed": true,
+    "siteAccessible": true,
+    "coreAPIsWorking": true,
+    "excludedAPIs": 60,
+    "excludedFeatures": [
+      "badges",
+      "achievements",
+      "analytics",
+      "admin",
+      "testing"
+    ]
+  },
+  "phases": [
+    {
+      "phase": 1,
+      "title": "🔥 КРИТИЧЕСКИЕ API ROUTES",
+      "priority": "HIGH",
+      "description": "Восстановление основных бизнес-функций",
+      "estimatedDays": 3,
+      "tasks": [
+        {
+          "id": "auth-apis",
+          "title": "Восстановить аутентификацию",
+          "priority": "CRITICAL",
+          "status": "pending",
+          "subtasks": [
+            {
+              "id": "auth-1",
+              "title": "Убрать app/api/auth/ из .vercelignore",
+              "description": "Восстановить NextAuth API routes",
+              "files": [
+                ".vercelignore"
+              ],
+              "testEndpoint": "/api/auth/session",
+              "status": "in_progress"
+            },
+            {
+              "id": "auth-2",
+              "title": "Протестировать логин/логаут",
+              "description": "Убедиться что аутентификация работает",
+              "dependencies": [
+                "auth-1"
+              ]
+            },
+            {
+              "id": "auth-3",
+              "title": "Восстановить middleware NextAuth",
+              "description": "Включить обратно защищённые роуты",
+              "files": [
+                "middleware.ts"
+              ],
+              "dependencies": [
+                "auth-2"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "booking-apis",
+          "title": "Восстановить систему бронирования",
+          "priority": "HIGH",
+          "status": "pending",
+          "subtasks": [
+            {
+              "id": "booking-1",
+              "title": "Восстановить основные booking APIs",
+              "description": "Включить /api/group-trips/, /api/participant-approvals/",
+              "files": [
+                ".vercelignore"
+              ],
+              "testEndpoints": [
+                "/api/group-trips",
+                "/api/participant-approvals"
+              ]
+            },
+            {
+              "id": "booking-2",
+              "title": "Протестировать создание поездки",
+              "description": "Создать тестовую групповую поездку",
+              "dependencies": [
+                "booking-1",
+                "auth-2"
+              ]
+            },
+            {
+              "id": "booking-3",
+              "title": "Протестировать участие в поездке",
+              "description": "Заявка и одобрение участника",
+              "dependencies": [
+                "booking-2"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "payment-apis",
+          "title": "Восстановить платёжную систему",
+          "priority": "HIGH",
+          "status": "pending",
+          "subtasks": [
+            {
+              "id": "payment-1",
+              "title": "Восстановить Stripe integration",
+              "description": "Включить /api/payments/, /api/create-checkout-session/",
+              "files": [
+                ".vercelignore"
+              ],
+              "testEndpoints": [
+                "/api/payments",
+                "/api/stripe-webhooks"
+              ]
+            },
+            {
+              "id": "payment-2",
+              "title": "Протестировать создание платежа",
+              "description": "Тест создания checkout session",
+              "dependencies": [
+                "payment-1"
+              ]
+            },
+            {
+              "id": "payment-3",
+              "title": "Протестировать webhooks",
+              "description": "Stripe webhooks обработка",
+              "dependencies": [
+                "payment-2"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "phase": 2,
+      "title": "📧 EMAIL ФУНКЦИОНАЛЬНОСТЬ",
+      "priority": "HIGH",
+      "description": "Восстановление email уведомлений",
+      "estimatedDays": 2,
+      "tasks": [
+        {
+          "id": "email-core",
+          "title": "Восстановить базовую email функциональность",
+          "priority": "HIGH",
+          "status": "pending",
+          "subtasks": [
+            {
+              "id": "email-1",
+              "title": "Создать минимальный email service",
+              "description": "Простые HTML шаблоны без React компонентов",
+              "files": [
+                "lib/services/email-service.ts"
+              ],
+              "approach": "HTML templates + nodemailer вместо @react-email"
+            },
+            {
+              "id": "email-2",
+              "title": "Создать базовые HTML шаблоны",
+              "description": "Шаблоны: booking confirmation, cancellation, payment",
+              "files": [
+                "lib/email-templates/"
+              ],
+              "templates": [
+                "booking-confirmation.html",
+                "booking-cancellation.html",
+                "payment-confirmation.html"
+              ]
+            },
+            {
+              "id": "email-3",
+              "title": "Интегрировать с booking API",
+              "description": "Автоматические email при бронировании",
+              "dependencies": [
+                "email-1",
+                "email-2",
+                "booking-apis"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "email-advanced",
+          "title": "Расширенные email функции",
+          "priority": "MEDIUM",
+          "status": "pending",
+          "subtasks": [
+            {
+              "id": "email-adv-1",
+              "title": "Email уведомления о платежах",
+              "description": "Интеграция с Stripe webhooks",
+              "dependencies": [
+                "email-3",
+                "payment-3"
+              ]
+            },
+            {
+              "id": "email-adv-2",
+              "title": "Напоминания о поездках",
+              "description": "Автоматические напоминания за 24ч",
+              "dependencies": [
+                "email-3"
+              ]
+            },
+            {
+              "id": "email-adv-3",
+              "title": "Email отчёты для капитанов",
+              "description": "Сводки по бронированиям",
+              "dependencies": [
+                "email-3"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "phase": 3,
+      "title": "📊 АНАЛИТИКА И ПРОФИЛИ",
+      "priority": "MEDIUM",
+      "description": "Восстановление пользовательских профилей и аналитики",
+      "estimatedDays": 4,
+      "tasks": [
+        {
+          "id": "profiles-core",
+          "title": "Восстановить систему профилей",
+          "priority": "MEDIUM",
+          "status": "pending",
+          "subtasks": [
+            {
+              "id": "profiles-1",
+              "title": "Восстановить /api/profiles/",
+              "description": "Основные операции с профилями рыболовов",
+              "files": [
+                ".vercelignore"
+              ],
+              "note": "Убрать profile-*/ из исключений"
+            },
+            {
+              "id": "profiles-2",
+              "title": "Исправить зависимости badges",
+              "description": "Создать заглушки или восстановить badges API",
+              "files": [
+                "app/api/profiles/analytics/route.ts"
+              ],
+              "dependencies": [
+                "profiles-1"
+              ]
+            },
+            {
+              "id": "profiles-3",
+              "title": "Протестировать профили",
+              "description": "CRUD операции с fisher profiles",
+              "dependencies": [
+                "profiles-2",
+                "auth-3"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "reviews-system",
+          "title": "Восстановить систему отзывов",
+          "priority": "MEDIUM",
+          "status": "pending",
+          "subtasks": [
+            {
+              "id": "reviews-1",
+              "title": "Восстановить /api/reviews/",
+              "description": "API для создания и получения отзывов",
+              "files": [
+                ".vercelignore"
+              ]
+            },
+            {
+              "id": "reviews-2",
+              "title": "Интегрировать с booking system",
+              "description": "Отзывы после завершения поездки",
+              "dependencies": [
+                "reviews-1",
+                "booking-3"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "phase": 4,
+      "title": "🏆 GAMIFICATION",
+      "priority": "LOW",
+      "description": "Восстановление системы достижений и наград",
+      "estimatedDays": 5,
+      "tasks": [
+        {
+          "id": "badges-system",
+          "title": "Восстановить систему badges",
+          "priority": "LOW",
+          "status": "pending",
+          "subtasks": [
+            {
+              "id": "badges-1",
+              "title": "Оптимизировать badges API",
+              "description": "Уменьшить размер функции, упростить логику",
+              "files": [
+                "app/api/badges/route.ts"
+              ]
+            },
+            {
+              "id": "badges-2",
+              "title": "Постепенное включение badges",
+              "description": "Убрать из .vercelignore и протестировать размер",
+              "dependencies": [
+                "badges-1"
+              ],
+              "riskAssessment": "Может снова превысить 250MB лимит"
+            },
+            {
+              "id": "badges-3",
+              "title": "Восстановить badges в profiles",
+              "description": "Включить обратно awardBadgesBasedOnActivity",
+              "files": [
+                "app/api/profiles/analytics/route.ts"
+              ],
+              "dependencies": [
+                "badges-2"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "achievements-system",
+          "title": "Восстановить систему достижений",
+          "priority": "LOW",
+          "status": "pending",
+          "subtasks": [
+            {
+              "id": "achievements-1",
+              "title": "Оптимизировать achievements API",
+              "description": "Упростить логику, уменьшить зависимости",
+              "files": [
+                "app/api/achievements/"
+              ]
+            },
+            {
+              "id": "achievements-2",
+              "title": "Восстановить achievements",
+              "description": "Убрать из .vercelignore поэтапно",
+              "dependencies": [
+                "achievements-1",
+                "badges-3"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "phase": 5,
+      "title": "⚡ ОПТИМИЗАЦИЯ И АДМИНИСТРИРОВАНИЕ",
+      "priority": "LOW",
+      "description": "Восстановление админ-функций и оптимизация",
+      "estimatedDays": 3,
+      "tasks": [
+        {
+          "id": "admin-panel",
+          "title": "Восстановить админ-панель",
+          "priority": "LOW",
+          "status": "pending",
+          "subtasks": [
+            {
+              "id": "admin-1",
+              "title": "Оптимизировать admin APIs",
+              "description": "Упростить /api/admin/ endpoints",
+              "files": [
+                "app/api/admin/"
+              ]
+            },
+            {
+              "id": "admin-2",
+              "title": "Восстановить admin функции",
+              "description": "Database management, user management",
+              "dependencies": [
+                "admin-1",
+                "auth-3"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "optimization",
+          "title": "Общая оптимизация",
+          "priority": "MEDIUM",
+          "status": "pending",
+          "subtasks": [
+            {
+              "id": "opt-1",
+              "title": "Bundle size analysis",
+              "description": "Проанализировать размер каждой функции",
+              "tools": [
+                "@vercel/build-utils",
+                "webpack-bundle-analyzer"
+              ]
+            },
+            {
+              "id": "opt-2",
+              "title": "Code splitting оптимизация",
+              "description": "Динамические импорты, lazy loading",
+              "files": [
+                "next.config.mjs"
+              ]
+            },
+            {
+              "id": "opt-3",
+              "title": "Dependencies cleanup",
+              "description": "Удалить неиспользуемые зависимости",
+              "files": [
+                "package.json"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "riskManagement": {
+    "primaryRisk": "Превышение 250MB лимита при восстановлении функций",
+    "mitigationStrategies": [
+      "Поэтапное включение по одной функции",
+      "Мониторинг размера bundle после каждого деплоя",
+      "Откат изменений при превышении лимита",
+      "Оптимизация перед включением тяжелых функций"
+    ],
+    "rollbackPlan": "Если размер превышен - немедленно исключить последнюю добавленную функцию"
+  },
+  "deploymentStrategy": {
+    "approach": "Blue-Green deployment",
+    "testingRequired": true,
+    "automatedRollback": true,
+    "monitoringEndpoints": [
+      "/api/health",
+      "/api/auth/session",
+      "/api/group-trips",
+      "/api/payments"
+    ]
+  },
+  "metrics": {
+    "trackingPoints": [
+      "Bundle size per function",
+      "API response times",
+      "Error rates",
+      "User experience impact"
+    ],
+    "successCriteria": {
+      "maxBundleSize": "240MB",
+      "maxResponseTime": "5s",
+      "maxErrorRate": "1%"
+    }
+  },
+  "timeline": {
+    "totalEstimatedDays": 17,
+    "phases": [
+      {
+        "phase": 1,
+        "days": 3,
+        "startDay": 1
+      },
+      {
+        "phase": 2,
+        "days": 2,
+        "startDay": 4
+      },
+      {
+        "phase": 3,
+        "days": 4,
+        "startDay": 6
+      },
+      {
+        "phase": 4,
+        "days": 5,
+        "startDay": 10
+      },
+      {
+        "phase": 5,
+        "days": 3,
+        "startDay": 15
+      }
+    ]
+  }
+}

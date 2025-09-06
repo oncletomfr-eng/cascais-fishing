@@ -22,7 +22,8 @@
     "test:e2e:ui": "playwright test --ui",
     "test:performance": "jest --testNamePattern='Performance|performance'",
     "test:unit": "jest --testPathPattern='__tests__|spec'",
-    "test:integration": "jest --testNamePattern='Integration|integration'"
+    "test:integration": "jest --testNamePattern='Integration|integration'",
+    "restore": "node scripts/restore-tracker.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
