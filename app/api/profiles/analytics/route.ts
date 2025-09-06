@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { PrismaClient } from '@prisma/client'
 import { z } from 'zod'
-import { awardBadgesBasedOnActivity } from '@/app/api/badges/route'
+// TEMPORARILY DISABLED: badges excluded from deployment to solve 250MB limit
+// import { awardBadgesBasedOnActivity } from '@/app/api/badges/route'
 
 const prisma = new PrismaClient()
 
@@ -139,10 +140,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Обновляем badges если запрошено
+    // TEMPORARILY DISABLED: badges excluded from deployment to solve 250MB limit
     let newBadges: any[] = []
     if (updateBadges) {
-      newBadges = await awardBadgesBasedOnActivity(targetUserId)
+      // newBadges = await awardBadgesBasedOnActivity(targetUserId)
+      console.log('⚠️ Badge awarding disabled - badges API excluded from deployment')
     }
 
     // Получаем обновленную аналитику
