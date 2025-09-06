@@ -1,66 +1,26 @@
 // Minimal email endpoint with actual sending capability
 import { NextRequest, NextResponse } from 'next/server';
 import { resend, isEmailConfigured, getFromAddress, validateEmail, logEmailAttempt } from '@/lib/resend';
-
-// Simple HTML email templates (no React components)
-const EMAIL_TEMPLATES = {
-  'private-booking-confirmation': (data: any) => `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #2563eb;">🎣 Your Private Fishing Charter is Confirmed!</h2>
-      <p>Hello ${data.customerName},</p>
-      <p>Your private fishing charter has been confirmed!</p>
-      <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <strong>Booking Details:</strong><br/>
-        📅 Date: ${data.date}<br/>
-        ⏰ Time: ${data.time}<br/>
-        👥 Participants: ${data.participants}<br/>
-        💰 Total: €${data.totalPrice}<br/>
-        📋 Confirmation: ${data.confirmationCode}
-      </div>
-      <p>For questions, call: ${data.customerPhone || '+351 934 027 852'}</p>
-      <p>See you at Cascais Marina!</p>
-      <hr/>
-      <small>Cascais Premium Fishing | Marina de Cascais</small>
-    </div>
-  `,
-  'group-booking-confirmation': (data: any) => `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #2563eb;">🎣 You've Joined the Fishing Crew!</h2>
-      <p>Hello ${data.customerName},</p>
-      <p>You've successfully joined a group fishing trip!</p>
-      <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <strong>Trip Details:</strong><br/>
-        📅 Date: ${data.date}<br/>
-        ⏰ Time: ${data.time}<br/>
-        💰 Price: €${data.price} per person<br/>
-        👥 Current participants: ${data.currentParticipants}/${data.maxParticipants}
-      </div>
-      <p>We'll notify you when the trip is confirmed!</p>
-      <hr/>
-      <small>Cascais Premium Fishing | Marina de Cascais</small>
-    </div>
-  `,
-  'test-email': (data: any) => `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #059669;">🧪 Test Email - Cascais Fishing</h2>
-      <p>This is a test email to verify the email system is working.</p>
-      <div style="background: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <strong>✅ Email system is operational!</strong><br/>
-        Timestamp: ${new Date().toISOString()}<br/>
-        Template: ${data.template || 'test-email'}
-      </div>
-      <p>If you received this, email configuration is working correctly.</p>
-      <hr/>
-      <small>Cascais Premium Fishing | Email System Test</small>
-    </div>
-  `
-};
+import { EMAIL_TEMPLATES, isValidTemplateName } from '@/lib/email-templates';
 
 // Email subjects mapping
 const EMAIL_SUBJECTS: Record<string, string> = {
+  // Booking templates
   'private-booking-confirmation': '🎣 Your Private Fishing Charter is Confirmed!',
   'group-booking-confirmation': '🎣 You\'ve Joined the Fishing Crew!',
   'group-trip-confirmed': '🎉 Great News - Your Group Trip is Confirmed!',
+  
+  // Cancellation templates
+  'trip-cancellation': '😔 Trip Cancellation Notice',
+  'customer-cancellation-confirmation': '📋 Cancellation Confirmed',
+  'weather-cancellation': '🌊 Weather Safety Cancellation',
+  
+  // Payment templates
+  'payment-confirmation': '💳 Payment Confirmed!',
+  'payment-failed': '❌ Payment Failed',
+  'refund-confirmation': '💰 Refund Processed',
+  
+  // Legacy/other templates
   'participant-approval': '📋 Update on Your Trip Application',
   'badge-awarded': '🏆 New Achievement Unlocked!',
   'reminder': '📅 Reminder: Your Fishing Trip Tomorrow',
@@ -94,16 +54,16 @@ export async function POST(request: NextRequest) {
       }, { status: 503 });
     }
 
-    // Generate HTML content
-    const templateFunc = EMAIL_TEMPLATES[template as keyof typeof EMAIL_TEMPLATES];
-    if (!templateFunc) {
+    // Generate HTML content using new template system
+    if (!isValidTemplateName(template)) {
       logEmailAttempt(to, 'Unknown Template', template, false, `Template '${template}' not found`);
       return NextResponse.json({ 
         success: false, 
-        error: `Email template '${template}' not found` 
+        error: `Email template '${template}' not found. Available: ${Object.keys(EMAIL_TEMPLATES).join(', ')}` 
       }, { status: 400 });
     }
 
+    const templateFunc = EMAIL_TEMPLATES[template];
     const htmlContent = templateFunc(data);
     const subject = customSubject || EMAIL_SUBJECTS[template] || `Cascais Fishing - ${template}`;
 
