@@ -1,4 +1,0 @@
-{
-  "summary": "PHASE 2 EMAIL FUNCTIONALITY - MAJOR PROGRESS ACHIEVED: Успешно создан функциональный email API с профессиональными HTML шаблонами, graceful degradation и улучшенной обработкой ошибок. Email система готова к работе, но заблокирована отсутствием DKIM записи в DNS. MX и SPF записи настроены и работают корректно. Version v2.1 с enhanced error handling подтвержден развёрнутым через custom headers. Создано полное руководство по настройке DKIM и готовые файлы для техподдержки Dynadot.",
-  "current_status": "Email API полностью разработан и развёрнут на Vercel. Resend интеграция настроена с реальными API ключами. HTML email templates созданы для всех booking/payment/cancellation сценариев. DNS: MX ✅, SPF ✅, DKIM ❌. Блокер: отсутствие DKIM TXT записи в DNS поставщике. Next step: добавить DKIM через техподдержку Dynadot или альтернативный DNS управление для полной верификации домена cascaisfishing.com в Resend."
-}

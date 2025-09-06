@@ -1,4 +1,0 @@
-{
-  "summary": "DNS records для Resend email service успешно настроены в Dynadot: MX запись (send -> feedback-smtp.eu-west-1.amazonses.com, Priority: 10) и SPF запись (send -> v=spf1 include:amazonses.com ~all). DNS propagation началось. Остается добавить DKIM запись для полной верификации домена cascaisfishing.com в Resend.",
-  "current_status": "Phase 2 Email Functionality почти завершена: код готов, Resend ENV vars настроены в Vercel, 2 из 3 DNS записей настроены. Ожидается DNS propagation (15-30 мин), затем добавление DKIM записи для полной верификации домена. Email API готов к тестированию после верификации."
-}

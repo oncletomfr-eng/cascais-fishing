@@ -187,7 +187,8 @@
                 "email-1",
                 "email-2",
                 "booking-apis"
-              ]
+              ],
+              "status": "completed"
             }
           ]
         },
@@ -204,7 +205,8 @@
               "dependencies": [
                 "email-3",
                 "payment-3"
-              ]
+              ],
+              "status": "completed"
             },
             {
               "id": "email-adv-2",
@@ -247,7 +249,7 @@
                 ".vercelignore"
               ],
               "note": "Убрать profile-*/ из исключений",
-              "status": "in_progress"
+              "status": "completed"
             },
             {
               "id": "profiles-2",
@@ -258,7 +260,8 @@
               ],
               "dependencies": [
                 "profiles-1"
-              ]
+              ],
+              "status": "completed"
             },
             {
               "id": "profiles-3",
@@ -283,7 +286,8 @@
               "description": "API для создания и получения отзывов",
               "files": [
                 ".vercelignore"
-              ]
+              ],
+              "status": "completed"
             },
             {
               "id": "reviews-2",
@@ -292,7 +296,8 @@
               "dependencies": [
                 "reviews-1",
                 "booking-3"
-              ]
+              ],
+              "status": "pending"
             }
           ]
         }

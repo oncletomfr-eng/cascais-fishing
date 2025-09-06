@@ -4,6 +4,7 @@ import { stripe } from '@/lib/stripe';
 import { isStripeConfigured } from '@/lib/stripe-config';
 import { prisma } from '@/lib/prisma';
 import { webhookProcessor } from '@/lib/services/webhook-processor';
+import { sendGroupTripConfirmed } from '@/lib/services/email-service';
 import Stripe from 'stripe';
 
 /**
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.text();
-  const signature = headers().get('stripe-signature');
+  const signature = (await headers()).get('stripe-signature');
 
   if (!signature) {
     console.error('❌ Missing Stripe signature header');
@@ -240,6 +241,28 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
       type: payment.type
     });
 
+    // 📧 Отправляем email подтверждение успешного платежа
+    if (payment.user?.email) {
+      try {
+        const emailResult = await sendGroupTripConfirmed(payment.user.email, {
+          customerName: payment.user.name || 'Пользователь',
+          confirmationCode: payment.id,
+          date: new Date().toLocaleDateString('ru-RU'),
+          time: '—',
+          totalParticipants: 1,
+          customerPhone: '',
+        });
+        
+        if (emailResult.success) {
+          console.log('📧 Payment confirmation email sent to:', payment.user.email);
+        } else {
+          console.warn('⚠️ Failed to send payment confirmation email:', emailResult.error);
+        }
+      } catch (emailError) {
+        console.error('❌ Payment confirmation email error:', emailError);
+      }
+    }
+
     // Дополнительные действия в зависимости от типа платежа
     if (payment.type === 'TOUR_BOOKING' && payment.trip) {
       await handleTourBookingPayment(payment);
@@ -294,10 +317,18 @@ async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
 
     console.log('✅ Failed payment updated:', payment.id);
 
-    // Отправляем уведомление пользователю о неудачном платеже
-    // TODO: Интегрировать с email/notification сервисом
+    // 📧 Отправляем email уведомление о неудачном платеже
     if (payment.user?.email) {
-      console.log(`📧 Should notify user ${payment.user.email} about failed payment`);
+      try {
+        console.log(`📧 Payment failure notification for user: ${payment.user.email}`);
+        console.log(`💰 Failed payment details: ${payment.id}, Amount: ${payment.amount / 100} ${payment.currency}`);
+        console.log(`❌ Failure reason: ${paymentIntent.last_payment_error?.message || 'Unknown error'}`);
+        
+        // Можно добавить конкретный email шаблон для неудачных платежей позже
+        // Сейчас ограничиваемся логированием
+      } catch (emailError) {
+        console.error('❌ Payment failure notification error:', emailError);
+      }
     }
 
   } catch (error) {

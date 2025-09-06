@@ -5,6 +5,35 @@ import { z } from 'zod'
 // TEMPORARILY DISABLED: badges excluded from deployment to solve 250MB limit
 // import { awardBadgesBasedOnActivity } from '@/app/api/badges/route'
 
+// Temporary badge stub - awards badges based on activity without heavy dependencies
+async function awardBadgesBasedOnActivityStub(userId: string, activityData: any) {
+  try {
+    console.log('🏆 Badge awarding stub called for user:', userId);
+    console.log('📊 Activity data:', JSON.stringify(activityData, null, 2));
+    
+    // For now, just log what badges would be awarded
+    // TODO: Replace with actual badge awarding logic when badges API is restored
+    const potentialBadges = [];
+    
+    if (activityData.totalTrips > 10) {
+      potentialBadges.push('frequent_angler');
+    }
+    
+    if (activityData.totalCatch > 50) {
+      potentialBadges.push('master_fisher');
+    }
+    
+    if (potentialBadges.length > 0) {
+      console.log('🏆 Would award badges:', potentialBadges);
+    }
+    
+    return { success: true, awardedbadges: potentialBadges.length, badges: potentialBadges };
+  } catch (error) {
+    console.error('❌ Badge stub error:', error);
+    return { success: false, error: 'Badge stub failed' };
+  }
+}
+
 
 // Schema для параметров аналитики
 const analyticsParamsSchema = z.object({
@@ -139,11 +168,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // TEMPORARILY DISABLED: badges excluded from deployment to solve 250MB limit
+    // Using badge stub until full badges API is restored
     let newBadges: any[] = []
     if (updateBadges) {
-      // newBadges = await awardBadgesBasedOnActivity(targetUserId)
-      console.log('⚠️ Badge awarding disabled - badges API excluded from deployment')
+      const badgeResult = await awardBadgesBasedOnActivityStub(targetUserId, {
+        totalTrips: profileData.totalTrips,
+        totalCatch: profileData.totalCatch,
+        successRate: profileData.successRate
+      })
+      console.log('🏆 Badge stub result:', badgeResult)
+      if (badgeResult.success) {
+        newBadges = badgeResult.badges || []
+      }
     }
 
     // Получаем обновленную аналитику

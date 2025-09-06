@@ -18,8 +18,6 @@ app/api/leaderboard/
 app/api/marine-calendar/
 app/api/payment-analytics/
 app/api/payout-*/
-app/api/profile-*/
-app/api/review-*/
 app/api/rewards/
 app/api/seasonal-*/
 app/api/subscription-*/

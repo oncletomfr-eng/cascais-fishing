@@ -7,6 +7,9 @@ import { GroupTripStatus, BookingStatus } from '@prisma/client';
 // WebSocket broadcast - conditionally imported to avoid errors in production
 import { broadcastGroupTripUpdateSSE } from './sse/route';
 import { AchievementTriggers } from '@/lib/services/achievement-service';
+import { sendGroupTripConfirmed } from '@/lib/services/email-service';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
 export async function GET(request: NextRequest) {
   try {
@@ -650,6 +653,31 @@ export async function POST(request: NextRequest) {
       console.log('🏆 Achievement trigger processed for event creation:', newTrip.id);
     } catch (achievementError) {
       console.error('❌ Achievement trigger failed:', achievementError);
+      // Не прерываем выполнение, просто логируем ошибку
+    }
+
+    // 📧 Отправляем email подтверждение капитану о создании поездки
+    try {
+      if (newTrip.captain?.email) {
+        const emailResult = await sendGroupTripConfirmed(newTrip.captain.email, {
+          customerName: newTrip.captain.name || 'Капитан',
+          confirmationCode: newTrip.id,
+          date: format(new Date(newTrip.date), 'dd MMMM yyyy', { locale: ru }),
+          time: newTrip.timeSlot || 'Время уточняется',
+          totalParticipants: newTrip.maxParticipants,
+          customerPhone: '',
+        });
+        
+        if (emailResult.success) {
+          console.log('📧 Trip creation email sent to captain:', newTrip.captain.email);
+        } else {
+          console.warn('⚠️ Failed to send trip creation email:', emailResult.error);
+        }
+      } else {
+        console.log('⚠️ Captain email not found, skipping trip creation notification');
+      }
+    } catch (emailError) {
+      console.error('❌ Trip creation email failed:', emailError);
       // Не прерываем выполнение, просто логируем ошибку
     }
 
