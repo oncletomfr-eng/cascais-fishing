@@ -1,0 +1,20 @@
+Subject: DNS TXT Record Addition Request for Domain: cascaisfishing.com
+
+Dear Dynadot Support,
+
+I need to add a DKIM TXT record for email service verification. Please add the following DNS record to my domain cascaisfishing.com:
+
+Record Type: TXT
+Subdomain/Host: resend._domainkey
+Value: p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJvnK21zdQTQWKaS9ZilGTWGLDC8n2NmtZ97WROvtVrcA+gfznw8k5zygpzZsxMP1hsXB7mx6JzQsiZKO2GYoeZuxtRFY03lPOy8+dfvrSBO+TIZy3kih1ImxzXKeoGBHNOvl1NmQoV4wUjxor52mrl4bLYyb2brlxT4Z+zn1mPwIDAQAB
+TTL: Auto/Default
+
+This record is required for Resend email service DKIM verification.
+
+Domain ID in your system: 29414388
+Domain: cascaisfishing.com
+
+Please confirm once the record has been added.
+
+Thank you,
+[Your Name]

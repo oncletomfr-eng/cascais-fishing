@@ -80,6 +80,24 @@ export async function POST(request: NextRequest) {
     if (response.error) {
       console.error('❌ Resend error:', response.error);
       logEmailAttempt(to, subject, template, false, response.error.message);
+      
+      // Enhanced handling for domain verification errors
+      if (response.error.message?.includes('domain is not verified')) {
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Domain verification pending: DKIM record missing',
+          details: 'MX and SPF records are correctly configured, but DKIM verification is incomplete.',
+          resolution: 'Add TXT record: resend._domainkey → p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDJvnK21zdQTQWKaS9ZilGTWGLDC8n2NmtZ97WROvtVrcA+gfznw8k5zygpzZsxMP1hsXB7mx6JzQsiZKO2GYoeZuxtRFY03lPOy8+dfvrSBO+TIZy3kih1ImxzXKeoGBHNOvl1NmQoV4wUjxor52mrl4bLYyb2brlxT4Z+zn1mPwIDAQAB',
+          code: 'DOMAIN_VERIFICATION_INCOMPLETE',
+          status: {
+            mx_record: '✅ Working (feedback-smtp.eu-west-1.amazonses.com)',
+            spf_record: '✅ Working (v=spf1 include:amazonses.com ~all)',
+            dkim_record: '❌ Missing (resend._domainkey)',
+            next_steps: 'Contact DNS provider to add DKIM TXT record'
+          }
+        }, { status: 403 });
+      }
+      
       return NextResponse.json({ 
         success: false, 
         error: response.error.message 

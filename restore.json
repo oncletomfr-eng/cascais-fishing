@@ -36,7 +36,7 @@
                 ".vercelignore"
               ],
               "testEndpoint": "/api/auth/session",
-              "status": "in_progress"
+              "status": "completed"
             },
             {
               "id": "auth-2",
@@ -44,7 +44,8 @@
               "description": "Убедиться что аутентификация работает",
               "dependencies": [
                 "auth-1"
-              ]
+              ],
+              "status": "completed"
             },
             {
               "id": "auth-3",
@@ -55,7 +56,8 @@
               ],
               "dependencies": [
                 "auth-2"
-              ]
+              ],
+              "status": "completed"
             }
           ]
         },
@@ -75,7 +77,8 @@
               "testEndpoints": [
                 "/api/group-trips",
                 "/api/participant-approvals"
-              ]
+              ],
+              "status": "completed"
             },
             {
               "id": "booking-2",
@@ -84,7 +87,8 @@
               "dependencies": [
                 "booking-1",
                 "auth-2"
-              ]
+              ],
+              "status": "completed"
             },
             {
               "id": "booking-3",
@@ -92,7 +96,8 @@
               "description": "Заявка и одобрение участника",
               "dependencies": [
                 "booking-2"
-              ]
+              ],
+              "status": "completed"
             }
           ]
         },
@@ -112,7 +117,8 @@
               "testEndpoints": [
                 "/api/payments",
                 "/api/stripe-webhooks"
-              ]
+              ],
+              "status": "completed"
             },
             {
               "id": "payment-2",
@@ -120,7 +126,8 @@
               "description": "Тест создания checkout session",
               "dependencies": [
                 "payment-1"
-              ]
+              ],
+              "status": "completed"
             },
             {
               "id": "payment-3",
@@ -128,7 +135,8 @@
               "description": "Stripe webhooks обработка",
               "dependencies": [
                 "payment-2"
-              ]
+              ],
+              "status": "completed"
             }
           ]
         }
@@ -154,7 +162,8 @@
               "files": [
                 "lib/services/email-service.ts"
               ],
-              "approach": "HTML templates + nodemailer вместо @react-email"
+              "approach": "HTML templates + nodemailer вместо @react-email",
+              "status": "completed"
             },
             {
               "id": "email-2",
@@ -167,7 +176,8 @@
                 "booking-confirmation.html",
                 "booking-cancellation.html",
                 "payment-confirmation.html"
-              ]
+              ],
+              "status": "completed"
             },
             {
               "id": "email-3",
@@ -236,7 +246,8 @@
               "files": [
                 ".vercelignore"
               ],
-              "note": "Убрать profile-*/ из исключений"
+              "note": "Убрать profile-*/ из исключений",
+              "status": "in_progress"
             },
             {
               "id": "profiles-2",
