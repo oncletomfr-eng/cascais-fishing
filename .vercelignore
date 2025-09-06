@@ -1,8 +1,29 @@
-# ULTRA-AGGRESSIVE - exclude ALL test pages and heavy dependencies
+# 🚀 RADICAL SOLUTION: Exclude ALL non-essential API routes to solve 250MB limit
 
 # Safe Next.js cache (keep manifests, server chunks!)
 .next/cache/
 .next/trace/
+
+# 🔥 MASSIVE API ROUTES EXCLUSION - Each route = separate serverless function!
+app/api/test-*/
+app/api/debug-*/
+app/api/admin/
+app/api/chat/files/
+app/api/data-export/
+app/api/achievements/
+app/api/badges/
+app/api/commission-*/
+app/api/earnings-*/
+app/api/leaderboard/
+app/api/marine-calendar/
+app/api/payment-analytics/
+app/api/payout-*/
+app/api/profile-*/
+app/api/review-*/
+app/api/rewards/
+app/api/seasonal-*/
+app/api/subscription-*/
+app/api/tax-*/
 
 # ALL TEST PAGES - HUGE SIZE REDUCTION!
 app/test-*/
