@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { StreamChat } from 'stream-chat';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
 const serverClient = StreamChat.getInstance(
   process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY!,
