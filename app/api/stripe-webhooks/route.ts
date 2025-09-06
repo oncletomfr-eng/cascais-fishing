@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
+import { isStripeConfigured } from '@/lib/stripe-config';
 import { prisma } from '@/lib/prisma';
 import { webhookProcessor } from '@/lib/services/webhook-processor';
 import Stripe from 'stripe';
@@ -36,6 +37,16 @@ const allowedEvents: Stripe.Event.Type[] = [
 ];
 
 export async function POST(request: NextRequest) {
+  // Check if Stripe is configured
+  if (!isStripeConfigured()) {
+    console.error('❌ Stripe webhooks not configured properly');
+    return NextResponse.json({
+      success: false,
+      error: 'Webhooks temporarily unavailable - Stripe not configured',
+      code: 'STRIPE_NOT_CONFIGURED'
+    }, { status: 503 });
+  }
+
   const body = await request.text();
   const signature = headers().get('stripe-signature');
 

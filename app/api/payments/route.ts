@@ -2,10 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { stripe, calculateCommission, createPaymentWithCommission } from '@/lib/stripe';
+import { isStripeConfigured } from '@/lib/stripe-config';
 
 // GET /api/payments - получить платежи пользователя  
 export async function GET(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!isStripeConfigured()) {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Payment system temporarily unavailable - Stripe not configured',
+        code: 'STRIPE_NOT_CONFIGURED'
+      }, { status: 503 });
+    }
+
     const session = await auth();
     
     if (!session?.user?.email) {
@@ -75,6 +85,16 @@ export async function GET(request: NextRequest) {
 // POST /api/payments - создать платеж с комиссией
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!isStripeConfigured()) {
+      return NextResponse.json({ 
+        success: false,
+        error: 'Payment system temporarily unavailable - Stripe not configured',
+        code: 'STRIPE_NOT_CONFIGURED',
+        action: 'Add Stripe environment variables in Vercel Dashboard'
+      }, { status: 503 });
+    }
+
     const session = await auth();
     
     if (!session?.user?.email) {

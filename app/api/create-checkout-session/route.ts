@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { stripe, createStripeCustomer } from '@/lib/stripe';
+import { isStripeConfigured } from '@/lib/stripe-config';
 import Stripe from 'stripe';
 
 /**
@@ -12,13 +13,16 @@ import Stripe from 'stripe';
 
 export async function POST(request: NextRequest) {
   try {
-    // Проверяем наличие Stripe API ключей
-    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_placeholder_for_build_only') {
-      console.error('❌ STRIPE_SECRET_KEY not configured properly');
-      return NextResponse.json(
-        { error: 'Payment processing is not configured' },
-        { status: 503 }
-      );
+    // Check if Stripe is configured
+    if (!isStripeConfigured()) {
+      console.error('❌ Stripe not configured properly');
+      return NextResponse.json({
+        success: false,
+        error: 'Payment processing temporarily unavailable - Stripe not configured',
+        code: 'STRIPE_NOT_CONFIGURED',
+        action: 'Add Stripe environment variables in Vercel Dashboard',
+        required: ['STRIPE_SECRET_KEY', 'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY', 'STRIPE_WEBHOOK_SECRET']
+      }, { status: 503 });
     }
 
     const session = await auth();
