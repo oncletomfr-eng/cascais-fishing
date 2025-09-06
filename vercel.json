@@ -9,7 +9,8 @@
   "build": {
     "env": {
       "NEXT_TELEMETRY_DISABLED": "1",
-      "PRISMA_CLI_FORCE_INSTALL": "true"
+      "PRISMA_CLI_FORCE_INSTALL": "true",
+      "PRISMA_SKIP_POSTINSTALL_GENERATE": "true"
     }
   }
 }
