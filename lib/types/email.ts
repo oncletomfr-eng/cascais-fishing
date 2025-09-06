@@ -64,9 +64,7 @@ export type EmailTemplate =
   | 'group-booking-confirmation'
   | 'group-trip-confirmed'
   | 'participant-approval'
-  | 'badge-awarded'
-  | 'reminder'
-  | 'cancellation';
+  | 'badge-awarded';
 
 // Import new template props
 export interface ParticipantApprovalNotificationEmailProps {

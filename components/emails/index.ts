@@ -1,7 +1,7 @@
 // Email Templates - Only export React components  
-export { BaseEmailTemplate } from './BaseEmailTemplate';
-export { PrivateBookingConfirmationEmail } from './PrivateBookingConfirmationEmail';
-export { GroupBookingConfirmationEmail } from './GroupBookingConfirmationEmail';
-export { GroupTripConfirmedEmail } from './GroupTripConfirmedEmail';
-export { ParticipantApprovalNotificationEmail } from './ParticipantApprovalNotificationEmail';
-export { BadgeAwardedNotificationEmail } from './BadgeAwardedNotificationEmail';
+export { BaseEmailTemplate } from './BaseEmailTemplate.tsx';
+export { PrivateBookingConfirmationEmail } from './PrivateBookingConfirmationEmail.tsx';
+export { GroupBookingConfirmationEmail } from './GroupBookingConfirmationEmail.tsx';
+export { GroupTripConfirmedEmail } from './GroupTripConfirmedEmail.tsx';
+export { ParticipantApprovalNotificationEmail } from './ParticipantApprovalNotificationEmail.tsx';
+export { BadgeAwardedNotificationEmail } from './BadgeAwardedNotificationEmail.tsx';

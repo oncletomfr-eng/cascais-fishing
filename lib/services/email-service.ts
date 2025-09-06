@@ -20,8 +20,6 @@ const EMAIL_SUBJECTS: Record<EmailTemplate, string> = {
   'group-trip-confirmed': '🎉 Great News - Your Group Trip is Confirmed!',
   'participant-approval': '📋 Update on Your Trip Application',
   'badge-awarded': '🏆 New Achievement Unlocked!',
-  'reminder': '📅 Reminder: Your Fishing Trip Tomorrow',
-  'cancellation': '😔 Trip Cancellation Notice',
 };
 
 // Email sending via dedicated API route - reduces main serverless function size
