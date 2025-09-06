@@ -1,9 +1,8 @@
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-const prisma = new PrismaClient();
 
 /**
  * GET /api/reviews - получение отзывов
