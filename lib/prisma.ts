@@ -1,10 +1,11 @@
 import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
 
 const globalForPrisma = global as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// Production-ready Supabase connection URLs
+// Production-ready Supabase connection URLs  
 const getProductionDatabaseUrl = () => {
   if (process.env.NODE_ENV === 'production') {
     // Use Transaction pooler for serverless functions with pgbouncer=true to disable prepared statements
@@ -13,17 +14,18 @@ const getProductionDatabaseUrl = () => {
   return process.env.DATABASE_URL
 }
 
-export const prisma = globalForPrisma.prisma || 
-  (process.env.NODE_ENV === 'production' 
-    ? new PrismaClient({
-        datasources: {
-          db: {
-            url: getProductionDatabaseUrl()
-          }
-        }
-      })
-    : new PrismaClient()
-  )
+// Create PostgreSQL adapter for QueryCompiler + driverAdapters
+const createPrismaClient = () => {
+  const connectionString = getProductionDatabaseUrl()
+  if (!connectionString) {
+    throw new Error('DATABASE_URL is required')
+  }
+  
+  const adapter = new PrismaPg({ connectionString })
+  return new PrismaClient({ adapter })
+}
+
+export const prisma = globalForPrisma.prisma || createPrismaClient()
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
