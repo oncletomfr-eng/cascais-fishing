@@ -1,11 +1,10 @@
 'use server'
 
 import { auth } from '@/auth'
-import { PrismaClient, BadgeCategory, FishingExperience } from '@prisma/client'
+import { BadgeCategory, FishingExperience } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { awardBadgesBasedOnActivity } from '@/app/api/badges/route'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/prisma'
 
 /**
  * Создание или обновление профиля рыболова

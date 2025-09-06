@@ -12,9 +12,9 @@ import {
   SkillLevelRequired,
   UserRole,
   WeatherCondition,
-  PrismaClient,
   RecommendationType
 } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
 // Инициализация OpenAI клиента с оптимизированными настройками
 // Проверяем наличие API ключа
@@ -68,7 +68,6 @@ const FISHING_CONFIG = {
   }
 };
 
-const prisma = new PrismaClient();
 
 export class SmartRecommendationsServiceV2 {
 

@@ -5,10 +5,8 @@
  * Запуск: npx tsx scripts/seed-full-database.ts
  */
 
-import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 // Устанавливаем locale для португальских данных
 faker.locale = 'pt_BR'; // Португальский для Cascais

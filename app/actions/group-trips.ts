@@ -1,12 +1,11 @@
 'use server';
 
-import { PrismaClient, GroupTripStatus, BookingStatus } from '@prisma/client';
+import { GroupTripStatus, BookingStatus } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { GroupTripUpdate } from '@/lib/types/group-events';
 import { transformTripToDisplay } from '@/lib/utils/group-trips-utils';
 import { auth } from '@/auth';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 /**
  * Создание бронирования в групповой поездке

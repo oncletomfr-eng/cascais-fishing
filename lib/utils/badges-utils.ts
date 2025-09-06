@@ -1,6 +1,5 @@
-import { PrismaClient, BadgeCategory, FishingExperience, FishingSpecialty } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { BadgeCategory, FishingExperience, FishingSpecialty } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
 /**
  * Определения значков с условиями получения

@@ -5,9 +5,7 @@
  * Запуск: npx tsx scripts/analyze-collaborative-filtering-data.ts
  */
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 async function analyzeCollaborativeFilteringData() {
   console.log('🔍 Analyzing data for Collaborative Filtering implementation...\n');

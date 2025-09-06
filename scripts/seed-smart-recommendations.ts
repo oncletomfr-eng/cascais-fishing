@@ -1,8 +1,6 @@
 #!/usr/bin/env tsx
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 async function seedSmartRecommendations() {
   console.log('🧠 Seeding Smart Recommendations data...');

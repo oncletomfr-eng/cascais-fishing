@@ -5,9 +5,8 @@
  * Запуск: npx tsx scripts/seed-captain-recommendations.ts
  */
 
-import { PrismaClient, CaptainRecommendationCategory, ModerationStatus, SkillLevelRequired, FishSpecies, FishingTechnique } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { CaptainRecommendationCategory, ModerationStatus, SkillLevelRequired, FishSpecies, FishingTechnique } from '@prisma/client';
+import prisma from '../lib/prisma';
 
 async function main() {
   console.log('🎣 Creating captain recommendations...');

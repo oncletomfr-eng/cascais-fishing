@@ -5,10 +5,8 @@
  * Запуск: npx tsx scripts/run-collaborative-filtering.ts
  */
 
-import { PrismaClient } from '@prisma/client';
 import { collaborativeFilteringService } from '../lib/services/collaborative-filtering-service';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 async function main() {
   console.log('🎣 Starting Collaborative Filtering for Cascais Fishing...\n');

@@ -2,8 +2,8 @@
  * Скрипт для заполнения базы данных историческими данными об уловах
  * Основан на реальных данных португальского рыболовства в Атлантике
  */
-import { PrismaClient, FishSpecies, LunarPhaseType, FishingTechnique, CatchDataSource } from '@prisma/client';
-const prisma = new PrismaClient();
+import { FishSpecies, LunarPhaseType, FishingTechnique, CatchDataSource } from '@prisma/client';
+import prisma from '../lib/prisma';
 // Реальные данные о рыболовстве в португальских водах
 const PORTUGUESE_FISHING_DATA = {
     // Основные коммерческие виды в районе Cascais

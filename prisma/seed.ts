@@ -3,10 +3,9 @@
  * Запуск: npx prisma db seed
  */
 
-import { PrismaClient, UserRole, FishingExperience, FishingSpecialty, BadgeCategory, ApprovalStatus, GroupTripStatus, TimeSlot, SkillLevelRequired, SocialEventMode, EquipmentType, FishingEventType, AchievementRarity, AchievementType, PaymentStatus, BookingStatus, ParticipantApprovalMode } from '@prisma/client';
+import { UserRole, FishingExperience, FishingSpecialty, BadgeCategory, ApprovalStatus, GroupTripStatus, TimeSlot, SkillLevelRequired, SocialEventMode, EquipmentType, FishingEventType, AchievementRarity, AchievementType, PaymentStatus, BookingStatus, ParticipantApprovalMode } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 async function main() {
   console.log('🎣 Starting comprehensive database seeding...');
