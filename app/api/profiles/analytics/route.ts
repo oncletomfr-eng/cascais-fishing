@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { z } from 'zod'
 // TEMPORARILY DISABLED: badges excluded from deployment to solve 250MB limit
 // import { awardBadgesBasedOnActivity } from '@/app/api/badges/route'
 
-const prisma = new PrismaClient()
 
 // Schema для параметров аналитики
 const analyticsParamsSchema = z.object({
