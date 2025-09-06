@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { PrismaClient, ApprovalStatus } from '@prisma/client'
+import prisma from '@/lib/prisma'
+import { ApprovalStatus } from '@prisma/client'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { sendParticipantApprovalNotification } from '../../../../lib/services/email-service'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 
-const prisma = new PrismaClient()
 
 // Schema для валидации запроса на обновление статуса одобрения
 const approvalUpdateSchema = z.object({

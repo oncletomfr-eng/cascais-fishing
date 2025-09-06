@@ -8,7 +8,6 @@ const serverClient = StreamChat.getInstance(
   process.env.STREAM_CHAT_API_SECRET!
 );
 
-const prisma = new PrismaClient();
 
 // Create or join trip chat channel
 export async function POST(request: NextRequest) {
