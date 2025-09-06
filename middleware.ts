@@ -1,10 +1,8 @@
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 
-// TEMPORARILY DISABLED: Middleware causing 401 Unauthorized on all routes
-// Issue: NextAuth session not properly available in Edge Runtime
-// TODO: Fix NextAuth middleware configuration for production
-/*
+// RESTORED: Middleware for admin route protection
+// NextAuth session should now be available in Edge Runtime
 export default auth((req) => {
   const { nextUrl } = req
   const isLoggedIn = !!req.auth?.user
@@ -48,12 +46,10 @@ export default auth((req) => {
   // Allow all other pages
   return NextResponse.next()
 })
-*/
 
 export const config = {
   matcher: [
-    // DISABLED - NextAuth session not properly available in middleware
-    // Need to investigate session handling in Edge Runtime
-    // '/admin/:path*',
+    // CAREFULLY RESTORED - Only protect admin routes
+    '/admin/:path*',
   ]
 }
