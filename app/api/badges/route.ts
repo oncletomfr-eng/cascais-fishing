@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { PrismaClient, BadgeCategory, FishingExperience } from '@prisma/client'
+import prisma from '@/lib/prisma'
+import { BadgeCategory, FishingExperience } from '@prisma/client'
 import { z } from 'zod'
 
-const prisma = new PrismaClient()
 
 // Schema для создания badge
 const createBadgeSchema = z.object({

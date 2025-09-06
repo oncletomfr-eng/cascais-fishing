@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { collaborativeFilteringService } from '@/lib/services/collaborative-filtering-service';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/lib/prisma';
 
 // GET - получить рекомендации для тестового пользователя
 export async function GET(req: NextRequest) {

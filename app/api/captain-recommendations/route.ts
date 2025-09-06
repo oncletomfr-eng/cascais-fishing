@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 import { CaptainRecommendationCategory, SkillLevelRequired, ModerationStatus } from '@prisma/client';
 
 // GET - получить рекомендации от капитанов
 export async function GET(req: NextRequest) {
-  const prisma = new PrismaClient();
   
   try {
     console.log('Captain recommendations API called');
@@ -91,7 +90,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const prisma = new PrismaClient();
   
   try {
     // Проверяем, что пользователь является капитаном
@@ -166,7 +164,6 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const prisma = new PrismaClient();
   
   try {
     const { searchParams } = new URL(req.url);

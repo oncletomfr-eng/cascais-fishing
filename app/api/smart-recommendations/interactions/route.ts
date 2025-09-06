@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { PrismaClient, RecommendationInteractionType } from '@prisma/client';
+import prisma from '@/lib/prisma';
+import { RecommendationInteractionType } from '@prisma/client';
 
-const prisma = new PrismaClient();
 
 // POST - записать взаимодействие пользователя с рекомендацией
 export async function POST(req: NextRequest) {

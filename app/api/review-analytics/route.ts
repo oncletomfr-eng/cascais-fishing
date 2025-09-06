@@ -5,11 +5,10 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { z } from 'zod'
 import { subMonths, startOfMonth, endOfMonth, format, differenceInDays } from 'date-fns'
 
-const prisma = new PrismaClient()
 
 // Schema for analytics parameters
 const analyticsParamsSchema = z.object({

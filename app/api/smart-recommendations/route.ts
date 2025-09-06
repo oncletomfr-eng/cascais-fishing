@@ -3,7 +3,8 @@ import { auth } from '@/auth';
 import { smartRecommendationsService } from '@/lib/services/smart-recommendations-service';
 import { smartRecommendationsServiceV2 } from '@/lib/services/smart-recommendations-service-v2';
 import { collaborativeFilteringService } from '@/lib/services/collaborative-filtering-service';
-import { RecommendationType, PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
+import { RecommendationType } from '@prisma/client';
 
 // GET - получить персонализированные рекомендации
 export async function GET(req: NextRequest) {
@@ -104,7 +105,6 @@ export async function POST(req: NextRequest) {
 
 // Вспомогательная функция для получения профиля пользователя
 async function getUserProfile(userId: string) {
-  const prisma = new PrismaClient();
 
   try {
     const user = await prisma.user.findUnique({
