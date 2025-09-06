@@ -2,14 +2,16 @@ import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { sendGroupTripConfirmed } from '@/lib/services/email-service';
 
 
 /**
- * GET /api/reviews - получение отзывов
+ * GET /api/reviews - получение отзывов или pending review opportunities
  * Query параметры:
  * - tripId: получить отзывы для конкретной поездки
  * - userId: получить отзывы для конкретного пользователя (полученные)
  * - fromUserId: получить отзывы, оставленные пользователем
+ * - pending: завершенные поездки без отзывов для аутентифицированного пользователя (true/false)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -17,6 +19,87 @@ export async function GET(request: NextRequest) {
     const tripId = url.searchParams.get('tripId');
     const userId = url.searchParams.get('userId');
     const fromUserId = url.searchParams.get('fromUserId');
+    const pending = url.searchParams.get('pending') === 'true';
+
+    // 🔄 Handle pending review opportunities
+    if (pending) {
+      const session = await auth();
+      if (!session?.user?.id) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Authentication required for pending reviews' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Get completed trips where user participated but hasn't left reviews for other participants
+      const completedTrips = await prisma.groupTrip.findMany({
+        where: {
+          date: { lt: new Date() }, // Trip completed
+          bookings: {
+            some: {
+              userId: session.user.id,
+              status: 'CONFIRMED'
+            }
+          }
+        },
+        include: {
+          bookings: {
+            where: { 
+              status: 'CONFIRMED',
+              userId: { not: session.user.id } // Other participants
+            },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  image: true,
+                  email: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Find participants the user hasn't reviewed yet
+      const pendingReviews = [];
+      for (const trip of completedTrips) {
+        for (const booking of trip.bookings) {
+          if (!booking.user) continue;
+          
+          // Check if user already reviewed this participant for this trip
+          const existingReview = await prisma.review.findUnique({
+            where: {
+              tripId_fromUserId_toUserId: {
+                tripId: trip.id,
+                fromUserId: session.user.id,
+                toUserId: booking.user.id
+              }
+            }
+          });
+
+          if (!existingReview) {
+            pendingReviews.push({
+              tripId: trip.id,
+              tripTitle: trip.title || trip.description,
+              tripDate: trip.date,
+              timeSlot: trip.timeSlot,
+              participant: booking.user
+            });
+          }
+        }
+      }
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          pendingReviews,
+          count: pendingReviews.length
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
     let whereClause: any = {};
 
@@ -235,6 +318,141 @@ export async function POST(request: NextRequest) {
       JSON.stringify({ success: false, error: 'Failed to create review' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
+  }
+}
+
+/**
+ * Send review reminders via separate endpoint to avoid conflicts
+ * PUT /api/reviews - отправить напоминания о возможности оставить отзыв
+ * Body: { action: 'send_reminders', tripId?: string }
+ */
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Authentication required' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { action, tripId } = await request.json();
+
+    if (action === 'send_reminders') {
+      const result = await sendReviewReminders(tripId);
+      return new Response(
+        JSON.stringify({ success: true, ...result }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    return new Response(
+      JSON.stringify({ success: false, error: 'Invalid action' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('Error in review PUT:', error);
+    return new Response(
+      JSON.stringify({ success: false, error: 'Failed to process request' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
+/**
+ * Send review reminders to participants of completed trips
+ */
+async function sendReviewReminders(specificTripId?: string) {
+  try {
+    const now = new Date();
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    let whereClause: any = {
+      date: { 
+        lt: oneDayAgo, // Trip completed at least 24 hours ago
+        gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) // Not more than 7 days ago
+      },
+      status: 'CONFIRMED'
+    };
+
+    if (specificTripId) {
+      whereClause.id = specificTripId;
+    }
+
+    const completedTrips = await prisma.groupTrip.findMany({
+      where: whereClause,
+      include: {
+        bookings: {
+          where: { status: 'CONFIRMED' },
+          include: { user: true }
+        }
+      }
+    });
+
+    let emailsSent = 0;
+    let errors = 0;
+
+    for (const trip of completedTrips) {
+      const participants = trip.bookings.filter(b => b.user?.email);
+      
+      for (const booking of participants) {
+        if (!booking.user?.email) continue;
+
+        // Count pending reviews for this participant
+        const otherParticipants = participants.filter(p => p.user?.id !== booking.user?.id);
+        let pendingCount = 0;
+
+        for (const otherBooking of otherParticipants) {
+          const existingReview = await prisma.review.findUnique({
+            where: {
+              tripId_fromUserId_toUserId: {
+                tripId: trip.id,
+                fromUserId: booking.user!.id,
+                toUserId: otherBooking.user!.id
+              }
+            }
+          });
+          if (!existingReview) pendingCount++;
+        }
+
+        // Send email if there are pending reviews
+        if (pendingCount > 0) {
+          try {
+            const emailResult = await sendGroupTripConfirmed(booking.user.email, {
+              customerName: booking.user.name || 'Участник',
+              confirmationCode: `REVIEW-${trip.id}`,
+              date: new Date(trip.date).toLocaleDateString('ru-RU'),
+              time: trip.timeSlot || 'Завершена',
+              totalParticipants: pendingCount,
+              customerPhone: ''
+            });
+
+            if (emailResult.success) {
+              console.log(`📧 Review reminder sent to: ${booking.user.email}`);
+              emailsSent++;
+            } else {
+              console.warn(`⚠️ Failed to send review reminder to ${booking.user.email}:`, emailResult.error);
+              errors++;
+            }
+          } catch (emailError) {
+            console.error(`❌ Review reminder email error for ${booking.user.email}:`, emailError);
+            errors++;
+          }
+        }
+      }
+    }
+
+    return {
+      emailsSent,
+      errors,
+      tripsProcessed: completedTrips.length,
+      message: `Processed ${completedTrips.length} trips, sent ${emailsSent} reminders`
+    };
+
+  } catch (error) {
+    console.error('❌ Error sending review reminders:', error);
+    return { emailsSent: 0, errors: 1, tripsProcessed: 0, error: error.message };
   }
 }
 

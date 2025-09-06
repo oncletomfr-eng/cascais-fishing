@@ -214,7 +214,8 @@
               "description": "Автоматические напоминания за 24ч",
               "dependencies": [
                 "email-3"
-              ]
+              ],
+              "status": "completed"
             },
             {
               "id": "email-adv-3",
@@ -222,7 +223,8 @@
               "description": "Сводки по бронированиям",
               "dependencies": [
                 "email-3"
-              ]
+              ],
+              "status": "completed"
             }
           ]
         }
@@ -297,7 +299,7 @@
                 "reviews-1",
                 "booking-3"
               ],
-              "status": "pending"
+              "status": "completed"
             }
           ]
         }
@@ -322,7 +324,8 @@
               "description": "Уменьшить размер функции, упростить логику",
               "files": [
                 "app/api/badges/route.ts"
-              ]
+              ],
+              "status": "completed"
             },
             {
               "id": "badges-2",
@@ -331,7 +334,8 @@
               "dependencies": [
                 "badges-1"
               ],
-              "riskAssessment": "Может снова превысить 250MB лимит"
+              "riskAssessment": "Может снова превысить 250MB лимит",
+              "status": "completed"
             },
             {
               "id": "badges-3",
@@ -342,7 +346,8 @@
               ],
               "dependencies": [
                 "badges-2"
-              ]
+              ],
+              "status": "completed"
             }
           ]
         },

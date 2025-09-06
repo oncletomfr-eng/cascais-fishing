@@ -1,446 +1,178 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
-import { BadgeCategory, FishingExperience } from '@prisma/client'
-import { z } from 'zod'
+import { BadgeCategory } from '@prisma/client'
+import { sendBadgeAwardedNotification } from '@/lib/services/email-service'
 
-
-// Schema для создания badge
-const createBadgeSchema = z.object({
-  name: z.string().min(1).max(100),
-  description: z.string().max(500).optional(),
-  icon: z.string().max(255),
-  category: z.enum(['ACHIEVEMENT', 'MILESTONE', 'SPECIAL', 'SEASONAL']),
-  requiredValue: z.number().min(0).optional()
-})
-
-/**
- * POST /api/badges - Создание нового badge (только для админов)
- */
-export async function POST(request: NextRequest) {
-  try {
-    console.log('🆕 Creating new badge')
-
-    // Проверяем аутентификацию
-    const session = await auth()
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Проверяем права админа
-    if (session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { success: false, error: 'Admin access required' },
-        { status: 403 }
-      )
-    }
-
-    const body = await request.json()
-    console.log('📋 Request body:', body)
-
-    // Валидируем данные
-    const validationResult = createBadgeSchema.safeParse(body)
-    if (!validationResult.success) {
-      console.error('❌ Validation error:', validationResult.error)
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Invalid request data', 
-          details: validationResult.error.flatten() 
-        },
-        { status: 400 }
-      )
-    }
-
-    const badgeData = validationResult.data
-
-    // Создаем badge (временно создаем для системного профиля)
-    // В реальной системе нужно было бы создавать badge template отдельно
-    const systemProfile = await prisma.fisherProfile.findFirst({
-      where: { user: { role: 'ADMIN' } }
-    })
-
-    if (!systemProfile) {
-      return NextResponse.json(
-        { success: false, error: 'System profile not found' },
-        { status: 500 }
-      )
-    }
-
-    const badge = await prisma.fisherBadge.create({
-      data: {
-        profileId: systemProfile.id,
-        name: badgeData.name,
-        description: badgeData.description || '',
-        icon: badgeData.icon,
-        category: badgeData.category as BadgeCategory,
-        requiredValue: badgeData.requiredValue
-      }
-    })
-
-    console.log('✅ Badge created:', badge.id)
-    
-    return NextResponse.json({
-      success: true,
-      data: badge,
-      message: 'Badge created successfully'
-    })
-    
-  } catch (error) {
-    console.error('❌ Error creating badge:', error)
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    )
-  }
-}
+// Simplified badge definitions for faster processing
+const BADGE_DEFINITIONS = [
+  { name: 'First Trip', description: 'Completed first fishing trip!', icon: '🎣', category: BadgeCategory.MILESTONE, check: (stats: any) => stats.confirmedBookings >= 1 },
+  { name: 'Regular Fisher', description: 'Completed 5+ fishing trips', icon: '🐟', category: BadgeCategory.MILESTONE, check: (stats: any) => stats.completedTrips >= 5 },
+  { name: 'Experienced Angler', description: 'Completed 10+ fishing trips', icon: '🎯', category: BadgeCategory.MILESTONE, check: (stats: any) => stats.completedTrips >= 10 },
+  { name: 'Highly Rated', description: 'Maintained 4.5+ star rating', icon: '⭐', category: BadgeCategory.ACHIEVEMENT, check: (stats: any) => stats.rating >= 4.5 && stats.totalReviews >= 3 },
+  { name: 'Big Catch Master', description: 'Caught 50+ fish', icon: '🐠', category: BadgeCategory.ACHIEVEMENT, check: (stats: any) => stats.totalCatch >= 50 }
+];
 
 /**
- * GET /api/badges - Получение списка доступных badges и пользовательских badges
+ * GET /api/badges - получение badges для пользователя
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId')
-    const category = searchParams.get('category')
-    
-    console.log('🔍 Fetching badges:', { userId, category })
-
-    // Проверяем аутентификацию
     const session = await auth()
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      )
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    let whereCondition: any = {}
-    
-    if (category && ['ACHIEVEMENT', 'MILESTONE', 'SPECIAL', 'SEASONAL'].includes(category)) {
-      whereCondition.category = category as BadgeCategory
-    }
-
-    // Если запрашиваются badges конкретного пользователя
-    if (userId) {
-      // Проверяем права доступа
-      const canAccess = session.user.id === userId || session.user.role === 'ADMIN'
-      if (!canAccess) {
-      return NextResponse.json(
-          { success: false, error: 'Access denied' },
-        { status: 403 }
-        )
-      }
-
-      const userProfile = await prisma.fisherProfile.findUnique({
-        where: { userId },
-        select: { id: true }
-      })
-
-      if (!userProfile) {
-        return NextResponse.json(
-          { success: false, error: 'User profile not found' },
-          { status: 404 }
-        )
-      }
-
-      whereCondition.profileId = userProfile.id
-    }
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('userId') || session.user.id
 
     const badges = await prisma.fisherBadge.findMany({
-      where: whereCondition,
-      include: {
-        profile: {
-          select: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                image: true
-              }
-            }
-          }
-        }
+      where: {
+        profile: { userId }
       },
-      orderBy: [
-        { earnedAt: 'desc' },
-        { category: 'asc' },
-        { name: 'asc' }
-      ]
+      orderBy: { awardedAt: 'desc' }
     })
 
-    console.log(`✅ Found ${badges.length} badges`)
-
-    // Группируем badges по категориям для удобства
-    const badgesByCategory = badges.reduce((acc, badge) => {
-      if (!acc[badge.category]) {
-        acc[badge.category] = []
-      }
-      acc[badge.category].push(badge)
-      return acc
-    }, {} as Record<string, any[]>)
-    
-    return NextResponse.json({
-      success: true,
-      data: {
-        badges,
-        badgesByCategory,
-        stats: {
-          total: badges.length,
-          achievement: badges.filter(b => b.category === 'ACHIEVEMENT').length,
-          milestone: badges.filter(b => b.category === 'MILESTONE').length,
-          special: badges.filter(b => b.category === 'SPECIAL').length,
-          seasonal: badges.filter(b => b.category === 'SEASONAL').length
-        }
-      }
-    })
-    
+    return NextResponse.json({ success: true, badges })
   } catch (error) {
-    console.error('❌ Error fetching badges:', error)
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    )
+    console.error('Error fetching badges:', error)
+    return NextResponse.json({ success: false, error: 'Failed to fetch badges' }, { status: 500 })
   }
 }
 
 /**
- * Автоматическое назначение badges на основе активности пользователя
+ * Optimized badge awarding system - lighter and faster
  */
 export async function awardBadgesBasedOnActivity(userId: string) {
   try {
-    console.log('🏆 Checking badges for user:', userId)
-
+    // Single optimized query to get all needed data
     const profile = await prisma.fisherProfile.findUnique({
       where: { userId },
-      include: {
-        badges: true,
+      select: {
+        id: true,
+        completedTrips: true,
+        totalCatch: true,
+        rating: true,
+        totalReviews: true,
+        badges: { select: { name: true } },
         user: {
-          include: {
+          select: {
             groupBookings: {
               where: { status: 'CONFIRMED' },
-              select: { id: true, createdAt: true }
-            },
-            reviewsReceived: {
-              where: { verified: true },
-              select: { rating: true }
+              select: { id: true }
             }
           }
         }
       }
     })
 
-    if (!profile) {
-      console.log('❌ Profile not found for user:', userId)
-      return []
+    if (!profile) return []
+
+    const existingBadgeNames = new Set(profile.badges.map(b => b.name))
+    const stats = {
+      confirmedBookings: profile.user.groupBookings.length,
+      completedTrips: profile.completedTrips,
+      totalCatch: profile.totalCatch,
+      rating: Number(profile.rating),
+      totalReviews: profile.totalReviews
     }
 
-    const existingBadgeNames = profile.badges.map(badge => badge.name)
-    const newBadges: any[] = []
-
-    // Badge за первое бронирование
-    if (profile.user.groupBookings.length >= 1 && !existingBadgeNames.includes('First Trip')) {
-      const badge = await prisma.fisherBadge.create({
-        data: {
-          profileId: profile.id,
-          name: 'First Trip',
-          description: 'Completed your first fishing trip!',
-          icon: '🎣',
-          category: BadgeCategory.MILESTONE,
-          requiredValue: 1
-        }
-      })
-      newBadges.push(badge)
-      console.log('🏆 Awarded "First Trip" badge')
-      
-      // Отправляем email уведомление о новом достижении
-      await sendBadgeAwardedNotification(userId, badge)
-    }
-
-    // Badge за 5 поездок
-    if (profile.completedTrips >= 5 && !existingBadgeNames.includes('Regular Fisher')) {
-      const badge = await prisma.fisherBadge.create({
-        data: {
-          profileId: profile.id,
-          name: 'Regular Fisher',
-          description: 'Completed 5+ fishing trips',
-          icon: '🐟',
-          category: BadgeCategory.MILESTONE,
-          requiredValue: 5
-        }
-      })
-      newBadges.push(badge)
-      console.log('🏆 Awarded "Regular Fisher" badge')
-      
-      // Отправляем email уведомление о новом достижении
-      await sendBadgeAwardedNotification(userId, badge)
-    }
-
-    // Badge за 10 поездок
-    if (profile.completedTrips >= 10 && !existingBadgeNames.includes('Experienced Angler')) {
-      const badge = await prisma.fisherBadge.create({
-        data: {
-          profileId: profile.id,
-          name: 'Experienced Angler',
-          description: 'Completed 10+ fishing trips',
-          icon: '🎯',
-          category: BadgeCategory.MILESTONE,
-          requiredValue: 10
-        }
-      })
-      newBadges.push(badge)
-      console.log('🏆 Awarded "Experienced Angler" badge')
-      
-      // Отправляем email уведомление о новом достижении
-      await sendBadgeAwardedNotification(userId, badge)
-    }
-
-    // Badge за высокий рейтинг (4.5+)
-    if (profile.rating >= 4.5 && profile.totalReviews >= 3 && 
-        !existingBadgeNames.includes('Highly Rated')) {
-      const badge = await prisma.fisherBadge.create({
-        data: {
-          profileId: profile.id,
-          name: 'Highly Rated',
-          description: 'Maintained 4.5+ star rating',
-          icon: '⭐',
-          category: BadgeCategory.ACHIEVEMENT,
-          requiredValue: null
-        }
-      })
-      newBadges.push(badge)
-      console.log('🏆 Awarded "Highly Rated" badge')
-      
-      // Отправляем email уведомление о новом достижении
-      await sendBadgeAwardedNotification(userId, badge)
-    }
-
-    // Badge за высокую надежность (95%+)
-    if (profile.reliability >= 95 && profile.completedTrips >= 5 && 
-        !existingBadgeNames.includes('Reliable Fisher')) {
-      const badge = await prisma.fisherBadge.create({
-        data: {
-          profileId: profile.id,
-          name: 'Reliable Fisher',
-          description: '95%+ reliability score',
-          icon: '🛡️',
-          category: BadgeCategory.ACHIEVEMENT,
-          requiredValue: null
-        }
-      })
-      newBadges.push(badge)
-      console.log('🏆 Awarded "Reliable Fisher" badge')
-    }
-
-    // Badge за экспертный уровень
-    if (profile.experience === FishingExperience.EXPERT && 
-        !existingBadgeNames.includes('Master Angler')) {
-      const badge = await prisma.fisherBadge.create({
-        data: {
-          profileId: profile.id,
-          name: 'Master Angler',
-          description: 'Reached Expert fishing level',
-          icon: '👑',
-          category: BadgeCategory.SPECIAL,
-          requiredValue: null
-        }
-      })
-      newBadges.push(badge)
-      console.log('🏆 Awarded "Master Angler" badge')
-    }
-
-    // Сезонный badge (пример - winter fishing)
-    const now = new Date()
-    const isWinter = now.getMonth() === 11 || now.getMonth() === 0 || now.getMonth() === 1
+    const newBadges = []
     
-    if (isWinter && profile.user.groupBookings.length >= 1 && 
-        !existingBadgeNames.includes('Winter Fisher')) {
-      
-      // Проверяем, есть ли зимние бронирования
-      const winterBookings = profile.user.groupBookings.filter(booking => {
-        const bookingMonth = booking.createdAt.getMonth()
-        return bookingMonth === 11 || bookingMonth === 0 || bookingMonth === 1
-      })
-      
-      if (winterBookings.length >= 1) {
+    // Process badges efficiently
+    for (const badgeDef of BADGE_DEFINITIONS) {
+      if (!existingBadgeNames.has(badgeDef.name) && badgeDef.check(stats)) {
         const badge = await prisma.fisherBadge.create({
           data: {
             profileId: profile.id,
-            name: 'Winter Fisher',
-            description: 'Went fishing during winter season',
-            icon: '❄️',
-            category: BadgeCategory.SEASONAL,
+            name: badgeDef.name,
+            description: badgeDef.description,
+            icon: badgeDef.icon,
+            category: badgeDef.category,
             requiredValue: null
           }
         })
+        
         newBadges.push(badge)
-        console.log('🏆 Awarded "Winter Fisher" badge')
+        
+        // Send notification asynchronously to avoid blocking
+        sendBadgeAwardedNotification(userId, {
+          customerName: 'Fisher',
+          badgeName: badge.name,
+          badgeDescription: badge.description,
+          badgeIcon: badge.icon,
+          profileUrl: `${process.env.NEXTAUTH_URL}/profile/${userId}`
+        }).catch(console.error)
       }
     }
 
-    console.log(`✅ Awarded ${newBadges.length} new badges to user ${userId}`)
     return newBadges
-
   } catch (error) {
-    console.error('❌ Error awarding badges:', error)
+    console.error('Error awarding badges:', error)
     return []
   }
 }
 
 /**
- * Отправляет email уведомление о получении нового достижения
+ * POST /api/badges - Manual badge awarding (admin only)
  */
-async function sendBadgeAwardedNotification(userId: string, badge: any) {
+export async function POST(request: NextRequest) {
   try {
-    // Получаем пользователя с профилем
-    const user = await prisma.user.findUnique({
-      where: { userId },
-      include: {
-        fisherProfile: {
-          include: {
-            badges: true
-          }
-        }
-      }
-    });
-
-    if (!user?.email) {
-      console.log('⚠️ User email not found, skipping badge notification');
-      return;
+    const session = await auth()
+    if (!session?.user || session.user.role !== 'ADMIN') {
+      return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 403 })
     }
 
-    const profileUrl = `${process.env.NEXTAUTH_URL}/profile`;
-    const totalBadges = user.fisherProfile?.badges.length || 1;
+    const { userId, badgeName, description, icon } = await request.json()
+    
+    const profile = await prisma.fisherProfile.findUnique({
+      where: { userId }
+    })
 
-    await emailService.sendBadgeAwardedNotification({
-      userEmail: user.email,
-      userName: user.name || 'Участник',
-      badge: {
-        name: badge.name,
-        description: badge.description,
-        icon: badge.icon,
-        category: badge.category
-      },
-      totalBadges,
-      profileUrl
-    });
+    if (!profile) {
+      return NextResponse.json({ success: false, error: 'Profile not found' }, { status: 404 })
+    }
 
-    console.log(`📧 Badge notification sent to ${user.email} (${badge.name})`);
+    const badge = await prisma.fisherBadge.create({
+      data: {
+        profileId: profile.id,
+        name: badgeName,
+        description: description || `Manual badge: ${badgeName}`,
+        icon: icon || '🏆',
+        category: BadgeCategory.SPECIAL,
+        requiredValue: null
+      }
+    })
 
+    return NextResponse.json({ success: true, badge })
   } catch (error) {
-    console.error('Error sending badge notification:', error);
+    console.error('Error creating badge:', error)
+    return NextResponse.json({ success: false, error: 'Failed to create badge' }, { status: 500 })
   }
 }
 
-// Функция экспортирована выше как named export
+/**
+ * PUT /api/badges - Trigger badge check for user
+ */
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { userId } = await request.json()
+    const targetUserId = userId || session.user.id
+
+    const newBadges = await awardBadgesBasedOnActivity(targetUserId)
+    
+    return NextResponse.json({ 
+      success: true, 
+      awardedbadges: newBadges.length,
+      badges: newBadges 
+    })
+  } catch (error) {
+    console.error('Error checking badges:', error)
+    return NextResponse.json({ success: false, error: 'Failed to check badges' }, { status: 500 })
+  }
+}

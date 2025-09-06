@@ -11,7 +11,6 @@ app/api/admin/
 app/api/chat/files/
 app/api/data-export/
 app/api/achievements/
-app/api/badges/
 app/api/commission-*/
 app/api/earnings-*/
 app/api/leaderboard/
