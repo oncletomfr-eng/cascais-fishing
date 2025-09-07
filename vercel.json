@@ -4,6 +4,15 @@
       "memory": 256,
       "maxDuration": 10,
       "includeFiles": "node_modules/@prisma/engines/**"
+    },
+    "app/api/admin/health/route.ts": {
+      "memory": 128,
+      "maxDuration": 15,
+      "includeFiles": "node_modules/@prisma/engines/**"
+    },
+    "app/api/**": {
+      "memory": 128,
+      "maxDuration": 30
     }
   },
   "build": {

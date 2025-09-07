@@ -1,0 +1,45 @@
+{
+  "timestamp": "2025-09-07T22:33:32.822Z",
+  "coldStart": {
+    "healthCheck": 755.210070000001,
+    "simpleApi": 528.7514760000049,
+    "average": 641.980773000003
+  },
+  "warmResponse": {
+    "healthCheck": [
+      494.06722499999887,
+      518.2512129999959,
+      533.9998020000057,
+      470.9690520000004,
+      510.59619699999894
+    ],
+    "simpleApi": [
+      392.7180789999984,
+      377.5100839999941,
+      347.5832420000006,
+      339.83833400000003,
+      342.236662000003
+    ],
+    "average": 432.7769889999996
+  },
+  "memoryUsage": {
+    "heapUsed": 9,
+    "heapTotal": 17,
+    "external": 3,
+    "rss": 104
+  },
+  "databaseTiming": {
+    "connectionTime": 3310.16582,
+    "queryTime": 496,
+    "poolStatus": {
+      "total": 60,
+      "active": 1,
+      "idle": 4
+    }
+  },
+  "systemInfo": {
+    "nodeVersion": "v20.19.4",
+    "platform": "darwin",
+    "uptime": 0
+  }
+}

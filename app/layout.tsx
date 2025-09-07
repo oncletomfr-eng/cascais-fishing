@@ -8,6 +8,8 @@ import QueryProvider from "@/components/providers/QueryProvider"
 import { EnhancedThemeProvider } from "@/components/design-system/EnhancedThemeProvider"
 import GlobalHeader from "@/components/layout/GlobalHeader"
 import GlobalWeatherAlerts from "@/components/weather/GlobalWeatherAlerts"
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/react"
 import "./globals.css"
 import "../styles/design-system.css"
 
@@ -63,6 +65,8 @@ export default function RootLayout({
             </SessionProvider>
           </ErrorProvider>
         </EnhancedThemeProvider>
+        <SpeedInsights />
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   )
