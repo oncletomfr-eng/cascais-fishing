@@ -4,8 +4,9 @@
  */
 
 import NextAuth from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "@/lib/prisma"
+// Temporarily removed PrismaAdapter to fix Vercel Edge Runtime issue
+// import { PrismaAdapter } from "@auth/prisma-adapter"
+// import { prisma } from "@/lib/prisma"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GitHubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
@@ -17,9 +18,10 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  // Temporarily removed adapter to fix Vercel Edge Runtime WASM issue
+  // adapter: PrismaAdapter(prisma),
   session: {
-    strategy: "jwt",
+    strategy: "jwt", // Using JWT-only strategy for now
   },
   pages: {
     signIn: "/auth/signin",
@@ -92,21 +94,34 @@ export const {
   ],
   callbacks: {
     async jwt({ token, user, account }) {
+      // Add user data to token on first sign in
       if (user) {
         token.id = user.id
-        token.role = user.role || "user"
+        token.role = user.role || "PARTICIPANT" // Default role
+        token.email = user.email
+        token.name = user.name
+        token.image = user.image
       }
       return token
     },
     async session({ session, token }) {
+      // Send properties to the client
       if (token) {
         session.user.id = token.id as string
         session.user.role = token.role as string
+        session.user.email = token.email as string
+        session.user.name = token.name as string
+        session.user.image = token.image as string
       }
       return session
     },
     async signIn({ user, account, profile }) {
-      // Allow sign in for all providers
+      // Allow sign in for OAuth providers (Google, GitHub)
+      if (account?.provider === "google" || account?.provider === "github") {
+        return true
+      }
+      
+      // For credentials provider, user validation is handled in authorize()
       return true
     },
   },
