@@ -130,12 +130,12 @@ export async function testStreamChatConnection(): Promise<{
     if (config.apiSecret && typeof window === 'undefined') {
       const client = getStreamChatServerClient();
       
-      // Test connection by fetching app info
-      const appInfo = await client.getAppInfo();
+      // Test connection with a simple query instead of getAppInfo
+      const testResult = await client.queryUsers({ id: { $in: ['connection-test'] } });
       
       return {
         success: true,
-        message: `Stream Chat connected successfully to app: ${appInfo.app?.name || 'Unknown'}`,
+        message: `Stream Chat connected successfully (API key: ${config.apiKey.substring(0, 8)}...)`,
         environment: config.environment,
         apiKeyValid: true
       };
@@ -310,7 +310,10 @@ export async function streamChatHealthCheck(): Promise<{
     // Check 2: Connection test (server-side only)
     if (typeof window === 'undefined' && config.apiSecret) {
       const client = getStreamChatServerClient();
-      await client.getAppInfo();
+      
+      // Test connection with a simple query instead of getAppInfo
+      // This is more reliable for health checks
+      const testResult = await client.queryUsers({ id: { $in: ['health-check-test'] } });
       checks.connectionEstablished = true;
       
       // Check 3: Token generation test
