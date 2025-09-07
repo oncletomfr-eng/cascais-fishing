@@ -53,6 +53,11 @@ const createPrismaClient = () => {
   const adapter = new PrismaPg(connectionPool)
   
   // Initialize Prisma Client with adapter (WASM-free with queryCompiler preview)
+  console.log('🔧 Creating PrismaClient with PostgreSQL adapter - NO WASM FILES SHOULD BE LOADED')
+  console.log('🔧 Adapter type:', adapter.constructor.name)
+  console.log('🔧 Environment:', process.env.NODE_ENV)
+  console.log('🔧 Database URL type:', typeof process.env.DATABASE_URL)
+  
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error']
