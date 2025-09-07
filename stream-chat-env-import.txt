@@ -1,9 +1,0 @@
-# Stream Chat Environment Variables for Vercel Import
-# Эти переменные отсутствуют в Vercel и нужны для работы Stream Chat в production
-# Используйте кнопку "Import .env" в Vercel Dashboard для импорта этого файла
-
-# Public API Key для Stream Chat (используется в frontend)
-NEXT_PUBLIC_STREAM_CHAT_API_KEY=8k83mgjc5mtt
-
-# Secret API Key для Stream Chat (используется в backend/server-side)
-STREAM_CHAT_API_SECRET=nx3f8rrnyhv68w9y64yj2k8jrqxrhhrmnchpr2uuxu94nbd7799qxdu95gqnv2u4
