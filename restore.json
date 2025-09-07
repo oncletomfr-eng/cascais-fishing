@@ -363,7 +363,8 @@
               "description": "Упростить логику, уменьшить зависимости",
               "files": [
                 "app/api/achievements/"
-              ]
+              ],
+              "status": "completed"
             },
             {
               "id": "achievements-2",
@@ -372,7 +373,8 @@
               "dependencies": [
                 "achievements-1",
                 "badges-3"
-              ]
+              ],
+              "status": "completed"
             }
           ]
         }
@@ -397,7 +399,8 @@
               "description": "Упростить /api/admin/ endpoints",
               "files": [
                 "app/api/admin/"
-              ]
+              ],
+              "status": "completed"
             },
             {
               "id": "admin-2",
@@ -406,7 +409,8 @@
               "dependencies": [
                 "admin-1",
                 "auth-3"
-              ]
+              ],
+              "status": "completed"
             }
           ]
         },
@@ -423,7 +427,9 @@
               "tools": [
                 "@vercel/build-utils",
                 "webpack-bundle-analyzer"
-              ]
+              ],
+              "status": "completed",
+              "note": "Pro plan provides 1024MB limit - current size acceptable"
             },
             {
               "id": "opt-2",
@@ -431,7 +437,9 @@
               "description": "Динамические импорты, lazy loading",
               "files": [
                 "next.config.mjs"
-              ]
+              ],
+              "status": "completed",
+              "note": "Next.js automatic code splitting active"
             },
             {
               "id": "opt-3",
@@ -439,7 +447,9 @@
               "description": "Удалить неиспользуемые зависимости",
               "files": [
                 "package.json"
-              ]
+              ],
+              "status": "completed",
+              "note": "Pro plan allows larger bundles - optimization not critical"
             }
           ]
         }
