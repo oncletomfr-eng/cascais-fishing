@@ -35,11 +35,14 @@ NEXT_PUBLIC_STREAM_CHAT_API_KEY=[YOUR_STREAM_CHAT_API_KEY]
 STREAM_CHAT_API_SECRET=[YOUR_STREAM_CHAT_API_SECRET]
 ```
 
-### 5. Database (Supabase production):
+### 5. Database (Supabase production) - ✅ ИСПРАВЛЕНО 2025-01-10:
 ```
-DATABASE_URL=postgresql://postgres.[PROJECT_ID]:[PASSWORD]@aws-0-eu-west-3.pooler.supabase.com:5432/postgres
-DIRECT_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT_ID].supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres.spblkbrkxmknfjugoueo:sdbSV_232sdsfbdKSK@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true
 ```
+**КРИТИЧНО:** 
+- ✅ Port 6543 (Transaction Pooler) для Vercel serverless  
+- ✅ pgbouncer=true для connection pooling
+- ✅ Протестировано и работает с новым Prisma client
 
 ### 6. Stripe (production keys):
 ```
@@ -90,6 +93,7 @@ NOAA_CDO_API_TOKEN=[YOUR_NOAA_API_TOKEN]
 2. ✅ Google OAuth должен работать без ошибок  
 3. ✅ GitHub OAuth должен работать без ошибок
 4. ✅ https://www.cascaisfishing.com/api/chat/health → status: "healthy"
+5. 🔥 **КРИТИЧНО:** https://www.cascaisfishing.com/api/profiles → должен возвращать JSON массив профилей (НЕ "Failed to fetch profiles")
 
 ---
 
