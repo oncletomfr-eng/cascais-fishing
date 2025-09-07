@@ -20,41 +20,41 @@ AUTH_TRUST_HOST=true
 ### 2. Google OAuth (NextAuth v5 format):
 ```
 AUTH_GOOGLE_ID=268443624329-0tningcfnejjev0fngg1uh9pct123hpp.apps.googleusercontent.com
-AUTH_GOOGLE_SECRET=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
+AUTH_GOOGLE_SECRET=[YOUR_GOOGLE_OAUTH_SECRET]
 ```
 
 ### 3. GitHub OAuth (NextAuth v5 format):
 ```
 AUTH_GITHUB_ID=Ov23lidOAF9VzbED5CvV
-AUTH_GITHUB_SECRET=9ef7cb02b0219463d7133b700ba21b0f6bc78a6d
+AUTH_GITHUB_SECRET=[YOUR_GITHUB_OAUTH_SECRET]
 ```
 
 ### 4. Stream Chat (production keys):
 ```
-NEXT_PUBLIC_STREAM_CHAT_API_KEY=8k83mgjc5mtt
-STREAM_CHAT_API_SECRET=nx3f8rrnyhv68w9y64yj2k8jrqxrhhrmnchpr2uuxu94nbd7799qxdu95gqnv2u4
+NEXT_PUBLIC_STREAM_CHAT_API_KEY=[YOUR_STREAM_CHAT_API_KEY]
+STREAM_CHAT_API_SECRET=[YOUR_STREAM_CHAT_API_SECRET]
 ```
 
 ### 5. Database (Supabase production):
 ```
-DATABASE_URL=postgresql://postgres.spblkbrkxmknfjugoueo:sdbSV_232sdsfbdKSK@aws-0-eu-west-3.pooler.supabase.com:5432/postgres
-DIRECT_URL=postgresql://postgres:sdbSV_232sdsfbdKSK@db.spblkbrkxmknfjugoueo.supabase.co:5432/postgres
+DATABASE_URL=postgresql://postgres.[PROJECT_ID]:[PASSWORD]@aws-0-eu-west-3.pooler.supabase.com:5432/postgres
+DIRECT_URL=postgresql://postgres:[PASSWORD]@db.[PROJECT_ID].supabase.co:5432/postgres
 ```
 
 ### 6. Stripe (production keys):
 ```
-STRIPE_SECRET_KEY=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
+STRIPE_SECRET_KEY=sk_live_[YOUR_STRIPE_SECRET_KEY_HERE]
 ```
 
 ### 7. AI Services:
 ```
-OPENAI_API_KEY=sk-proj-QWTB8qCKhRXx7L6QjVYhP9uT3BlbkFJyN8sH4vGfCdE2rMzA1K
+OPENAI_API_KEY=sk-proj-[YOUR_OPENAI_API_KEY_HERE]
 ```
 
 ### 8. Weather APIs:
 ```
-NASA_API_KEY=PezDXIin60MfVTtTbeJXfXXv8fZNuC22g89RRea6
-NOAA_CDO_API_TOKEN=XDzuydbinQFtYJDkrDXCyTwPJzVHYQTE
+NASA_API_KEY=[YOUR_NASA_API_KEY]
+NOAA_CDO_API_TOKEN=[YOUR_NOAA_API_TOKEN]
 ```
 
 ---
