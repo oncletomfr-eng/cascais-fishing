@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
 import { 
   Loader2, 
   CreditCard, 
@@ -21,7 +22,9 @@ import {
   DollarSign,
   Settings,
   Zap,
-  Code2
+  Code2,
+  RefreshCw,
+  X
 } from 'lucide-react';
 import { PaymentDemo, useCreatePaymentIntent } from '@/components/payment/RealStripeIntegration';
 import { StyledPaymentElements, type PaymentFormData } from '@/components/payment/StyledPaymentElements';
@@ -31,6 +34,7 @@ import { usePaymentFlow, usePaymentValidation, usePaymentAnalytics, type Payment
 import { usePaymentIntentManagement } from '@/hooks/usePaymentIntentManagement';
 import { isStripeConfigured } from '@/lib/stripe-config';
 import { useSession } from 'next-auth/react';
+import { cn } from '@/lib/utils';
 
 export default function StripeElementsTestPage() {
   const { data: session, status } = useSession();
