@@ -169,6 +169,27 @@ const nextConfig = {
         '__tests__': false,
         'e2e-tests': false,
       };
+
+      // 🔥 CRITICAL FIX: Prisma WASM files in Vercel serverless
+      // Fixes: ENOENT: no such file or directory, open '.../query_compiler_bg.wasm'
+      config.experiments = {
+        ...config.experiments,
+        asyncWebAssembly: true,
+        layers: true,
+        topLevelAwait: true
+      };
+
+      // Handle WASM files properly for serverless deployment
+      config.module.rules.push({
+        test: /\.wasm$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'static/wasm/[name].[hash][ext]'
+        }
+      });
+
+      // Ensure Prisma client is externalized correctly
+      config.externals = [...(config.externals || []), '@prisma/client'];
     }
 
     // Tree shaking improvements
