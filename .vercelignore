@@ -20,9 +20,9 @@ app/api/seasonal-*/
 app/api/subscription-*/
 app/api/tax-*/
 
-# ALL TEST PAGES - HUGE SIZE REDUCTION!
-app/test-*/
-public/test-*
+# NOTE: Re-enabling test pages for development/testing purposes
+# app/test-*/  # COMMENTED OUT - Test pages needed in production
+# public/test-*  # COMMENTED OUT - Public test assets may be needed
 
 # Test files (safe to exclude)
 __tests__/
