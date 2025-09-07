@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
         name: true,
         image: true,
         password: true,
+        role: true, // ✅ ИСПРАВЛЕНИЕ: добавляем роль для admin access
       }
     })
 

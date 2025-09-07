@@ -6,6 +6,8 @@ import { NextResponse } from "next/server"
 export default auth((req) => {
   const { nextUrl } = req
   const isLoggedIn = !!req.auth?.user
+  const userRole = req.auth?.user?.role
+  const isAdmin = userRole === 'ADMIN'
   const isOnAdminPage = nextUrl.pathname.startsWith('/admin')
   const isOnLoginPage = nextUrl.pathname === '/admin/login'
 
@@ -14,7 +16,8 @@ export default auth((req) => {
     isLoggedIn,
     user: req.auth?.user ? 'EXISTS' : 'NULL',
     userEmail: req.auth?.user?.email,
-    userRole: req.auth?.user?.role
+    userRole,
+    isAdmin
   })
 
   // Skip middleware for API routes (including NextAuth API routes)
@@ -25,21 +28,29 @@ export default auth((req) => {
 
   // Allow access to login page for unauthenticated users
   if (isOnLoginPage) {
-    if (isLoggedIn) {
-      console.log('✅ Authenticated user on login page, redirecting to /admin')
+    if (isLoggedIn && isAdmin) {
+      console.log('✅ Admin user on login page, redirecting to /admin')
       return NextResponse.redirect(new URL('/admin', nextUrl))
+    }
+    if (isLoggedIn && !isAdmin) {
+      console.log('❌ Authenticated non-admin user on login page, access denied')
+      return NextResponse.redirect(new URL('/', nextUrl))
     }
     console.log('🔓 Allowing unauthenticated access to login page')
     return NextResponse.next()
   }
 
-  // Protect all other admin pages
+  // ✅ ИСПРАВЛЕНИЕ: Protect all admin pages with ADMIN role check
   if (isOnAdminPage) {
     if (!isLoggedIn) {
       console.log('❌ Unauthenticated user on admin page, redirecting to login')
       return NextResponse.redirect(new URL('/admin/login', nextUrl))
     }
-    console.log('✅ Authenticated user accessing admin page')
+    if (!isAdmin) {
+      console.log('❌ Authenticated non-admin user on admin page, access denied')
+      return NextResponse.redirect(new URL('/', nextUrl))
+    }
+    console.log('✅ Admin user accessing admin page')
     return NextResponse.next()
   }
 

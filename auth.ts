@@ -97,10 +97,34 @@ export const {
       // Add user data to token on first sign in
       if (user) {
         token.id = user.id
-        token.role = user.role || "PARTICIPANT" // Default role
         token.email = user.email
         token.name = user.name
         token.image = user.image
+        
+        // ✅ ИСПРАВЛЕНИЕ: правильно получаем роль для всех провайдеров
+        if (user.role) {
+          // Роль пришла из credentials provider (уже содержит роль из БД)
+          token.role = user.role
+        } else if (account?.provider && (account.provider === "google" || account.provider === "github")) {
+          // Для OAuth провайдеров загружаем роль из БД
+          try {
+            // TODO: Временно используем dynamic import для Prisma в Edge Runtime
+            // const { prisma } = await import('@/lib/prisma')
+            // const dbUser = await prisma.user.findUnique({
+            //   where: { email: user.email },
+            //   select: { role: true }
+            // })
+            // token.role = dbUser?.role || "PARTICIPANT"
+            
+            // Временное решение: используем default роль для OAuth
+            token.role = "PARTICIPANT" // Будет исправлено после настройки Prisma в Edge Runtime
+          } catch (error) {
+            console.error("Error loading user role:", error)
+            token.role = "PARTICIPANT"
+          }
+        } else {
+          token.role = "PARTICIPANT" // Default fallback
+        }
       }
       return token
     },

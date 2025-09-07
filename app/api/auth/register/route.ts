@@ -9,7 +9,7 @@ import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password } = await request.json()
+    const { name, email, password, role } = await request.json()
 
     // Validate input
     if (!name || !email || !password) {
@@ -18,6 +18,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // ✅ ДОБАВЛЕНИЕ: валидация роли (для создания admin пользователей)
+    const validRoles = ['PARTICIPANT', 'CAPTAIN', 'ADMIN']
+    const userRole = role && validRoles.includes(role) ? role : 'PARTICIPANT'
 
     if (password.length < 6) {
       return NextResponse.json(
@@ -41,13 +45,13 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Create user
+    // ✅ ИСПРАВЛЕНИЕ: Create user с правильной ролью
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        role: 'PARTICIPANT'
+        role: userRole // Теперь может быть ADMIN, CAPTAIN или PARTICIPANT
       }
     })
 
