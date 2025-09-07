@@ -213,7 +213,7 @@ export async function generateUserToken(
       ? { exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60 } // 24 hours in production
       : undefined; // No expiration in development
     
-    const token = client.createUserToken(userId, tokenOptions?.exp);
+    const token = client.createToken(userId, tokenOptions?.exp);
     
     console.log(`🔑 Generated Stream Chat token for user: ${userId}`);
     
@@ -317,8 +317,14 @@ export async function streamChatHealthCheck(): Promise<{
       checks.connectionEstablished = true;
       
       // Check 3: Token generation test
-      const testToken = client.createUserToken('health-check-user');
-      checks.authenticationWorking = !!testToken;
+      // Try different token creation methods for Stream Chat v9
+      try {
+        const testToken = client.createToken('health-check-user');
+        checks.authenticationWorking = !!testToken;
+      } catch (tokenError) {
+        console.warn('⚠️ Token creation test failed:', tokenError);
+        checks.authenticationWorking = false;
+      }
     }
     
     const allHealthy = Object.values(checks).every(check => check);
