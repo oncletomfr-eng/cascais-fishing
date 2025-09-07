@@ -74,6 +74,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Production optimizations for Vercel
+  poweredByHeader: false,
+  // Increase timeout for complex static generation
+  staticPageGenerationTimeout: 300,
   // Disable preloading to reduce memory usage
   experimental: {
     preloadEntriesOnStart: false,

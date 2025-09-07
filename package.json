@@ -169,8 +169,5 @@
         "react-dom": "$react-dom"
       }
     }
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
   }
 }

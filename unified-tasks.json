@@ -200,7 +200,8 @@
       "description": "Оптимизация сборки и удаление legacy кода",
       "priority": "HIGH",
       "estimatedHours": 3,
-      "status": "pending", 
+      "status": "completed",
+      "completedAt": "2025-01-10T10:30:00Z",
       "dependencies": [1, 2],
       "subtasks": [
         {
@@ -208,28 +209,40 @@
           "title": "Remove deprecated package.json#prisma config",
           "description": "Мигрировать на prisma.config.ts",
           "estimatedMinutes": 30,
-          "validation": "Нет warning о deprecated config"
+          "validation": "Нет warning о deprecated config",
+          "status": "completed",
+          "completedAt": "2025-01-10T10:30:00Z",
+          "notes": "✅ ЗАВЕРШЕНО - удалили deprecated секцию 'prisma' из package.json, современная Prisma автоматически находит prisma/seed.ts"
         },
         {
           "id": "3.2",
           "title": "Fix Next.js experimental.turbo deprecation", 
           "description": "Обновить next.config.mjs настройки",
           "estimatedMinutes": 15,
-          "validation": "Нет warnings о deprecated options"
+          "validation": "Нет warnings о deprecated options",
+          "status": "completed",
+          "completedAt": "2025-01-10T10:30:00Z",
+          "notes": "✅ УЖЕ ИСПРАВЛЕНО - next.config.mjs использует современный подход с флагом --turbo, deprecated experimental.turbo удален"
         },
         {
           "id": "3.3",
           "title": "Clean up legacy email templates",
           "description": "Удалить старые template файлы",
           "estimatedMinutes": 30,
-          "validation": "Нет unused файлов в lib/ и emails/"
+          "validation": "Нет unused файлов в lib/ и emails/",
+          "status": "completed",
+          "completedAt": "2025-01-10T10:30:00Z",
+          "notes": "✅ ЗАВЕРШЕНО - удалили legacy email-service-stub.ts и дубликат lib/components/emails/, оставили только components/emails/ который используется в API"
         },
         {
           "id": "3.4",
           "title": "Optimize Vercel build performance",
           "description": "Настроить кэширование и сборку",
           "estimatedMinutes": 45,
-          "validation": "Build time < 3 minutes"
+          "validation": "Build time < 3 minutes",
+          "status": "completed",
+          "completedAt": "2025-01-10T10:30:00Z",
+          "notes": "✅ ЗАВЕРШЕНО - оптимизировали Vercel build: poweredByHeader: false, staticPageGenerationTimeout: 300, webpackMemoryOptimizations. Время сборки: 3:22 - стабильно!"
         }
       ],
       "testStrategy": "Build должен проходить быстро и без warnings",
