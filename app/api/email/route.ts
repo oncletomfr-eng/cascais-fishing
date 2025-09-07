@@ -1,7 +1,23 @@
-// Minimal email endpoint with actual sending capability
+// Minimal email endpoint with React Email components
 import { NextRequest, NextResponse } from 'next/server';
 import { resend, isEmailConfigured, getFromAddress, validateEmail, logEmailAttempt } from '@/lib/resend';
-import { EMAIL_TEMPLATES, isValidTemplateName } from '@/lib/email-templates';
+import { render } from '@react-email/components';
+import * as React from 'react';
+
+// Import React Email Templates
+import { PrivateBookingConfirmationEmail } from '@/components/emails/PrivateBookingConfirmationEmail';
+import { GroupBookingConfirmationEmail } from '@/components/emails/GroupBookingConfirmationEmail'; 
+import { GroupTripConfirmedEmail } from '@/components/emails/GroupTripConfirmedEmail';
+import { ParticipantApprovalNotificationEmail } from '@/components/emails/ParticipantApprovalNotificationEmail';
+import { BadgeAwardedNotificationEmail } from '@/components/emails/BadgeAwardedNotificationEmail';
+
+import type {
+  PrivateBookingConfirmationEmailProps,
+  GroupBookingConfirmationEmailProps,
+  GroupTripConfirmedEmailProps,
+  ParticipantApprovalNotificationEmailProps,
+  BadgeAwardedNotificationEmailProps,
+} from '@/lib/types/email';
 
 // Email subjects mapping
 const EMAIL_SUBJECTS: Record<string, string> = {
@@ -10,28 +26,32 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'group-booking-confirmation': '🎣 You\'ve Joined the Fishing Crew!',
   'group-trip-confirmed': '🎉 Great News - Your Group Trip is Confirmed!',
   
-  // Cancellation templates
-  'trip-cancellation': '😔 Trip Cancellation Notice',
-  'customer-cancellation-confirmation': '📋 Cancellation Confirmed',
-  'weather-cancellation': '🌊 Weather Safety Cancellation',
-  
-  // Payment templates
-  'payment-confirmation': '💳 Payment Confirmed!',
-  'payment-failed': '❌ Payment Failed',
-  'refund-confirmation': '💰 Refund Processed',
-  
-  // Legacy/other templates
+  // Notification templates  
   'participant-approval': '📋 Update on Your Trip Application',
   'badge-awarded': '🏆 New Achievement Unlocked!',
-  'reminder': '📅 Reminder: Your Fishing Trip Tomorrow',
-  'cancellation': '😔 Trip Cancellation Notice',
+  
+  // Test template
   'test-email': '🧪 Test Email - Cascais Fishing'
+};
+
+// React Email Templates mapping
+const EMAIL_TEMPLATES: Record<string, (props: any) => React.ReactElement> = {
+  'private-booking-confirmation': (props: PrivateBookingConfirmationEmailProps) => PrivateBookingConfirmationEmail(props),
+  'group-booking-confirmation': (props: GroupBookingConfirmationEmailProps) => GroupBookingConfirmationEmail(props),
+  'group-trip-confirmed': (props: GroupTripConfirmedEmailProps) => GroupTripConfirmedEmail(props),
+  'participant-approval': (props: ParticipantApprovalNotificationEmailProps) => ParticipantApprovalNotificationEmail(props),
+  'badge-awarded': (props: BadgeAwardedNotificationEmailProps) => BadgeAwardedNotificationEmail(props),
+};
+
+// Validate template exists
+const isValidTemplateName = (name: string): name is keyof typeof EMAIL_TEMPLATES => {
+  return name in EMAIL_TEMPLATES;
 };
 
 export async function POST(request: NextRequest) {
   try {
     // DEBUG: Version identifier for deployment verification
-    console.log('📧 Email API v2.1 - Enhanced DKIM error handling');
+    console.log('📧 Email API v3.0 - React Email Components');
     
     const { template, to, data, subject: customSubject } = await request.json();
     
@@ -43,7 +63,7 @@ export async function POST(request: NextRequest) {
         success: false, 
         error: emailValidation.error 
       }, { status: 400 });
-      validationErrorResponse.headers.set('X-Email-API-Version', 'v2.1-enhanced-dkim');
+      validationErrorResponse.headers.set('X-Email-API-Version', 'v3.0-react-email');
       return validationErrorResponse;
     }
 
@@ -57,23 +77,25 @@ export async function POST(request: NextRequest) {
         error: 'Email service not configured. Add RESEND_API_KEY, RESEND_FROM_EMAIL, RESEND_FROM_NAME to environment variables.',
         code: 'EMAIL_NOT_CONFIGURED'
       }, { status: 503 });
-      configErrorResponse.headers.set('X-Email-API-Version', 'v2.1-enhanced-dkim');
+      configErrorResponse.headers.set('X-Email-API-Version', 'v3.0-react-email');
       return configErrorResponse;
     }
 
-    // Generate HTML content using new template system
+    // Generate HTML content using React Email components
     if (!isValidTemplateName(template)) {
       logEmailAttempt(to, 'Unknown Template', template, false, `Template '${template}' not found`);
       const templateErrorResponse = NextResponse.json({ 
         success: false, 
         error: `Email template '${template}' not found. Available: ${Object.keys(EMAIL_TEMPLATES).join(', ')}` 
       }, { status: 400 });
-      templateErrorResponse.headers.set('X-Email-API-Version', 'v2.1-enhanced-dkim');
+      templateErrorResponse.headers.set('X-Email-API-Version', 'v3.0-react-email');
       return templateErrorResponse;
     }
 
-    const templateFunc = EMAIL_TEMPLATES[template];
-    const htmlContent = templateFunc(data);
+    // Render React Email component to HTML
+    const templateComponent = EMAIL_TEMPLATES[template];
+    const emailElement = templateComponent(data);
+    const htmlContent = await render(emailElement);
     const subject = customSubject || EMAIL_SUBJECTS[template] || `Cascais Fishing - ${template}`;
 
     // Send email using Resend
@@ -105,7 +127,7 @@ export async function POST(request: NextRequest) {
             next_steps: 'Contact DNS provider to add DKIM TXT record'
           }
           }, { status: 403 });
-        dkimErrorResponse.headers.set('X-Email-API-Version', 'v2.1-enhanced-dkim');
+        dkimErrorResponse.headers.set('X-Email-API-Version', 'v3.0-react-email');
         return dkimErrorResponse;
       }
       
@@ -113,7 +135,7 @@ export async function POST(request: NextRequest) {
         success: false, 
         error: response.error.message 
       }, { status: 500 });
-      errorResponse.headers.set('X-Email-API-Version', 'v2.1-enhanced-dkim');
+      errorResponse.headers.set('X-Email-API-Version', 'v3.0-react-email');
       return errorResponse;
     }
 
@@ -123,9 +145,11 @@ export async function POST(request: NextRequest) {
     const successResponse = NextResponse.json({ 
       success: true, 
       messageId: response.data?.id,
-      message: 'Email sent successfully'
+      message: 'Email sent successfully',
+      template: template,
+      renderer: 'react-email'
     });
-    successResponse.headers.set('X-Email-API-Version', 'v2.1-enhanced-dkim');
+    successResponse.headers.set('X-Email-API-Version', 'v3.0-react-email');
     return successResponse;
     
   } catch (error) {

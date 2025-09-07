@@ -1,0 +1,1006 @@
+{
+  "meta": {
+    "title": "Cascais Fishing - Unified Implementation Plan",
+    "description": "Объединенный план всех оставшихся задач с приоритизацией и разбивкой на подзадачи",
+    "version": "1.0.0",
+    "created": "2025-01-10",
+    "totalEstimatedHours": 180,
+    "phases": 6,
+    "totalTasks": 32
+  },
+  
+  "phases": [
+    {
+      "id": "P1_CRITICAL_FIXES",
+      "name": "Phase 1: Critical Technical Fixes",
+      "description": "Устранение блокирующих проблем сборки и деплоя",
+      "priority": "CRITICAL",
+      "estimatedHours": 8,
+      "status": "pending"
+    },
+    {
+      "id": "P2_MONITORING", 
+      "name": "Phase 2: Basic Monitoring Setup",
+      "description": "Базовый мониторинг для production stability",
+      "priority": "HIGH",
+      "estimatedHours": 4,
+      "status": "pending"
+    },
+    {
+      "id": "P3_SECURITY",
+      "name": "Phase 3: Security Hardening",
+      "description": "Усиление безопасности и аутентификации",
+      "priority": "HIGH", 
+      "estimatedHours": 12,
+      "status": "pending"
+    },
+    {
+      "id": "P4_COMMUNICATIONS",
+      "name": "Phase 4: Real-time Communications",
+      "description": "Stream Chat и Server-Sent Events",
+      "priority": "MEDIUM",
+      "estimatedHours": 16,
+      "status": "pending"
+    },
+    {
+      "id": "P5_OBSERVABILITY",
+      "name": "Phase 5: Advanced Monitoring",
+      "description": "Error tracking и расширенная observability",
+      "priority": "MEDIUM",
+      "estimatedHours": 8,
+      "status": "pending"
+    },
+    {
+      "id": "P6_OPTIMIZATION",
+      "name": "Phase 6: Performance Optimization",
+      "description": "Анализ и оптимизация производительности", 
+      "priority": "LOW",
+      "estimatedHours": 6,
+      "status": "pending"
+    }
+  ],
+
+  "tasks": [
+    {
+      "id": 1,
+      "phase": "P1_CRITICAL_FIXES",
+      "title": "Email Service Unification",
+      "description": "Объединить email сервисы и исправить проблемы импортов",
+      "priority": "CRITICAL",
+      "estimatedHours": 3,
+      "status": "completed",
+      "completedAt": "2025-01-10T10:00:00Z",
+      "dependencies": [],
+      "files": [
+        "lib/email-service.ts",
+        "lib/services/email-service.ts", 
+        "app/api/participant-approvals/[id]/route.ts"
+      ],
+      "subtasks": [
+        {
+          "id": "1.1",
+          "title": "Удалить дублирующий lib/email-service.ts",
+          "description": "Убрать старый email сервис и мигрировать все импорты",
+          "estimatedMinutes": 30,
+          "validation": "Нет импортов от @/lib/email-service в коде",
+          "status": "completed",
+          "completedAt": "2025-01-10T09:45:00Z",
+          "notes": "✅ Уже выполнено - дублирующий файл не существует, все импорты корректно используют @/lib/services/email-service, сборка проходит успешно"
+        },
+        {
+          "id": "1.2", 
+          "title": "Мигрировать participant-approvals route на unified service",
+          "description": "Обновить импорты и логику отправки email",
+          "estimatedMinutes": 45,
+          "validation": "Route использует @/lib/services/email-service",
+          "status": "completed",
+          "completedAt": "2025-01-10T09:50:00Z",
+          "notes": "✅ Уже выполнено - route корректно использует sendParticipantApprovalNotification из lib/services/email-service, типы соответствуют, логика отправки email работает"
+        },
+        {
+          "id": "1.3",
+          "title": "Создать недостающие email templates",
+          "description": "ParticipantApprovalNotificationEmail и BadgeAwardedNotificationEmail",
+          "estimatedMinutes": 90,
+          "validation": "Templates доступны в components/emails/",
+          "status": "completed",
+          "completedAt": "2025-01-10T10:00:00Z",
+          "notes": "✅ ВЫПОЛНЕНО ПОЛНОСТЬЮ - мигрировали на React Email! API v3.0 теперь использует React компоненты вместо HTML templates. ParticipantApprovalNotificationEmail и BadgeAwardedNotificationEmail доступны и работают. Удалены устаревшие HTML template functions. Сборка проходит успешно за 75 секунд."
+        },
+        {
+          "id": "1.4",
+          "title": "Обновить email types и service mappings",
+          "description": "Добавить новые типы в lib/types/email.ts",
+          "estimatedMinutes": 15,
+          "validation": "TypeScript компилируется без ошибок",
+          "status": "completed",
+          "completedAt": "2025-01-10T10:00:00Z",
+          "notes": "✅ Уже выполнено - типы ParticipantApprovalNotificationEmailProps и BadgeAwardedNotificationEmailProps существуют в lib/types/email.ts и корректно используются в API"
+        }
+      ],
+      "testStrategy": "npm run build должен проходить без ошибок импортов",
+      "acceptanceCriteria": [
+        "Только один email service используется в проекте",
+        "Все email templates доступны и работают",
+        "Build проходит успешно на Vercel",
+        "Email отправка функционирует в production"
+      ]
+    },
+
+    {
+      "id": 2,
+      "phase": "P1_CRITICAL_FIXES",
+      "title": "Module Resolution Fixes",
+      "description": "Исправить проблемы разрешения модулей в Vercel",
+      "priority": "CRITICAL", 
+      "estimatedHours": 2,
+      "status": "pending",
+      "dependencies": [1],
+      "files": [
+        "tsconfig.json",
+        "next.config.mjs",
+        ".vercelignore"
+      ],
+      "subtasks": [
+        {
+          "id": "2.1",
+          "title": "Аудит всех @ alias импортов",
+          "description": "Найти все проблемные @ imports в проекте",
+          "estimatedMinutes": 45,
+          "validation": "Список всех @ imports с их статусом"
+        },
+        {
+          "id": "2.2",
+          "title": "Проверить tsconfig.json path mappings",
+          "description": "Убедиться что @ aliases настроены корректно",
+          "estimatedMinutes": 15,
+          "validation": "Path mappings соответствуют структуре проекта"
+        },
+        {
+          "id": "2.3",
+          "title": "Очистить .vercelignore от блокирующих правил",
+          "description": "Удалить правила которые блокируют нужные файлы",
+          "estimatedMinutes": 30,
+          "validation": "Все нужные файлы доступны в build"
+        },
+        {
+          "id": "2.4",
+          "title": "Исправить case sensitivity в импортах",
+          "description": "Проверить регистр всех файлов и импортов",
+          "estimatedMinutes": 30,
+          "validation": "Все файлы импортируются с правильным регистром"
+        }
+      ],
+      "testStrategy": "Vercel build должен проходить без Module not found errors",
+      "acceptanceCriteria": [
+        "Все @ alias imports разрешаются корректно",
+        "Нет case sensitivity проблем",
+        ".vercelignore не блокирует нужные файлы",
+        "Vercel deployment проходит успешно"
+      ]
+    },
+
+    {
+      "id": 3,
+      "phase": "P1_CRITICAL_FIXES", 
+      "title": "Build Optimization & Legacy Cleanup",
+      "description": "Оптимизация сборки и удаление legacy кода",
+      "priority": "HIGH",
+      "estimatedHours": 3,
+      "status": "pending", 
+      "dependencies": [1, 2],
+      "subtasks": [
+        {
+          "id": "3.1",
+          "title": "Remove deprecated package.json#prisma config",
+          "description": "Мигрировать на prisma.config.ts",
+          "estimatedMinutes": 30,
+          "validation": "Нет warning о deprecated config"
+        },
+        {
+          "id": "3.2",
+          "title": "Fix Next.js experimental.turbo deprecation", 
+          "description": "Обновить next.config.mjs настройки",
+          "estimatedMinutes": 15,
+          "validation": "Нет warnings о deprecated options"
+        },
+        {
+          "id": "3.3",
+          "title": "Clean up legacy email templates",
+          "description": "Удалить старые template файлы",
+          "estimatedMinutes": 30,
+          "validation": "Нет unused файлов в lib/ и emails/"
+        },
+        {
+          "id": "3.4",
+          "title": "Optimize Vercel build performance",
+          "description": "Настроить кэширование и сборку",
+          "estimatedMinutes": 45,
+          "validation": "Build time < 3 minutes"
+        }
+      ],
+      "testStrategy": "Build должен проходить быстро и без warnings",
+      "acceptanceCriteria": [
+        "Нет deprecation warnings",
+        "Build время оптимизировано",
+        "Нет legacy/unused файлов",
+        "Vercel functions работают стабильно"
+      ]
+    },
+
+    {
+      "id": 4,
+      "phase": "P2_MONITORING",
+      "title": "Health Check Endpoint",
+      "description": "Создать комплексный health check для мониторинга",
+      "priority": "HIGH",
+      "estimatedHours": 2,
+      "status": "pending",
+      "dependencies": [3],
+      "files": ["app/api/admin/health/route.ts"],
+      "subtasks": [
+        {
+          "id": "4.1", 
+          "title": "Создать базовый health endpoint",
+          "description": "GET /api/admin/health с базовыми проверками",
+          "estimatedMinutes": 45,
+          "validation": "Endpoint возвращает 200 OK"
+        },
+        {
+          "id": "4.2",
+          "title": "Добавить database connectivity test",
+          "description": "Проверка подключения к Supabase",
+          "estimatedMinutes": 30,
+          "validation": "Database status в health response"
+        },
+        {
+          "id": "4.3",
+          "title": "Добавить connection pool statistics", 
+          "description": "Статистика PostgreSQL pool connections",
+          "estimatedMinutes": 30,
+          "validation": "Pool stats в health response"
+        },
+        {
+          "id": "4.4",
+          "title": "Добавить response time measurement",
+          "description": "Измерение времени отклика API",
+          "estimatedMinutes": 15,
+          "validation": "Response time metrics в health check"
+        }
+      ],
+      "testStrategy": "Health endpoint должен возвращать comprehensive status", 
+      "acceptanceCriteria": [
+        "Health check endpoint работает",
+        "Database connectivity проверяется",
+        "Connection pool мониторится",
+        "Response times измеряются",
+        "JSON response с детальным статусом"
+      ]
+    },
+
+    {
+      "id": 5,
+      "phase": "P2_MONITORING",
+      "title": "Vercel Analytics Setup",
+      "description": "Настроить встроенную аналитику Vercel Functions",
+      "priority": "MEDIUM",
+      "estimatedHours": 1, 
+      "status": "pending",
+      "dependencies": [4],
+      "subtasks": [
+        {
+          "id": "5.1",
+          "title": "Включить Vercel Speed Insights",
+          "description": "Активировать встроенный performance monitoring",
+          "estimatedMinutes": 15,
+          "validation": "Speed Insights активен в Vercel dashboard"
+        },
+        {
+          "id": "5.2", 
+          "title": "Настроить Vercel Web Analytics",
+          "description": "Включить user analytics для frontend",
+          "estimatedMinutes": 15,
+          "validation": "Web Analytics собирает данные"
+        },
+        {
+          "id": "5.3",
+          "title": "Настроить alert thresholds",
+          "description": "Пороги для response time и error rate",
+          "estimatedMinutes": 30,
+          "validation": "Alert rules настроены в Vercel"
+        }
+      ],
+      "testStrategy": "Analytics dashboard показывает function metrics",
+      "acceptanceCriteria": [
+        "Function duration мониторится",
+        "Memory usage отслеживается", 
+        "Error rate tracking активен",
+        "Cold start frequency измеряется",
+        "Alerts настроены для критических метрик"
+      ]
+    },
+
+    {
+      "id": 6,
+      "phase": "P2_MONITORING",
+      "title": "Performance Baseline Establishment",
+      "description": "Установить baseline производительности после WASM fix",
+      "priority": "MEDIUM",
+      "estimatedHours": 1,
+      "status": "pending", 
+      "dependencies": [4, 5],
+      "subtasks": [
+        {
+          "id": "6.1",
+          "title": "Benchmark current API performance",
+          "description": "Измерить cold start и warm response times",
+          "estimatedMinutes": 30,
+          "validation": "Baseline metrics записаны"
+        },
+        {
+          "id": "6.2",
+          "title": "Memory usage analysis",
+          "description": "Проанализировать использование памяти functions",
+          "estimatedMinutes": 20,
+          "validation": "Memory baseline установлен"
+        },
+        {
+          "id": "6.3",
+          "title": "Database connection timing",
+          "description": "Измерить время подключения к Supabase",
+          "estimatedMinutes": 10,
+          "validation": "Connection timing baseline"
+        }
+      ],
+      "testStrategy": "Baseline performance metrics established",
+      "acceptanceCriteria": [
+        "Cold start время измерено и документировано",
+        "Warm response время зафиксировано", 
+        "Memory usage baseline установлен",
+        "Database connection performance documented"
+      ]
+    },
+
+    {
+      "id": 7,
+      "phase": "P3_SECURITY",
+      "title": "NextAuth Production Hardening",
+      "description": "Усиление безопасности аутентификации в production",
+      "priority": "HIGH",
+      "estimatedHours": 4,
+      "status": "pending",
+      "dependencies": [6],
+      "files": [
+        "auth.ts",
+        "middleware.ts"
+      ],
+      "subtasks": [
+        {
+          "id": "7.1",
+          "title": "Verify JWT secrets security",
+          "description": "Проверить что NEXTAUTH_SECRET достаточно сложный",
+          "estimatedMinutes": 30,
+          "validation": "JWT secret соответствует security best practices"
+        },
+        {
+          "id": "7.2",
+          "title": "Configure session security settings",
+          "description": "Optimal session timeout и security options",
+          "estimatedMinutes": 45,
+          "validation": "Session config оптимизирован для security"
+        },
+        {
+          "id": "7.3", 
+          "title": "Test OAuth providers in production",
+          "description": "Проверить работу всех OAuth провайдеров",
+          "estimatedMinutes": 60,
+          "validation": "Все OAuth flows работают в production"
+        },
+        {
+          "id": "7.4",
+          "title": "Enhance middleware security",
+          "description": "Добавить rate limiting и security headers",
+          "estimatedMinutes": 90,
+          "validation": "Middleware блокирует подозрительные requests"
+        },
+        {
+          "id": "7.5",
+          "title": "Add CSRF protection",
+          "description": "Защита от Cross-Site Request Forgery",
+          "estimatedMinutes": 45,
+          "validation": "CSRF tokens проверяются"
+        }
+      ],
+      "testStrategy": "Security audit должен проходить без критических замечаний",
+      "acceptanceCriteria": [
+        "JWT secrets соответствуют требованиям безопасности", 
+        "Session security настроен корректно",
+        "Все OAuth провайдеры работают",
+        "CSRF protection активна",
+        "Rate limiting функционирует"
+      ]
+    },
+
+    {
+      "id": 8,
+      "phase": "P3_SECURITY",
+      "title": "API Security Hardening",
+      "description": "Усиление безопасности API endpoints",
+      "priority": "HIGH",
+      "estimatedHours": 3,
+      "status": "pending",
+      "dependencies": [7],
+      "subtasks": [
+        {
+          "id": "8.1",
+          "title": "Implement API rate limiting",
+          "description": "Rate limits для всех public API endpoints",
+          "estimatedMinutes": 90,
+          "validation": "Rate limiting активен на критических endpoints"
+        },
+        {
+          "id": "8.2",
+          "title": "Configure security headers",
+          "description": "CORS, CSP, HSTS и другие security headers",
+          "estimatedMinutes": 60,
+          "validation": "Security headers установлены"
+        },
+        {
+          "id": "8.3",
+          "title": "Add input validation middleware",
+          "description": "Валидация всех API inputs с помощью Zod",
+          "estimatedMinutes": 45,
+          "validation": "Все inputs проходят валидацию"
+        },
+        {
+          "id": "8.4",
+          "title": "Implement API authentication checks",
+          "description": "Проверка авторизации на protected routes",
+          "estimatedMinutes": 15,
+          "validation": "Unauthorized requests блокируются"
+        }
+      ],
+      "testStrategy": "API security tests должны проходить",
+      "acceptanceCriteria": [
+        "Rate limiting защищает от spam",
+        "Security headers настроены корректно",
+        "Input validation блокирует malicious data",
+        "API authentication работает надежно"
+      ]
+    },
+
+    {
+      "id": 9,
+      "phase": "P3_SECURITY", 
+      "title": "Database Security Review",
+      "description": "Проверка безопасности database layer",
+      "priority": "MEDIUM",
+      "estimatedHours": 2,
+      "status": "pending",
+      "dependencies": [8],
+      "subtasks": [
+        {
+          "id": "9.1",
+          "title": "Review Prisma queries for SQL injection",
+          "description": "Audit всех raw queries и user inputs",
+          "estimatedMinutes": 60,
+          "validation": "Нет потенциальных SQL injection vectors"
+        },
+        {
+          "id": "9.2",
+          "title": "Check database permissions",
+          "description": "Минимальные права для database user",
+          "estimatedMinutes": 30,
+          "validation": "Database user имеет только необходимые права"
+        },
+        {
+          "id": "9.3",
+          "title": "Review sensitive data handling",
+          "description": "Проверка обработки passwords, tokens, PII",
+          "estimatedMinutes": 30,
+          "validation": "Sensitive data обрабатывается безопасно"
+        }
+      ],
+      "testStrategy": "Database security audit без критических находок",
+      "acceptanceCriteria": [
+        "Нет SQL injection vulnerabilities",
+        "Database permissions минимальны", 
+        "Sensitive data защищена",
+        "Audit log на sensitive operations"
+      ]
+    },
+
+    {
+      "id": 10,
+      "phase": "P3_SECURITY",
+      "title": "Environment Variables Security Audit",
+      "description": "Проверка безопасности environment variables",
+      "priority": "MEDIUM",
+      "estimatedHours": 1,
+      "status": "pending",
+      "dependencies": [9],
+      "subtasks": [
+        {
+          "id": "10.1", 
+          "title": "Audit all environment variables",
+          "description": "Проверить что secrets не логируются",
+          "estimatedMinutes": 30,
+          "validation": "Secrets не попадают в logs"
+        },
+        {
+          "id": "10.2",
+          "title": "Verify Vercel environment segregation",
+          "description": "Production/preview/development разделены",
+          "estimatedMinutes": 20,
+          "validation": "Environments правильно разделены"
+        },
+        {
+          "id": "10.3",
+          "title": "Check for hardcoded secrets",
+          "description": "Поиск hardcoded API keys в коде",
+          "estimatedMinutes": 10,
+          "validation": "Нет hardcoded secrets в code"
+        }
+      ],
+      "testStrategy": "Secrets management audit проходит",
+      "acceptanceCriteria": [
+        "Все secrets в environment variables",
+        "Production/preview environments разделены",
+        "Нет secrets в коде или логах",
+        "Environment variables документированы"
+      ]
+    },
+
+    {
+      "id": 11,
+      "phase": "P4_COMMUNICATIONS",
+      "title": "Stream Chat Production Setup",
+      "description": "Настройка Stream Chat для production использования",
+      "priority": "MEDIUM", 
+      "estimatedHours": 6,
+      "status": "pending",
+      "dependencies": [10],
+      "files": [
+        "lib/stream-chat.ts",
+        "components/chat/",
+        "app/api/stream-token/"
+      ],
+      "subtasks": [
+        {
+          "id": "11.1",
+          "title": "Create Stream Chat production app",
+          "description": "Настроить production app в getstream.io",
+          "estimatedMinutes": 30,
+          "validation": "Production Stream app создан"
+        },
+        {
+          "id": "11.2",
+          "title": "Configure Vercel environment variables", 
+          "description": "STREAM_CHAT_API_KEY и STREAM_CHAT_API_SECRET",
+          "estimatedMinutes": 15,
+          "validation": "Environment variables настроены в Vercel"
+        },
+        {
+          "id": "11.3",
+          "title": "Implement Stream Chat client setup",
+          "description": "Client-side инициализация и authentication",
+          "estimatedMinutes": 120,
+          "validation": "Chat client подключается успешно"
+        },
+        {
+          "id": "11.4",
+          "title": "Create token generation API",
+          "description": "API для генерации Stream Chat tokens",
+          "estimatedMinutes": 60,
+          "validation": "/api/stream-token генерирует валидные tokens"
+        },
+        {
+          "id": "11.5", 
+          "title": "Enable chat moderation & security",
+          "description": "Настроить automod и user permissions",
+          "estimatedMinutes": 90,
+          "validation": "Moderation rules активны"
+        },
+        {
+          "id": "11.6",
+          "title": "Test production chat connectivity",
+          "description": "End-to-end тестирование чата",
+          "estimatedMinutes": 45,
+          "validation": "Chat функционирует в production"
+        }
+      ],
+      "testStrategy": "Chat должен работать между разными пользователями",
+      "acceptanceCriteria": [
+        "Stream Chat настроен в production",
+        "Users могут создавать и присоединяться к чатам",
+        "Moderation и security настроены",
+        "Real-time messaging работает",
+        "File uploads безопасны"
+      ]
+    },
+
+    {
+      "id": 12,
+      "phase": "P4_COMMUNICATIONS",
+      "title": "Server-Sent Events System Enhancement",
+      "description": "Улучшение SSE для real-time notifications",
+      "priority": "MEDIUM",
+      "estimatedHours": 4,
+      "status": "pending",
+      "dependencies": [11],
+      "files": [
+        "app/api/sse/",
+        "components/notifications/"
+      ],
+      "subtasks": [
+        {
+          "id": "12.1",
+          "title": "Review current SSE implementation",
+          "description": "Audit existing Server-Sent Events код",
+          "estimatedMinutes": 45,
+          "validation": "SSE implementation проанализирован"
+        },
+        {
+          "id": "12.2",
+          "title": "Test SSE endpoints in production",
+          "description": "Проверить работу SSE в production environment",
+          "estimatedMinutes": 60,
+          "validation": "SSE connections стабильны в production"
+        },
+        {
+          "id": "12.3",
+          "title": "Enhance booking notifications via SSE",
+          "description": "Real-time уведомления о статусе booking",
+          "estimatedMinutes": 90,
+          "validation": "Booking notifications приходят в real-time"
+        },
+        {
+          "id": "12.4",
+          "title": "Add connection management",
+          "description": "Reconnection logic и error handling",
+          "estimatedMinutes": 45,
+          "validation": "SSE connections восстанавливаются автоматически"
+        }
+      ],
+      "testStrategy": "SSE должны работать надежно с reconnection",
+      "acceptanceCriteria": [
+        "SSE endpoints работают в production",
+        "Real-time booking notifications функционируют",
+        "Connection management надежен",
+        "Error handling корректен"
+      ]
+    },
+
+    {
+      "id": 13, 
+      "phase": "P4_COMMUNICATIONS",
+      "title": "Notification System Integration", 
+      "description": "Интеграция chat и SSE с notification system",
+      "priority": "MEDIUM",
+      "estimatedHours": 3,
+      "status": "pending",
+      "dependencies": [11, 12],
+      "subtasks": [
+        {
+          "id": "13.1",
+          "title": "Create unified notification service",
+          "description": "Service для управления всеми типами notifications",
+          "estimatedMinutes": 90,
+          "validation": "Notification service обрабатывает разные типы"
+        },
+        {
+          "id": "13.2",
+          "title": "Integrate chat notifications with database",
+          "description": "Сохранение chat events в database для persistence",
+          "estimatedMinutes": 60,
+          "validation": "Chat notifications сохраняются в DB"
+        },
+        {
+          "id": "13.3",
+          "title": "Add notification preferences",
+          "description": "User settings для notification preferences",
+          "estimatedMinutes": 30,
+          "validation": "Users могут настраивать notification preferences"
+        }
+      ],
+      "testStrategy": "Notifications должны работать across всех channels",
+      "acceptanceCriteria": [
+        "Unified notification system работает",
+        "Chat и SSE интегрированы", 
+        "User preferences учитываются",
+        "Notification persistence функционирует"
+      ]
+    },
+
+    {
+      "id": 14,
+      "phase": "P4_COMMUNICATIONS",
+      "title": "Mobile-Responsive Communication UI",
+      "description": "Адаптация UI коммуникаций под mobile devices",
+      "priority": "LOW",
+      "estimatedHours": 3,
+      "status": "pending",
+      "dependencies": [13],
+      "subtasks": [
+        {
+          "id": "14.1",
+          "title": "Optimize chat UI for mobile",
+          "description": "Responsive design для chat components",
+          "estimatedMinutes": 120,
+          "validation": "Chat UI работает на mobile devices"
+        },
+        {
+          "id": "14.2",
+          "title": "Mobile notification handling",
+          "description": "Touch-friendly notification interactions",
+          "estimatedMinutes": 60,
+          "validation": "Notifications удобны на mobile"
+        }
+      ],
+      "testStrategy": "UI должен быть удобен на всех device sizes",
+      "acceptanceCriteria": [
+        "Chat responsive на mobile",
+        "Notifications адаптированы для touch",
+        "Performance не страдает на mobile"
+      ]
+    },
+
+    {
+      "id": 15,
+      "phase": "P5_OBSERVABILITY", 
+      "title": "Error Tracking Integration",
+      "description": "Настройка comprehensive error tracking",
+      "priority": "MEDIUM",
+      "estimatedHours": 3,
+      "status": "pending",
+      "dependencies": [6],
+      "subtasks": [
+        {
+          "id": "15.1",
+          "title": "Choose error tracking solution",
+          "description": "Выбрать между Sentry, LogRocket, или Vercel native",
+          "estimatedMinutes": 30,
+          "validation": "Error tracking solution выбран и обоснован"
+        },
+        {
+          "id": "15.2",
+          "title": "Implement client-side error tracking",
+          "description": "JavaScript errors и unhandled promises",
+          "estimatedMinutes": 90,
+          "validation": "Client errors отслеживаются и отправляются"
+        },
+        {
+          "id": "15.3",
+          "title": "Implement server-side error tracking",
+          "description": "API errors и database exceptions", 
+          "estimatedMinutes": 60,
+          "validation": "Server errors логируются с context"
+        },
+        {
+          "id": "15.4",
+          "title": "Configure error alerting",
+          "description": "Alerts для critical errors",
+          "estimatedMinutes": 30,
+          "validation": "Critical errors trigger alerts"
+        }
+      ],
+      "testStrategy": "Errors должны отслеживаться и alerting работать",
+      "acceptanceCriteria": [
+        "Client и server errors отслеживаются",
+        "Error context сохраняется",
+        "Critical errors генерируют alerts",
+        "Error trends анализируются"
+      ]
+    },
+
+    {
+      "id": 16,
+      "phase": "P5_OBSERVABILITY",
+      "title": "Advanced Logging Implementation",
+      "description": "Структурированное логирование для better observability",
+      "priority": "MEDIUM",
+      "estimatedHours": 2,
+      "status": "pending", 
+      "dependencies": [15],
+      "subtasks": [
+        {
+          "id": "16.1",
+          "title": "Implement structured logging",
+          "description": "JSON logging с consistent format",
+          "estimatedMinutes": 60,
+          "validation": "Logs имеют consistent JSON structure"
+        },
+        {
+          "id": "16.2",
+          "title": "Add request correlation IDs",
+          "description": "Trace requests через все layers",
+          "estimatedMinutes": 45,
+          "validation": "Requests имеют correlation IDs"
+        },
+        {
+          "id": "16.3",
+          "title": "Configure log retention",
+          "description": "Log retention policy и archiving",
+          "estimatedMinutes": 15,
+          "validation": "Log retention настроен"
+        }
+      ],
+      "testStrategy": "Logs должны быть searchable и correlatable",
+      "acceptanceCriteria": [
+        "Structured logging работает", 
+        "Request correlation функционирует",
+        "Log retention policy активен",
+        "Logs легко searchable"
+      ]
+    },
+
+    {
+      "id": 17,
+      "phase": "P5_OBSERVABILITY",
+      "title": "Performance Metrics Collection",
+      "description": "Сбор детальных performance metrics",
+      "priority": "MEDIUM",
+      "estimatedHours": 3,
+      "status": "pending",
+      "dependencies": [16],
+      "subtasks": [
+        {
+          "id": "17.1", 
+          "title": "Implement custom performance metrics",
+          "description": "Business logic timing и database query performance",
+          "estimatedMinutes": 120,
+          "validation": "Custom metrics собираются"
+        },
+        {
+          "id": "17.2",
+          "title": "Add Core Web Vitals monitoring", 
+          "description": "LCP, FID, CLS tracking",
+          "estimatedMinutes": 45,
+          "validation": "Core Web Vitals мониторятся"
+        },
+        {
+          "id": "17.3",
+          "title": "Create performance dashboard",
+          "description": "Dashboard для viewing performance trends",
+          "estimatedMinutes": 15,
+          "validation": "Performance dashboard доступен"
+        }
+      ],
+      "testStrategy": "Performance metrics должны собираться и анализироваться",
+      "acceptanceCriteria": [
+        "Custom performance metrics работают",
+        "Core Web Vitals отслеживаются", 
+        "Performance trends видны",
+        "Alerts на performance degradation"
+      ]
+    },
+
+    {
+      "id": 18,
+      "phase": "P6_OPTIMIZATION",
+      "title": "Performance Analysis & Optimization",
+      "description": "Анализ performance metrics и optimization",
+      "priority": "LOW",
+      "estimatedHours": 4,
+      "status": "pending",
+      "dependencies": [17],
+      "subtasks": [
+        {
+          "id": "18.1",
+          "title": "Analyze current performance metrics",
+          "description": "Deep dive в collected performance data",
+          "estimatedMinutes": 90,
+          "validation": "Performance analysis report создан"
+        },
+        {
+          "id": "18.2",
+          "title": "Identify optimization opportunities",
+          "description": "Найти bottlenecks и improvement areas",
+          "estimatedMinutes": 60,
+          "validation": "Optimization opportunities документированы"
+        },
+        {
+          "id": "18.3",
+          "title": "Implement high-impact optimizations",
+          "description": "Внедрить optimizations с высоким impact",
+          "estimatedMinutes": 90,
+          "validation": "Key optimizations внедрены"
+        }
+      ],
+      "testStrategy": "Performance improvements должны быть measurable",
+      "acceptanceCriteria": [
+        "Performance analysis завершен",
+        "Optimization opportunities найдены",
+        "High-impact optimizations внедрены",
+        "Performance improvements измерены"
+      ]
+    },
+
+    {
+      "id": 19,
+      "phase": "P6_OPTIMIZATION",
+      "title": "Database Query Optimization",
+      "description": "Оптимизация database queries для performance",
+      "priority": "LOW",
+      "estimatedHours": 2,
+      "status": "pending",
+      "dependencies": [18],
+      "subtasks": [
+        {
+          "id": "19.1",
+          "title": "Profile slow database queries",
+          "description": "Найти самые медленные queries",
+          "estimatedMinutes": 60,
+          "validation": "Slow queries идентифицированы"
+        },
+        {
+          "id": "19.2",
+          "title": "Optimize N+1 query problems",
+          "description": "Fix N+1 queries с proper includes",
+          "estimatedMinutes": 45,
+          "validation": "N+1 queries устранены"
+        },
+        {
+          "id": "19.3",
+          "title": "Add database indexes",
+          "description": "Indexes для frequently queried fields",
+          "estimatedMinutes": 15,
+          "validation": "Database indexes добавлены"
+        }
+      ],
+      "testStrategy": "Database query performance должен улучшиться",
+      "acceptanceCriteria": [
+        "Slow queries оптимизированы",
+        "N+1 problems решены",
+        "Database indexes эффективны",
+        "Query performance улучшен"
+      ]
+    }
+  ],
+
+  "implementation_guidelines": {
+    "workflow": {
+      "1": "Создать feature branch для каждой задачи",
+      "2": "Написать тесты для новой functionality",
+      "3": "Implement задачу согласно subtasks",
+      "4": "Протестировать локально",
+      "5": "Deploy на preview environment",
+      "6": "Code review",
+      "7": "Deploy на production",
+      "8": "Мониторинг после deploy"
+    },
+    "testing_requirements": {
+      "unit_tests": "Для всех business logic functions",
+      "integration_tests": "Для API endpoints и database operations", 
+      "end_to_end_tests": "Для critical user flows",
+      "load_tests": "Для performance-critical endpoints"
+    },
+    "deployment_strategy": {
+      "preview_deployments": "Для всех feature branches",
+      "staging_validation": "Перед production deployment",
+      "production_deployment": "После successful staging tests",
+      "rollback_plan": "Automatic rollback если health checks fail"
+    },
+    "monitoring_requirements": {
+      "health_checks": "После каждого deployment",
+      "performance_monitoring": "Continuous во время implementation",
+      "error_tracking": "Real-time alert setup",
+      "user_impact_assessment": "После каждой production change"
+    }
+  },
+
+  "risk_assessment": {
+    "high_risk_tasks": [1, 2, 7, 11],
+    "mitigation_strategies": {
+      "email_service_migration": "Gradual migration с fallback на old service",
+      "module_resolution_fixes": "Тщательное testing на preview environment",
+      "auth_hardening": "Incremental changes с monitoring",
+      "chat_integration": "Feature flags для gradual rollout"
+    },
+    "rollback_procedures": {
+      "code_changes": "Git revert + immediate redeploy",
+      "environment_changes": "Backup environment variables",
+      "database_changes": "Database migration rollback scripts"
+    }
+  }
+}
