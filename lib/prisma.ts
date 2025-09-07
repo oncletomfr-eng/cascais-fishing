@@ -7,11 +7,19 @@ const globalForPrisma = global as unknown as {
 
 // Production-ready Supabase connection URLs  
 const getProductionDatabaseUrl = () => {
-  if (process.env.NODE_ENV === 'production') {
-    // Use Transaction pooler for serverless functions with pgbouncer=true to disable prepared statements
-    return "postgresql://postgres.spblkbrkxmknfjugoueo:sdbSV_232sdsfbdKSK@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true"
+  // Always use environment variable for maximum security and flexibility
+  const dbUrl = process.env.DATABASE_URL
+  if (!dbUrl) {
+    throw new Error('DATABASE_URL environment variable is required')
   }
-  return process.env.DATABASE_URL
+  
+  // For production, ensure pgbouncer is enabled for serverless compatibility
+  if (process.env.NODE_ENV === 'production' && !dbUrl.includes('pgbouncer=true')) {
+    const separator = dbUrl.includes('?') ? '&' : '?'
+    return `${dbUrl}${separator}pgbouncer=true`
+  }
+  
+  return dbUrl
 }
 
 // Create PostgreSQL adapter for QueryCompiler + driverAdapters
