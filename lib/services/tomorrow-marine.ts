@@ -11,7 +11,7 @@ const TOMORROW_IO_CONFIG = {
   baseUrl: 'https://api.tomorrow.io/v4',
   // Note: In production, this should be stored securely in environment variables
   // For testing, we'll use a free tier key or create a fallback
-  apiKey: process.env.NEXT_PUBLIC_TOMORROW_IO_API_KEY || '',
+  apiKey: process.env.NEXT_PUBLIC_TOMORROW_IO_API_KEY || process.env.TOMORROW_IO_API_KEY || '',
   timeout: 10000
 };
 
@@ -88,7 +88,12 @@ export class TomorrowMarineService {
    * Check if the service is properly configured
    */
   isConfigured(): boolean {
-    return Boolean(this.apiKey && this.apiKey.length > 0);
+    return Boolean(
+      this.apiKey && 
+      this.apiKey.length > 10 && 
+      !this.apiKey.includes('demo-key') && 
+      !this.apiKey.includes('please-configure')
+    );
   }
 
   /**
@@ -96,7 +101,7 @@ export class TomorrowMarineService {
    */
   async getMarineConditions(location: WeatherLocation): Promise<MarineConditions | null> {
     if (!this.isConfigured()) {
-      console.warn('Tomorrow.io Marine service not configured - missing API key');
+      console.log('Tomorrow.io Marine service not configured - using fallback estimates');
       return this.createFallbackMarineData(location);
     }
 

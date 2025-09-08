@@ -83,7 +83,23 @@ export function useWeather(options: UseWeatherOptions = {}): UseWeatherReturn {
       if (!isMountedRef.current) return;
       
       console.error('Failed to fetch weather data:', error);
-      setError(error instanceof Error ? error.message : 'Не удалось загрузить данные о погоде');
+      
+      // Provide more specific error messages
+      let errorMessage = 'Не удалось загрузить данные о погоде';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('fetch')) {
+          errorMessage = 'Проблема с сетевым подключением. Проверьте интернет соединение.';
+        } else if (error.message.includes('timeout')) {
+          errorMessage = 'Превышено время ожидания. Попробуйте позже.';
+        } else if (error.message.includes('API')) {
+          errorMessage = 'Погодный сервис временно недоступен.';
+        } else {
+          errorMessage = `Ошибка: ${error.message}`;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       if (isMountedRef.current) {
         setIsLoading(false);

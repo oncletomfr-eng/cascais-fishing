@@ -1,6 +1,7 @@
 /**
  * NextAuth v5 Configuration for Cascais Fishing Platform
  * Production-ready authentication with multiple providers
+ * Enhanced with OAuth configuration validation and error handling
  */
 
 import NextAuth from "next-auth"
@@ -10,6 +11,51 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GitHubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
+
+// 🛡️ SECURITY: Validate OAuth configuration to prevent production failures
+const validateOAuthConfig = () => {
+  const requiredVars = [
+    { key: 'AUTH_GOOGLE_ID', value: process.env.AUTH_GOOGLE_ID },
+    { key: 'AUTH_GOOGLE_SECRET', value: process.env.AUTH_GOOGLE_SECRET },
+    { key: 'AUTH_GITHUB_ID', value: process.env.AUTH_GITHUB_ID },
+    { key: 'AUTH_GITHUB_SECRET', value: process.env.AUTH_GITHUB_SECRET },
+    { key: 'NEXTAUTH_URL', value: process.env.NEXTAUTH_URL },
+    { key: 'NEXTAUTH_SECRET', value: process.env.NEXTAUTH_SECRET }
+  ];
+  
+  const missing = requiredVars.filter(({ value }) => !value || value.length < 5);
+  const invalid = requiredVars.filter(({ value }) => value && (
+    value.includes('demo') || 
+    value.includes('please-configure') || 
+    value.includes('your_') ||
+    value === 'undefined'
+  ));
+  
+  if (missing.length > 0) {
+    console.error('🚨 MISSING OAuth Environment Variables:', missing.map(v => v.key));
+    console.error('📋 OAuth authentication will fail until these are configured in Vercel dashboard');
+  }
+  
+  if (invalid.length > 0) {
+    console.error('⚠️  INVALID OAuth Environment Variables (demo/placeholder values):', invalid.map(v => v.key));
+    console.error('🔧 Replace with actual OAuth credentials from Google/GitHub developer consoles');
+  }
+  
+  return { missing: missing.length === 0, valid: invalid.length === 0 };
+};
+
+// Run validation in all environments to catch configuration issues early
+const oauthStatus = validateOAuthConfig();
+
+// 🛡️ Enhanced logging for OAuth debugging
+if (process.env.NODE_ENV === 'production') {
+  console.log('🔐 OAuth Configuration Status:', {
+    googleConfigured: !!(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET),
+    githubConfigured: !!(process.env.AUTH_GITHUB_ID && process.env.AUTH_GITHUB_SECRET),
+    nextauthConfigured: !!(process.env.NEXTAUTH_URL && process.env.NEXTAUTH_SECRET),
+    allValid: oauthStatus.missing && oauthStatus.valid
+  });
+}
 
 // 🛡️  SECURITY HARDENED: Production-ready authentication configuration
 export const {
@@ -69,13 +115,11 @@ export const {
       },
     },
   },
-  // 🛡️  SECURITY: Enhanced security settings
+  // 🛡️  SECURITY: Enhanced security settings  
   useSecureCookies: process.env.NODE_ENV === 'production',
-  // 🔒 CSRF protection built-in
-  csrf: true,
+  // 🔒 CSRF protection is built-in with NextAuth v5
   pages: {
     signIn: "/auth/signin",
-    signUp: "/auth/signup",
     error: "/auth/error",
   },
   providers: [
@@ -122,6 +166,7 @@ export const {
             email: user.email,
             name: user.name,
             image: user.image,
+            role: user.role || "PARTICIPANT", // Default role if not provided
           }
         } catch (error) {
           console.error("Authentication error:", error)
@@ -130,16 +175,55 @@ export const {
       }
     }),
 
-    // GitHub OAuth
+    // GitHub OAuth - Enhanced with configuration validation
     GitHubProvider({
-      clientId: process.env.AUTH_GITHUB_ID ?? "",
-      clientSecret: process.env.AUTH_GITHUB_SECRET ?? "",
+      clientId: process.env.GITHUB_CLIENT_ID ?? "",
+      clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
+      // 🛡️ SECURITY: Additional OAuth settings for production
+      authorization: {
+        params: {
+          scope: "read:user user:email",
+          // Add additional security parameters
+          prompt: "consent",
+        }
+      },
+      profile(profile) {
+        return {
+          id: profile.id.toString(),
+          name: profile.name || profile.login,
+          email: profile.email,
+          image: profile.avatar_url,
+          // 🛡️ SECURITY: Add GitHub-specific user data
+          role: "PARTICIPANT", // Default role for OAuth users
+          provider: "github"
+        }
+      }
     }),
 
-    // Google OAuth  
+    // Google OAuth - Enhanced with configuration validation
     GoogleProvider({
-      clientId: process.env.AUTH_GOOGLE_ID ?? "",
-      clientSecret: process.env.AUTH_GOOGLE_SECRET ?? "",
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      // 🛡️ SECURITY: Additional OAuth settings for production
+      authorization: {
+        params: {
+          scope: "openid email profile",
+          // Force account selection for security
+          prompt: "select_account",
+        }
+      },
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+          // 🛡️ SECURITY: Add Google-specific user data  
+          role: "PARTICIPANT", // Default role for OAuth users
+          provider: "google",
+          emailVerified: profile.email_verified
+        }
+      }
     }),
   ],
   callbacks: {
@@ -203,65 +287,118 @@ export const {
       // Send properties to the client (only safe data)
       if (token) {
         session.user.id = token.id as string
-        session.user.role = token.role as string
+        session.user.role = (token.role as string) as "PARTICIPANT" | "CAPTAIN" | "ADMIN"
         session.user.email = token.email as string
         session.user.name = token.name as string
         session.user.image = token.image as string
         
-        // 🛡️  SECURITY: Add session security metadata (safe for client)
-        session.expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
-        session.user.lastActivity = token.lastActivity as number || token.signInTime as number;
+        // 🛡️  SECURITY: Session expiry handled automatically by NextAuth
+        // Note: lastActivity removed as it's not part of User type
       }
       return session
     },
     async signIn({ user, account, profile, email, credentials }) {
-      // 🛡️  SECURITY: Enhanced sign-in validation
+      // 🛡️  SECURITY: Enhanced sign-in validation with OAuth error handling
       
-      // Блокировка подозрительных email паттернов
-      if (user.email) {
-        const suspiciousPatterns = [
-          /temp.*@/i,
-          /test.*@/i,
-          /@temp/i,
-          /@test/i,
-          /@10minutemail/i,
-          /@guerrillamail/i
-        ];
-        
-        if (suspiciousPatterns.some(pattern => pattern.test(user.email!))) {
-          console.warn(`🚨 Suspicious email blocked: ${user.email}`);
-          return false;
-        }
-      }
-
-      // OAuth providers security checks
-      if (account?.provider === "google") {
-        // 🛡️  SECURITY: Validate Google account
-        if (!profile?.email_verified) {
-          console.warn(`🚨 Google account not verified: ${user.email}`);
-          return false;
-        }
-        return true;
-      }
-      
-      if (account?.provider === "github") {
-        // 🛡️  SECURITY: Validate GitHub account  
-        const githubProfile = profile as any;
-        if (githubProfile?.created_at) {
-          const accountAge = Date.now() - new Date(githubProfile.created_at).getTime();
-          const daysSinceCreated = accountAge / (1000 * 60 * 60 * 24);
+      try {
+        // 🚨 CRITICAL: Enhanced OAuth error detection and logging
+        if (account?.error) {
+          console.error('🚨 OAuth Sign-in Error:', {
+            provider: account.provider,
+            error: account.error,
+            errorDescription: account.error_description,
+            email: user.email,
+            timestamp: new Date().toISOString()
+          });
           
-          // Блокировка слишком новых GitHub аккаунтов (< 7 дней)
-          if (daysSinceCreated < 7) {
-            console.warn(`🚨 GitHub account too new: ${user.email} (${Math.floor(daysSinceCreated)} days)`);
+          // Specific error handling for common OAuth issues
+          const errorStr = String(account.error);
+          if (errorStr.includes('invalid_client') || errorStr.includes('client_id')) {
+            console.error('🚨 CRITICAL: OAuth client_id missing or invalid - check environment variables');
+            console.error('📋 Required variables: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET');
+            return false;
+          }
+          
+          if (errorStr.includes('redirect_uri_mismatch')) {
+            console.error('🚨 CRITICAL: OAuth redirect URI mismatch - check OAuth app configuration');
+            console.error('📋 Expected: https://www.cascaisfishing.com/api/auth/callback/' + account.provider);
+            return false;
+          }
+          
+          if (errorStr.includes('access_denied')) {
+            console.warn('👤 User denied OAuth authorization:', user.email);
             return false;
           }
         }
+        
+        // Блокировка подозрительных email паттернов
+        if (user.email) {
+          const suspiciousPatterns = [
+            /temp.*@/i,
+            /test.*@/i,
+            /@temp/i,
+            /@test/i,
+            /@10minutemail/i,
+            /@guerrillamail/i
+          ];
+          
+          if (suspiciousPatterns.some(pattern => pattern.test(user.email!))) {
+            console.warn(`🚨 Suspicious email blocked: ${user.email}`);
+            return false;
+          }
+        }
+
+        // OAuth providers security checks
+        if (account?.provider === "google") {
+          // 🛡️  SECURITY: Validate Google account
+          if (!profile?.email_verified) {
+            console.warn(`🚨 Google account not verified: ${user.email}`);
+            return false;
+          }
+          
+          // 🛡️ Log successful Google OAuth
+          console.log(`✅ Google OAuth successful: ${user.email}`);
+          return true;
+        }
+        
+        if (account?.provider === "github") {
+          // 🛡️  SECURITY: Validate GitHub account  
+          const githubProfile = profile as any;
+          if (githubProfile?.created_at) {
+            const accountAge = Date.now() - new Date(githubProfile.created_at).getTime();
+            const daysSinceCreated = accountAge / (1000 * 60 * 60 * 24);
+            
+            // Блокировка слишком новых GitHub аккаунтов (< 7 дней)
+            if (daysSinceCreated < 7) {
+              console.warn(`🚨 GitHub account too new: ${user.email} (${Math.floor(daysSinceCreated)} days)`);
+              return false;
+            }
+          }
+          
+          // 🛡️ Log successful GitHub OAuth
+          console.log(`✅ GitHub OAuth successful: ${user.email}`);
+          return true;
+        }
+        
+        // For credentials provider, user validation is handled in authorize()
+        return true;
+        
+      } catch (error) {
+        // 🚨 CRITICAL: Catch and log any unexpected sign-in errors
+        console.error('🚨 CRITICAL Sign-in Error:', {
+          error: error instanceof Error ? error.message : String(error),
+          user: user.email,
+          provider: account?.provider,
+          timestamp: new Date().toISOString()
+        });
+        
+        // Allow sign-in to continue unless it's a critical OAuth config error
+        if (error instanceof Error && error.message.includes('client_id')) {
+          return false;
+        }
+        
         return true;
       }
-      
-      // For credentials provider, user validation is handled in authorize()
-      return true
     },
   },
   events: {
@@ -295,9 +432,12 @@ export const {
       //   ipAddress: req.ip
       // });
     },
-    async signOut({ token, session }) {
+    async signOut(params) {
       // 🛡️  SECURITY: Comprehensive sign-out logging
-      console.log(`👋 Sign-out: ${token?.email || session?.user?.email}`);
+      const token = 'token' in params ? params.token : null;
+      const session = 'session' in params ? params.session : null;
+      const userEmail = token ? (token.email as string) : 'unknown';
+      console.log(`👋 Sign-out: ${userEmail}`);
       
       // Calculate session duration
       const signInTime = token?.signInTime as number;

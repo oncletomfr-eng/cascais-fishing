@@ -22,6 +22,7 @@ import {
 
 import { WeatherData, WeatherLocation, FishingConditions } from '@/lib/types/weather';
 import { weatherService } from '@/lib/services/weather';
+import WeatherErrorBoundary from '@/components/error-boundaries/WeatherErrorBoundary';
 
 interface WeatherWidgetProps {
   location?: WeatherLocation;
@@ -31,7 +32,7 @@ interface WeatherWidgetProps {
   onLocationChange?: (location: WeatherLocation) => void;
 }
 
-export default function WeatherWidget({
+function WeatherWidgetCore({
   location,
   showFishingConditions = true,
   showMarineData = true,
@@ -457,5 +458,18 @@ function FishingConditionsDisplay({ conditions }: { conditions: FishingCondition
         </div>
       )}
     </div>
+  );
+}
+
+// Export the main component wrapped in error boundary
+export default function WeatherWidget(props: WeatherWidgetProps) {
+  return (
+    <WeatherErrorBoundary 
+      className={props.className}
+      showRefresh={true}
+      onRetry={() => window.location.reload()}
+    >
+      <WeatherWidgetCore {...props} />
+    </WeatherErrorBoundary>
   );
 }
