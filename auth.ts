@@ -144,7 +144,14 @@ export const {
 
         try {
           // Make request to our authentication API
-          const response = await fetch(`${process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://www.cascaisfishing.com'}/api/auth/verify-credentials`, {
+          const authUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://www.cascaisfishing.com'
+          const apiEndpoint = `${authUrl}/api/auth/verify-credentials`
+          console.log(`🔍 [AUTH DEBUG] Attempting credentials verification:`)
+          console.log(`🔍 [AUTH DEBUG] Email: ${credentials.email}`)
+          console.log(`🔍 [AUTH DEBUG] AUTH_URL: ${authUrl}`)
+          console.log(`🔍 [AUTH DEBUG] API Endpoint: ${apiEndpoint}`)
+          
+          const response = await fetch(apiEndpoint, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -155,11 +162,17 @@ export const {
             }),
           })
 
+          console.log(`🔍 [AUTH DEBUG] Response status: ${response.status}`)
+          console.log(`🔍 [AUTH DEBUG] Response ok: ${response.ok}`)
+          
           if (!response.ok) {
+            const errorText = await response.text()
+            console.log(`🔍 [AUTH DEBUG] Error response: ${errorText}`)
             return null
           }
 
           const user = await response.json()
+          console.log(`🔍 [AUTH DEBUG] User data received:`, JSON.stringify(user, null, 2))
           
           return {
             id: user.id,
@@ -169,7 +182,12 @@ export const {
             role: user.role || "PARTICIPANT", // Default role if not provided
           }
         } catch (error) {
-          console.error("Authentication error:", error)
+          console.error("🔍 [AUTH DEBUG] Authentication error:", error)
+          console.error("🔍 [AUTH DEBUG] Error details:", {
+            message: error.message,
+            name: error.name,
+            stack: error.stack
+          })
           return null
         }
       }
