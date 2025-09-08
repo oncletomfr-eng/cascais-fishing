@@ -20,8 +20,16 @@ app/api/seasonal-*/
 app/api/subscription-*/
 app/api/tax-*/
 
-# ALL TEST PAGES - HUGE SIZE REDUCTION!
-app/test-*/
+# SELECTIVE TEST PAGES EXCLUSION - Keep essential test pages in production
+# app/test-*/ # ← DISABLED: Some test pages needed in production for diagnostics
+# Exclude specific heavy test pages instead:
+app/test-datagrid/
+app/test-enhanced-*/
+app/test-controlled-tabs/
+app/test-tabs-only/
+app/test-ui-components/
+app/test-fishing-event-components/
+app/test-profiles/
 public/test-*
 
 # Test files (safe to exclude)
