@@ -15,12 +15,12 @@ import GoogleProvider from "next-auth/providers/google"
 // 🛡️ SECURITY: Validate OAuth configuration to prevent production failures
 const validateOAuthConfig = () => {
   const requiredVars = [
-    { key: 'AUTH_GOOGLE_ID', value: process.env.AUTH_GOOGLE_ID },
-    { key: 'AUTH_GOOGLE_SECRET', value: process.env.AUTH_GOOGLE_SECRET },
-    { key: 'AUTH_GITHUB_ID', value: process.env.AUTH_GITHUB_ID },
-    { key: 'AUTH_GITHUB_SECRET', value: process.env.AUTH_GITHUB_SECRET },
+    { key: 'GOOGLE_CLIENT_ID', value: process.env.GOOGLE_CLIENT_ID },
+    { key: 'GOOGLE_CLIENT_SECRET', value: process.env.GOOGLE_CLIENT_SECRET },
+    { key: 'GITHUB_CLIENT_ID', value: process.env.GITHUB_CLIENT_ID },
+    { key: 'GITHUB_CLIENT_SECRET', value: process.env.GITHUB_CLIENT_SECRET },
     { key: 'NEXTAUTH_URL', value: process.env.NEXTAUTH_URL },
-    { key: 'NEXTAUTH_SECRET', value: process.env.NEXTAUTH_SECRET }
+    { key: 'AUTH_SECRET', value: process.env.AUTH_SECRET }
   ];
   
   const missing = requiredVars.filter(({ value }) => !value || value.length < 5);
@@ -50,9 +50,9 @@ const oauthStatus = validateOAuthConfig();
 // 🛡️ Enhanced logging for OAuth debugging
 if (process.env.NODE_ENV === 'production') {
   console.log('🔐 OAuth Configuration Status:', {
-    googleConfigured: !!(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET),
-    githubConfigured: !!(process.env.AUTH_GITHUB_ID && process.env.AUTH_GITHUB_SECRET),
-    nextauthConfigured: !!(process.env.NEXTAUTH_URL && process.env.NEXTAUTH_SECRET),
+    googleConfigured: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
+    githubConfigured: !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET),
+    nextauthConfigured: !!(process.env.NEXTAUTH_URL && process.env.AUTH_SECRET),
     allValid: oauthStatus.missing && oauthStatus.valid
   });
 }
@@ -73,9 +73,8 @@ export const {
   },
   jwt: {
     maxAge: 30 * 24 * 60 * 60, // 30 days
-    // 🔐 SECURITY: Strong JWT algorithm
-    encode: undefined, // Use default secure encoding
-    decode: undefined, // Use default secure decoding
+    // 🔐 SECURITY: NextAuth v5 uses secure JWT defaults automatically
+    // Removed encode/decode undefined - causes "o.encode is not a function" error
   },
   // 🛡️  SECURITY: Enhanced cookie settings
   cookies: {
@@ -184,9 +183,9 @@ export const {
         } catch (error) {
           console.error("🔍 [AUTH DEBUG] Authentication error:", error)
           console.error("🔍 [AUTH DEBUG] Error details:", {
-            message: error.message,
-            name: error.name,
-            stack: error.stack
+            message: error instanceof Error ? error.message : 'Unknown error',
+            name: error instanceof Error ? error.name : 'Unknown',
+            stack: error instanceof Error ? error.stack : undefined
           })
           return null
         }
