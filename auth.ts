@@ -144,7 +144,7 @@ export const {
 
         try {
           // Make request to our authentication API
-          const response = await fetch(`${process.env.AUTH_URL || 'http://localhost:3000'}/api/auth/verify-credentials`, {
+          const response = await fetch(`${process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://www.cascaisfishing.com'}/api/auth/verify-credentials`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
