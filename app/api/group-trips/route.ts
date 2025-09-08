@@ -382,32 +382,104 @@ export async function GET(request: NextRequest) {
     console.log('🔍 Built where clause:', JSON.stringify(whereClause, null, 2));
     console.log('🔍 Include cancelled:', includeCancelled);
     
-    // Получаем поездки из базы данных с полными данными FishingEvent
-    console.log('🔍 Executing groupTrip.findMany query...');
+    // 🚀 OPTIMIZED: Use selective fields instead of full includes to reduce data transfer
+    console.log('🔍 Executing OPTIMIZED groupTrip.findMany query...');
     const trips = await prisma.groupTrip.findMany({
       where: whereClause,
-      include: {
+      select: {
+        id: true,
+        date: true,
+        timeSlot: true,
+        maxParticipants: true,
+        minRequired: true,
+        pricePerPerson: true,
+        status: true,
+        description: true,
+        meetingPoint: true,
+        specialNotes: true,
+        createdAt: true,
+        updatedAt: true,
+        approvalMode: true,
+        departureLocation: true,
+        difficultyRating: true,
+        equipment: true,
+        estimatedFishCatch: true,
+        eventType: true,
+        fishingTechniques: true,
+        fishingZones: true,
+        maxGroupSize: true,
+        minimumWeatherScore: true,
+        recommendedFor: true,
+        skillLevel: true,
+        socialMode: true,
+        targetSpecies: true,
+        weatherDependency: true,
+        
+        // Optimized includes with selective fields
         bookings: {
           where: includeCancelled ? {} : {
             status: {
               in: [BookingStatus.PENDING, BookingStatus.CONFIRMED]
             }
           },
-          include: {
-            user: true
+          select: {
+            id: true,
+            status: true,
+            participants: true,
+            createdAt: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true
+              }
+            }
           }
         },
         captain: {
-          include: {
-            fisherProfile: true
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            fisherProfile: {
+              select: {
+                id: true,
+                experienceLevel: true,
+                rating: true,
+                specializations: true,
+                isActive: true
+              }
+            }
           }
         },
-        skillCriteria: true, // 🎣 Include skill criteria for approval system
+        skillCriteria: {
+          select: {
+            id: true,
+            skillType: true,
+            minimumLevel: true,
+            isRequired: true
+          }
+        },
         participantApprovals: {
-          include: {
+          select: {
+            id: true,
+            status: true,
+            createdAt: true,
             participant: {
-              include: {
-                fisherProfile: true
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                fisherProfile: {
+                  select: {
+                    id: true,
+                    experienceLevel: true,
+                    rating: true,
+                    isActive: true
+                  }
+                }
               }
             }
           }

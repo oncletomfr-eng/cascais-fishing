@@ -72,7 +72,28 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    // Enable image optimization for production performance
+    unoptimized: false,
+    // Configure allowed external image domains
+    domains: [
+      'images.unsplash.com',
+      'res.cloudinary.com', 
+      'avatars.githubusercontent.com',
+      'via.placeholder.com',
+      'picsum.photos',
+      'www.cascaisfishing.com'
+    ],
+    // Supported image formats (optimized order for performance)
+    formats: ['image/webp', 'image/avif'],
+    // Device sizes for responsive images
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    // Image sizes for different use cases
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Enable placeholder blur data URLs
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    // Minimize layout shift with proper placeholder
+    minimumCacheTTL: 31536000 // 1 year for static images
   },
   // Production optimizations for Vercel
   poweredByHeader: false,
@@ -80,12 +101,13 @@ const nextConfig = {
   staticPageGenerationTimeout: 300,
   // Disable preloading to reduce memory usage
   experimental: {
+    // Disable preloading to reduce memory usage
     preloadEntriesOnStart: false,
     // Enable Webpack memory optimizations (Next.js v15.0.0+)
     webpackMemoryOptimizations: true,
     // Enable server components HMR cache for local development
     serverComponentsHmrCache: true,
-    // Optimize package imports
+    // Optimize package imports to reduce bundle size
     optimizePackageImports: [
       'lucide-react',
       'date-fns',
@@ -103,8 +125,8 @@ const nextConfig = {
       '@prisma/client',
       'stripe'
     ],
-    // Turbopack is now enabled via --turbo flag in dev command
-    // Removed complex turbo rules configuration (deprecated in Next.js 15+)
+    // Note: Turbopack is enabled via --turbo flag in dev command
+    // Legacy experimental.turbo configuration removed (deprecated in Next.js 15+)
   },
   // On-demand entries optimization for dev server
   onDemandEntries: {

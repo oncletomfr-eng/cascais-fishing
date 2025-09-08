@@ -174,8 +174,8 @@ function auditEnvironmentSecrets(): void {
   const secretVars = [
     'AUTH_SECRET',
     'NEXTAUTH_SECRET', 
-    'AUTH_GITHUB_SECRET',
-    'AUTH_GOOGLE_SECRET',
+    'GITHUB_CLIENT_SECRET',
+    'GOOGLE_CLIENT_SECRET',
     'STRIPE_SECRET_KEY',
     'STREAM_CHAT_API_SECRET'
   ];

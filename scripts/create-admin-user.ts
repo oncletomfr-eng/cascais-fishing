@@ -13,7 +13,11 @@ async function createAdminUser() {
     console.log('🔧 Creating admin user...')
 
     const adminEmail = 'admin@cascaisfishing.com'
-    const adminPassword = 'admin123'
+    const adminPassword = process.env.ADMIN_PASSWORD || (() => {
+      console.error('❌ ADMIN_PASSWORD not set in environment variables')
+      console.log('🔧 Set ADMIN_PASSWORD in your .env file')
+      throw new Error('ADMIN_PASSWORD environment variable required')
+    })()
     const adminName = 'Admin Test User'
 
     // Check if admin user already exists
@@ -52,7 +56,7 @@ async function createAdminUser() {
 
     console.log('✅ Admin user created successfully!')
     console.log('📧 Email:', adminUser.email)
-    console.log('🔑 Password: admin123')
+    console.log('🔑 Password: [REDACTED FOR SECURITY]')
     console.log('👤 Role:', adminUser.role)
     console.log('🆔 ID:', adminUser.id)
 

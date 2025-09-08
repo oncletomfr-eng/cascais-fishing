@@ -3,6 +3,7 @@ import { requireChatPermissions, requireChatRole } from '@/lib/middleware/chat-a
 import { ChatSecurityManager, ChatRole, ChannelType, ChatPermission } from '@/lib/security/chat-permissions';
 import { getStreamChatServerClient, createTripChannel } from '@/lib/config/stream-chat';
 import { prisma } from '@/lib/prisma';
+import { withCache } from '@/lib/cache/api-cache';
 
 /**
  * Secure Channel Management API
@@ -149,7 +150,7 @@ export const POST = requireChatPermissions.createChannel()(
 /**
  * GET /api/chat/secure-channels - Get user's accessible channels with security context
  */
-export const GET = requireChatPermissions.sendMessage()(
+const handleGetSecureChannels = requireChatPermissions.sendMessage()(
   async (request: NextRequest, context) => {
     try {
       const { user, securityContext } = context;
@@ -314,6 +315,13 @@ export const GET = requireChatPermissions.sendMessage()(
     }
   }
 );
+
+// Export cached GET handler - channels can be cached for 30 seconds
+export const GET = withCache(handleGetSecureChannels, {
+  ttl: 30,
+  staleWhileRevalidate: 60,  
+  vary: ['authorization']
+});
 
 // Handler functions
 

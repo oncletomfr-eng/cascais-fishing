@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile, stat } from 'fs/promises';
 import { join } from 'path';
+import { withCache, CachePresets } from '@/lib/cache/api-cache';
 
 // Dynamic imports to reduce bundle size
 const loadChatAuth = () => import('@/lib/middleware/chat-auth');
@@ -35,7 +36,7 @@ interface FileRequest {
 /**
  * GET /api/chat/files - File operations with access control
  */
-export const GET = async (request: NextRequest) => {
+async function handleGetFiles(request: NextRequest) {
   // Load authentication middleware dynamically
   const { requireChatAuth } = await loadChatAuth();
   
@@ -107,7 +108,14 @@ export const GET = async (request: NextRequest) => {
   
   // Execute the handler
   return handler(request);
-};
+}
+
+// Export cached GET handler - files can be cached for 60 seconds
+export const GET = withCache(handleGetFiles, { 
+  ttl: 60, 
+  staleWhileRevalidate: 120,
+  vary: ['authorization']
+});
 
 /**
  * POST /api/chat/files - Update file settings and permissions

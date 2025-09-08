@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Fish, 
@@ -87,6 +88,7 @@ export function CatchPhotoCard({
   onImageClick
 }: CatchPhotoCardProps) {
   const [showFullImage, setShowFullImage] = useState(false)
+  const [imageSrc, setImageSrc] = useState(payload.imageUrl)
   
   const handleImageClick = () => {
     if (onImageClick) {
@@ -146,14 +148,14 @@ export function CatchPhotoCard({
           <CardContent className="pt-0 space-y-4">
             {/* Фото улова */}
             <div className="relative group cursor-pointer" onClick={handleImageClick}>
-              <img
-                src={payload.imageUrl}
+              <Image
+                src={imageSrc}
                 alt={payload.fishSpecies || 'Улов'}
+                width={400}
+                height={256}
                 className="w-full h-64 object-cover rounded-lg shadow-md transition-transform group-hover:scale-105"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement
-                  target.src = '/images/placeholder-fish.png'
-                }}
+                onError={() => setImageSrc('/images/placeholder-fish.png')}
+                unoptimized={imageSrc === '/images/placeholder-fish.png'}
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-lg transition-colors flex items-center justify-center">
                 <Maximize2 className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />

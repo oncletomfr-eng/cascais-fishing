@@ -11,33 +11,44 @@
 
 ### 1. NextAuth v5 Configuration:
 ```
-AUTH_SECRET=cascais-fishing-next-auth-secret-2024-development
+AUTH_SECRET=[GENERATE_SECURE_64_CHAR_HEX_SECRET]
 AUTH_URL=https://www.cascaisfishing.com/
 AUTH_TRUST_HOST=true
 ```
-**ВАЖНО:** `AUTH_TRUST_HOST=true` обязательно для NextAuth v5 в production!
+**ВАЖНО:** 
+- `AUTH_TRUST_HOST=true` обязательно для NextAuth v5 в production!
+- **GENERATE SECURE SECRET**: Use `openssl rand -hex 64` to generate production AUTH_SECRET
 
 ### 2. Google OAuth (NextAuth v5 format):
 ```
-AUTH_GOOGLE_ID=268443624329-0tningcfnejjev0fngg1uh9pct123hpp.apps.googleusercontent.com
-AUTH_GOOGLE_SECRET=[YOUR_GOOGLE_OAUTH_SECRET]
+GOOGLE_CLIENT_ID=[YOUR_GOOGLE_OAUTH_CLIENT_ID]
+GOOGLE_CLIENT_SECRET=[YOUR_GOOGLE_OAUTH_SECRET]
 ```
 
 ### 3. GitHub OAuth (NextAuth v5 format):
 ```
-AUTH_GITHUB_ID=Ov23lidOAF9VzbED5CvV
-AUTH_GITHUB_SECRET=[YOUR_GITHUB_OAUTH_SECRET]
+GITHUB_CLIENT_ID=[YOUR_GITHUB_OAUTH_CLIENT_ID]
+GITHUB_CLIENT_SECRET=[YOUR_GITHUB_OAUTH_SECRET]
 ```
 
-### 4. Stream Chat (production keys):
+### 4. Stream Chat (production keys) - ✅ PRIORITY:
 ```
 NEXT_PUBLIC_STREAM_CHAT_API_KEY=[YOUR_STREAM_CHAT_API_KEY]
 STREAM_CHAT_API_SECRET=[YOUR_STREAM_CHAT_API_SECRET]
+STREAM_CHAT_ENVIRONMENT=production
+STREAM_CHAT_TIMEOUT=10000
+STREAM_CHAT_ENABLE_LOGGING=false
 ```
+**SETUP INSTRUCTIONS:**
+1. Create production Stream Chat app at https://getstream.io/chat/
+2. Get API Key and Secret from dashboard
+3. Configure automod: AI moderation enabled
+4. Set connection timeout to 10 seconds for production
+5. Disable debug logging for performance
 
-### 5. Database (Supabase production) - ✅ ИСПРАВЛЕНО 2025-01-10:
+### 5. Database (Supabase production):
 ```
-DATABASE_URL=postgresql://postgres.spblkbrkxmknfjugoueo:sdbSV_232sdsfbdKSK@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true
+DATABASE_URL=[YOUR_SUPABASE_DATABASE_URL_WITH_POOLER_PORT_6543]
 ```
 **КРИТИЧНО:** 
 - ✅ Port 6543 (Transaction Pooler) для Vercel serverless  
@@ -59,6 +70,29 @@ OPENAI_API_KEY=sk-proj-[YOUR_OPENAI_API_KEY_HERE]
 NASA_API_KEY=[YOUR_NASA_API_KEY]
 NOAA_CDO_API_TOKEN=[YOUR_NOAA_API_TOKEN]
 ```
+
+### 9. 🚨 NEW: Sentry Error Tracking (PRIORITY):
+```
+SENTRY_DSN=[YOUR_SENTRY_DSN_URL]
+NEXT_PUBLIC_SENTRY_DSN=[YOUR_SENTRY_DSN_URL]  
+SENTRY_ORG=[YOUR_SENTRY_ORG_NAME]
+SENTRY_PROJECT=cascais-fishing
+SENTRY_ENVIRONMENT=production
+```
+**SETUP INSTRUCTIONS:**
+1. Create Sentry account at https://sentry.io/
+2. Create new project "cascais-fishing" (Next.js platform)
+3. Copy DSN URL from project settings
+4. Set sample rates: 10% for production performance
+5. Enable session replay for error debugging
+6. Configure alerts for critical errors
+
+**BENEFITS:**
+- 🚨 Real-time error monitoring & alerting
+- 📊 Performance tracking & bottleneck detection  
+- 🔍 Session replay for debugging user issues
+- 📈 Error trends & impact analysis
+- 🎯 User context & comprehensive error details
 
 ---
 

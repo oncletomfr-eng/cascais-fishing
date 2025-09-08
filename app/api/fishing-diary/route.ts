@@ -4,9 +4,10 @@ import prisma from '@/lib/prisma';
 import { writeFile, mkdir, unlink } from 'fs/promises';
 import { join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { withCache, CachePresets } from '@/lib/cache/api-cache';
 
 // GET - получить записи дневника и статистику
-export async function GET(req: NextRequest) {
+async function handleGetFishingDiary(req: NextRequest) {
   const session = await auth();
   if (!session || !session.user?.id) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -71,7 +72,7 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    // Статистика по месяцам (последние 12 месяцев)
+    // Статистика по месяцам (последние 12 месяцев) - БЕЗОПАСНЫЙ ПАРАМЕТРИЗОВАННЫЙ ЗАПРОС
     const monthlyStats = await prisma.$queryRaw<Array<{
       month: string;
       catches: number;
@@ -80,7 +81,7 @@ export async function GET(req: NextRequest) {
         TO_CHAR(date, 'YYYY-MM') as month,
         COUNT(*)::integer as catches
       FROM fishing_diary_entries 
-      WHERE user_id = ${userId}
+      WHERE user_id = ${userId}::uuid
         AND date >= NOW() - INTERVAL '12 months'
       GROUP BY TO_CHAR(date, 'YYYY-MM')
       ORDER BY month DESC
@@ -196,8 +197,8 @@ export async function POST(req: NextRequest) {
           fileUrl: `/uploads/fishing-diary/${userId}/${fileName}`,
           fileSize: file.size,
           mimeType: file.type,
-          mediaType: file.type.startsWith('image/') ? 'PHOTO' : 
-                    file.type.startsWith('video/') ? 'VIDEO' : 'AUDIO',
+          mediaType: (file.type.startsWith('image/') ? 'PHOTO' : 
+                    file.type.startsWith('video/') ? 'VIDEO' : 'AUDIO') as any,
           exifData: exifData?.allExif || null,
           gpsLatitude: exifData?.gpsLatitude || null,
           gpsLongitude: exifData?.gpsLongitude || null,
@@ -430,3 +431,6 @@ export async function DELETE(req: NextRequest) {
     );
   }
 }
+
+// Apply caching to GET requests for user-specific fishing diary data
+export const GET = withCache(handleGetFishingDiary, CachePresets.USER_DATA);

@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD
 const SESSION_COOKIE = 'admin-session'
 const SESSION_DURATION = 24 * 60 * 60 * 1000 // 24 hours
 
@@ -46,13 +46,16 @@ export function isValidAdminSession(sessionToken?: string): boolean {
  * Проверяет пароль админа
  */
 export function validateAdminPassword(password: string): boolean {
-  console.log('validateAdminPassword called with:', password)
-  console.log('ADMIN_PASSWORD from env:', ADMIN_PASSWORD)
-  console.log('Expected password: qwerty123')
+  // Security: Never log passwords in production
   
-  // Для отладки - прямая проверка
-  const isValid = password === 'qwerty123' || password === ADMIN_PASSWORD
-  console.log('Validation result:', isValid)
+  // Production-ready password validation
+  if (!ADMIN_PASSWORD) {
+    console.error('ADMIN_PASSWORD not configured in environment variables')
+    return false
+  }
+  
+  const isValid = password === ADMIN_PASSWORD
+  // Security: Don't log validation results in production
   
   return isValid
 }

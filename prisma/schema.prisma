@@ -341,6 +341,11 @@ model User {
   sessions             Session[]
   achievements         UserAchievement[] // Достижения пользователя
   
+  // Notification System
+  notificationLogs         NotificationLog[]          // Audit trail всех уведомлений
+  userNotifications        UserNotification[]         // In-app уведомления
+  notificationPreferences  UserNotificationPreferences? // Настройки уведомлений
+  
   // Монетизация
   subscriptions     Subscription[]
   payments          Payment[]
@@ -2784,4 +2789,125 @@ enum RewardEventStatus {
   ACTIVE      // Активно
   COMPLETED   // Завершено
   CANCELLED   // Отменено
+}
+
+// ==== UNIFIED NOTIFICATION SYSTEM ====
+
+// Notification audit log - все отправленные уведомления
+model NotificationLog {
+  id String @id @default(cuid())
+  
+  // Basic info
+  userId String
+  type   String // NotificationType enum value
+  title  String
+  message String
+  
+  // Data and context
+  data           Json?  // Structured data for template rendering
+  channels       Json   // Array of NotificationChannel enum values
+  priority       String // NotificationPriority enum value
+  
+  // Context IDs for filtering
+  bookingId      String?
+  tripId         String?
+  chatChannelId  String?
+  
+  // Scheduling and expiry
+  scheduledFor   DateTime?
+  expiresAt      DateTime?
+  
+  // Retry logic
+  maxRetries     Int @default(3)
+  retryCount     Int @default(0)
+  
+  // Status tracking
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime? @updatedAt
+  deliveredAt    DateTime?
+  
+  // Metadata
+  source         String    // Which system/API created this
+  templateId     String?   // Email template ID
+  locale         String    @default("en") // Language
+  
+  // Relations
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([scheduledFor])
+  @@map("notification_logs")
+}
+
+// In-app notifications for notification center
+model UserNotification {
+  id String @id @default(cuid())
+  
+  // Basic info
+  userId     String
+  type       String // NotificationType enum value
+  title      String
+  message    String
+  
+  // Data and context
+  data       Json?  // Structured data
+  priority   String // NotificationPriority enum value
+  
+  // Context IDs
+  bookingId  String?
+  tripId     String?
+  
+  // Status
+  isRead     Boolean   @default(false)
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime? @updatedAt
+  
+  // Relations
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@index([type])
+  @@map("user_notifications")
+}
+
+// User notification preferences
+model UserNotificationPreferences {
+  id     String @id @default(cuid())
+  userId String @unique
+  
+  // Channel preferences
+  emailEnabled Boolean @default(true)
+  sseEnabled   Boolean @default(true)
+  pushEnabled  Boolean @default(true)
+  
+  // Type preferences
+  bookingNotifications     Boolean @default(true)
+  tripNotifications       Boolean @default(true)
+  achievementNotifications Boolean @default(true)
+  chatNotifications       Boolean @default(true)
+  marketingNotifications  Boolean @default(false)
+  
+  // Timing preferences
+  quietHoursEnabled Boolean @default(false)
+  quietHoursStart   String? // "22:00"
+  quietHoursEnd     String? // "08:00"
+  timezone         String  @default("UTC")
+  
+  // Frequency preferences
+  digestEnabled       Boolean @default(false)
+  digestFrequency     String  @default("never") // daily, weekly, never
+  immediateForUrgent  Boolean @default(true)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_notification_preferences")
 }

@@ -154,62 +154,90 @@ async function getReviewAnalytics(
     ...(userId && { toUserId: userId }) // If userId provided, get reviews received by that user
   }
 
-  // Get all reviews with related data
+  // 🚀 OPTIMIZED: First get reviews with minimal data, then batch fetch related data
   const reviews = await prisma.review.findMany({
     where: whereClause,
-    include: {
-      fromUser: {
-        select: {
-          id: true,
-          name: true,
-          createdAt: true
-        }
-      },
-      toUser: {
-        select: {
-          id: true,
-          name: true,
-          createdAt: true
-        }
-      },
-      trip: {
-        select: {
-          id: true,
-          date: true,
-          timeSlot: true,
-          pricePerPerson: true,
-          status: true,
-          createdAt: true,
-          bookings: {
-            select: {
-              id: true,
-              status: true,
-              participants: true,
-              createdAt: true
-            }
+    select: {
+      id: true,
+      tripId: true,
+      fromUserId: true,
+      toUserId: true,
+      rating: true,
+      comment: true,
+      helpful: true,
+      createdAt: true,
+      verified: true
+    },
+    orderBy: { createdAt: 'asc' }
+  });
+
+  // Then batch fetch related data for better performance
+  const userIds = [...new Set([
+    ...reviews.map(r => r.fromUserId),
+    ...reviews.map(r => r.toUserId)
+  ].filter(Boolean))];
+  
+  const tripIds = [...new Set(reviews.map(r => r.tripId).filter(Boolean))];
+  
+  // Parallel fetch related data to reduce total query time
+  const [users, trips] = await Promise.all([
+    userIds.length > 0 ? prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true
+      }
+    }) : [],
+    tripIds.length > 0 ? prisma.groupTrip.findMany({
+      where: { id: { in: tripIds } },
+      select: {
+        id: true,
+        date: true,
+        timeSlot: true,
+        pricePerPerson: true,
+        status: true,
+        createdAt: true,
+        bookings: {
+          select: {
+            id: true,
+            status: true,
+            participants: true,
+            createdAt: true
           }
         }
       }
-    },
-    orderBy: { createdAt: 'asc' }
-  })
+    }) : []
+  ]);
+
+  // Create lookup maps for efficient data access
+  const userMap = new Map(users.map(u => [u.id, u]));
+  const tripMap = new Map(trips.map(t => [t.id, t]));
+
+  // Enrich reviews with related data
+  const enrichedReviews = reviews.map(review => ({
+    ...review,
+    fromUser: review.fromUserId ? userMap.get(review.fromUserId) || null : null,
+    toUser: review.toUserId ? userMap.get(review.toUserId) || null : null,
+    trip: review.tripId ? tripMap.get(review.tripId) || null : null
+  }));
 
   console.log(`📊 Found ${reviews.length} reviews for analysis`)
 
-  // Calculate rating distributions
-  const ratingDistributions = calculateRatingDistributions(reviews)
+  // Calculate rating distributions using enriched reviews
+  const ratingDistributions = calculateRatingDistributions(enrichedReviews)
 
   // Perform sentiment analysis if requested
   let sentimentAnalysis = null
   if (includeSentiment) {
-    sentimentAnalysis = performSentimentAnalysis(reviews)
+    sentimentAnalysis = performSentimentAnalysis(enrichedReviews)
   }
 
   // Track rating trends over time
-  const ratingTrends = generateRatingTrends(reviews, groupBy)
+  const ratingTrends = generateRatingTrends(enrichedReviews, groupBy)
 
   // Generate improvement suggestions
-  const improvementInsights = generateImprovementSuggestions(reviews, sentimentAnalysis)
+  const improvementInsights = generateImprovementSuggestions(enrichedReviews, sentimentAnalysis)
 
   // Calculate response rates and metrics
   const responseMetrics = await calculateResponseMetrics(startDate, endDate, userId)

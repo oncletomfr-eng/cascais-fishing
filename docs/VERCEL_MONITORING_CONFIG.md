@@ -195,8 +195,104 @@ interface HealthResponse {
 3. **High Cold Start Rate**: Consider increasing concurrency or warming functions
 4. **Memory Usage Growth**: Check for memory leaks or inefficient queries
 
+## 🎭 Advanced Monitoring Features
+
+### Real-time Performance Tracking
+```javascript
+// app/layout.tsx - Enhanced Analytics Configuration
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from '@vercel/analytics/react';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        {children}
+        <SpeedInsights />
+        <Analytics 
+          mode={process.env.NODE_ENV === 'production' ? 'production' : 'development'}
+          debug={false}
+        />
+      </body>
+    </html>
+  );
+}
+```
+
+### Custom Performance Tracking
+```typescript
+// lib/monitoring/performance-tracker.ts
+export class PerformanceTracker {
+  static trackCustomMetric(name: string, value: number, unit: string = 'ms') {
+    if (typeof window !== 'undefined' && window.va) {
+      window.va('track', name, { value, unit });
+    }
+  }
+  
+  static trackUserFlow(flowName: string, step: string, duration?: number) {
+    if (typeof window !== 'undefined' && window.va) {
+      window.va('track', 'User Flow', {
+        flow: flowName,
+        step: step,
+        duration: duration || performance.now(),
+      });
+    }
+  }
+}
+
+// Usage in components
+export function TripBookingFlow() {
+  useEffect(() => {
+    PerformanceTracker.trackUserFlow('trip-booking', 'started');
+  }, []);
+  
+  const handleBookingComplete = () => {
+    PerformanceTracker.trackUserFlow('trip-booking', 'completed');
+    PerformanceTracker.trackCustomMetric('booking-conversion', 1, 'count');
+  };
+}
+```
+
+### Monitoring Dashboard URLs
+
+#### Vercel Analytics Dashboards
+- **Speed Insights**: https://vercel.com/[team]/[project]/speed-insights
+- **Web Analytics**: https://vercel.com/[team]/[project]/analytics
+- **Function Logs**: https://vercel.com/[team]/[project]/functions
+- **Deployments**: https://vercel.com/[team]/[project]/deployments
+
+#### Performance Budgets Configuration
+```json
+{
+  "performanceBudgets": {
+    "mobile": {
+      "lcp": 2500,          // Largest Contentful Paint (ms)
+      "fid": 100,           // First Input Delay (ms)
+      "cls": 0.1,           // Cumulative Layout Shift
+      "fcp": 1500,          // First Contentful Paint (ms)
+      "ttfb": 800           // Time to First Byte (ms)
+    },
+    "desktop": {
+      "lcp": 2000,
+      "fid": 50,
+      "cls": 0.1,
+      "fcp": 1200,
+      "ttfb": 600
+    }
+  },
+  "alerts": {
+    "budget_exceeded_threshold": 0.1,  // Alert if 10% of users exceed budget
+    "consecutive_failures": 3          // Alert after 3 consecutive budget failures
+  }
+}
+```
+
 ---
 
 *Last updated: 2025-01-10*  
 *Health Check: `/api/admin/health`*  
-*Analytics Status: Speed Insights + Web Analytics enabled*
+*Analytics Status: Speed Insights + Web Analytics + Custom Tracking enabled*

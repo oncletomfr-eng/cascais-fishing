@@ -1,0 +1,437 @@
+/**
+ * Mobile Notification System Styles
+ * Task 14.2: Touch-friendly notification interactions
+ * 
+ * Optimized for:
+ * - Touch interactions
+ * - Mobile screen sizes
+ * - Accessibility
+ * - Smooth animations
+ * - Haptic feedback visual cues
+ */
+
+/* Base mobile notification container */
+.mobile-notification-container {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  
+  /* Support for safe areas */
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+}
+
+/* Individual notification item */
+.mobile-notification-item {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  
+  /* Enhanced shadows for mobile */
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  
+  /* Touch-optimized border radius */
+  border-radius: 12px;
+  
+  /* Smooth transitions */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Touch feedback */
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mobile-notification-item:active {
+  transform: scale(0.98);
+}
+
+/* Notification types with enhanced mobile colors */
+.mobile-notification-item.success {
+  background: linear-gradient(135deg, 
+    rgba(34, 197, 94, 0.95) 0%, 
+    rgba(22, 163, 74, 0.95) 100%);
+  border-left: 4px solid #16a34a;
+  color: white;
+}
+
+.mobile-notification-item.warning {
+  background: linear-gradient(135deg, 
+    rgba(245, 158, 11, 0.95) 0%, 
+    rgba(217, 119, 6, 0.95) 100%);
+  border-left: 4px solid #d97706;
+  color: white;
+}
+
+.mobile-notification-item.error {
+  background: linear-gradient(135deg, 
+    rgba(239, 68, 68, 0.95) 0%, 
+    rgba(220, 38, 38, 0.95) 100%);
+  border-left: 4px solid #dc2626;
+  color: white;
+}
+
+.mobile-notification-item.info {
+  background: linear-gradient(135deg, 
+    rgba(59, 130, 246, 0.95) 0%, 
+    rgba(29, 78, 216, 0.95) 100%);
+  border-left: 4px solid #1d4ed8;
+  color: white;
+}
+
+/* Dragging state */
+.mobile-notification-item.dragging {
+  z-index: 1001;
+  box-shadow: 
+    0 8px 40px rgba(0, 0, 0, 0.2),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: rotate(2deg);
+}
+
+/* Content layout */
+.mobile-notification-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.mobile-notification-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mobile-notification-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-notification-title {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.3;
+  margin: 0 0 4px 0;
+  word-wrap: break-word;
+}
+
+.mobile-notification-message {
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 0.9;
+  margin: 0 0 8px 0;
+  word-wrap: break-word;
+}
+
+/* Action button */
+.mobile-notification-action {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.25);
+  color: inherit;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  
+  /* Touch-friendly minimum size */
+  min-height: 32px;
+  min-width: 60px;
+  
+  /* Smooth hover effect */
+  transition: background-color 0.2s ease;
+  
+  /* Focus styles for accessibility */
+  outline: none;
+}
+
+.mobile-notification-action:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.mobile-notification-action:focus-visible {
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.mobile-notification-action:active {
+  transform: scale(0.96);
+}
+
+/* Dismiss button */
+.mobile-notification-dismiss {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: inherit;
+  padding: 4px;
+  border-radius: 50%;
+  cursor: pointer;
+  
+  /* Touch-friendly size */
+  width: 32px;
+  height: 32px;
+  
+  /* Center icon */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Smooth transitions */
+  transition: all 0.2s ease;
+  
+  /* Remove tap highlight */
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-notification-dismiss:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mobile-notification-dismiss:active {
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Timestamp */
+.mobile-notification-timestamp {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 4px;
+}
+
+/* Swipe indicator */
+.mobile-notification-swipe-indicator {
+  position: absolute;
+  right: 16px;
+  bottom: -20px;
+  font-size: 10px;
+  color: rgba(107, 114, 128, 0.6);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+/* Hidden notifications counter */
+.mobile-notification-counter {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.mobile-notification-counter-badge {
+  display: inline-block;
+  background: rgba(31, 41, 55, 0.9);
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Settings toggle button */
+.mobile-notification-settings {
+  background: rgba(31, 41, 55, 0.9);
+  color: white;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  
+  /* Center icon */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Smooth transitions */
+  transition: all 0.2s ease;
+  
+  /* Shadow */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.mobile-notification-settings:hover {
+  background: rgba(55, 65, 81, 0.9);
+}
+
+.mobile-notification-settings:active {
+  transform: scale(0.95);
+}
+
+/* Position variants */
+.mobile-notification-container.top {
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+.mobile-notification-container.bottom {
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.mobile-notification-container.center {
+  top: 50%;
+  left: 16px;
+  right: 16px;
+  transform: translateY(-50%);
+}
+
+/* Responsive breakpoints */
+
+/* Large mobile (iPhone Plus, etc.) */
+@media (max-width: 414px) and (max-height: 736px) {
+  .mobile-notification-item {
+    font-size: 13px;
+    padding: 12px;
+  }
+  
+  .mobile-notification-title {
+    font-size: 13px;
+  }
+  
+  .mobile-notification-message {
+    font-size: 12px;
+  }
+}
+
+/* Standard mobile */
+@media (max-width: 375px) {
+  .mobile-notification-container {
+    left: 12px;
+    right: 12px;
+  }
+  
+  .mobile-notification-item {
+    padding: 10px;
+  }
+  
+  .mobile-notification-content {
+    gap: 10px;
+  }
+  
+  .mobile-notification-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Small mobile */
+@media (max-width: 320px) {
+  .mobile-notification-container {
+    left: 8px;
+    right: 8px;
+  }
+  
+  .mobile-notification-item {
+    padding: 8px;
+  }
+  
+  .mobile-notification-title {
+    font-size: 12px;
+  }
+  
+  .mobile-notification-message {
+    font-size: 11px;
+  }
+  
+  .mobile-notification-action {
+    font-size: 11px;
+    padding: 4px 8px;
+    min-width: 50px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .mobile-notification-item {
+    background: rgba(31, 41, 55, 0.95);
+    color: white;
+  }
+  
+  .mobile-notification-item.success {
+    background: linear-gradient(135deg, 
+      rgba(21, 128, 61, 0.95) 0%, 
+      rgba(22, 163, 74, 0.95) 100%);
+  }
+  
+  .mobile-notification-item.warning {
+    background: linear-gradient(135deg, 
+      rgba(180, 83, 9, 0.95) 0%, 
+      rgba(217, 119, 6, 0.95) 100%);
+  }
+  
+  .mobile-notification-item.error {
+    background: linear-gradient(135deg, 
+      rgba(185, 28, 28, 0.95) 0%, 
+      rgba(220, 38, 38, 0.95) 100%);
+  }
+  
+  .mobile-notification-item.info {
+    background: linear-gradient(135deg, 
+      rgba(30, 64, 175, 0.95) 0%, 
+      rgba(29, 78, 216, 0.95) 100%);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-notification-item,
+  .mobile-notification-action,
+  .mobile-notification-dismiss,
+  .mobile-notification-settings {
+    transition: none;
+  }
+  
+  .mobile-notification-swipe-indicator {
+    animation: none;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+  }
+}
+
+/* High contrast support */
+@media (prefers-contrast: high) {
+  .mobile-notification-item {
+    border-width: 2px;
+    border-style: solid;
+  }
+  
+  .mobile-notification-item.success {
+    border-color: #15803d;
+  }
+  
+  .mobile-notification-item.warning {
+    border-color: #b45309;
+  }
+  
+  .mobile-notification-item.error {
+    border-color: #b91c1c;
+  }
+  
+  .mobile-notification-item.info {
+    border-color: #1e40af;
+  }
+}

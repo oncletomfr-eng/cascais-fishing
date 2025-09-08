@@ -70,49 +70,86 @@ async function logErrorToFile(errorReport: ErrorReport) {
 
 // Отправка в внешнюю систему мониторинга
 async function reportToMonitoringSystem(errorReport: ErrorReport) {
-  // В production здесь должна быть интеграция с системами типа:
-  // - Sentry
-  // - LogRocket  
-  // - Bugsnag
-  // - DataDog
-  // - Собственная система логирования
-
-  // Пример интеграции с Sentry (закомментировано)
-  /*
+  // 🚀 SENTRY INTEGRATION ACTIVATED
   if (process.env.SENTRY_DSN) {
     try {
       const Sentry = await import('@sentry/nextjs');
       
       Sentry.withScope((scope) => {
+        // Set tags for filtering and grouping
         scope.setTag('errorBoundary', true);
         scope.setTag('level', errorReport.level);
         scope.setTag('boundaryName', errorReport.boundaryName || 'unknown');
-        scope.setContext('errorInfo', errorReport.errorInfo);
+        scope.setTag('source', 'cascais-fishing');
+        
+        // Set user context if available
+        if (errorReport.userId) {
+          scope.setUser({ id: errorReport.userId });
+        }
+        
+        // Add comprehensive context
+        scope.setContext('errorInfo', {
+          componentStack: errorReport.errorInfo.componentStack,
+          errorId: errorReport.id,
+        });
+        
         scope.setContext('userReport', {
           id: errorReport.id,
           userAgent: errorReport.userAgent,
           url: errorReport.url,
           userFeedback: errorReport.userFeedback,
+          timestamp: errorReport.timestamp,
+        });
+        
+        // Add environment context
+        scope.setContext('environment', {
+          nodeEnv: process.env.NODE_ENV,
+          vercelEnv: process.env.VERCEL_ENV,
+          version: process.env.npm_package_version,
         });
 
+        // Create error object with proper stack trace
         const error = new Error(errorReport.error.message);
         error.name = errorReport.error.name;
-        error.stack = errorReport.error.stack;
+        if (errorReport.error.stack) {
+          error.stack = errorReport.error.stack;
+        }
 
+        // Set severity based on error level
+        const level = errorReport.level === 'critical' ? 'fatal' : 
+                     errorReport.level === 'component' ? 'error' : 'warning';
+        scope.setLevel(level as any);
+
+        // Capture the exception
         Sentry.captureException(error);
+        
+        console.log('✅ Error successfully reported to Sentry:', {
+          id: errorReport.id,
+          level: errorReport.level,
+          boundary: errorReport.boundaryName,
+        });
       });
-    } catch (error) {
-      console.error('Failed to report to Sentry:', error);
+    } catch (sentryError) {
+      console.error('❌ Failed to report to Sentry:', sentryError);
+      // Fallback to console logging
+      console.log('📊 Error report (Sentry fallback):', {
+        id: errorReport.id,
+        level: errorReport.level,
+        boundary: errorReport.boundaryName,
+        url: errorReport.url,
+        error: errorReport.error.message,
+      });
     }
+  } else {
+    // Development mode or Sentry not configured
+    console.log('📊 Sentry DSN not configured, logging locally:', {
+      id: errorReport.id,
+      level: errorReport.level,
+      boundary: errorReport.boundaryName,
+      url: errorReport.url,
+      error: errorReport.error.message,
+    });
   }
-  */
-
-  console.log('📊 Error report would be sent to monitoring system:', {
-    id: errorReport.id,
-    level: errorReport.level,
-    boundary: errorReport.boundaryName,
-    url: errorReport.url,
-  });
 }
 
 // Сохранение в базу данных (опционально)

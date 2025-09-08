@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -93,10 +94,13 @@ export default function FishingLandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div className="relative h-64 rounded-lg overflow-hidden">
-              <img
+              <Image
                 src="/happy-tourist-fish.png"
                 alt="Happy customers with Atlantic tuna catch"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               <div className="absolute bottom-4 left-4 text-white">
@@ -106,10 +110,12 @@ export default function FishingLandingPage() {
             </div>
 
             <div className="relative h-64 rounded-lg overflow-hidden">
-              <img
+              <Image
                 src="/deep-sea-fishing-action.png"
                 alt="Deep sea fishing action"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               <div className="absolute bottom-4 left-4 text-white">

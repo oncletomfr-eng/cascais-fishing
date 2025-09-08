@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { 
   Lightbulb,
@@ -318,14 +319,16 @@ export function FishingTipCard({
                             className="relative aspect-square cursor-pointer group"
                             onClick={() => handleImageClick(imageUrl)}
                           >
-                            <img
+                            <Image
                               src={imageUrl}
                               alt={`Изображение ${index + 1}`}
-                              className="w-full h-full object-cover rounded-lg group-hover:opacity-80 transition-opacity"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement
-                                target.src = '/images/placeholder.png'
+                              fill
+                              className="object-cover rounded-lg group-hover:opacity-80 transition-opacity"
+                              onError={() => {
+                                // Handle error by setting a fallback - could be improved with state management
+                                console.warn(`Failed to load image: ${imageUrl}`)
                               }}
+                              unoptimized={imageUrl.includes('placeholder')}
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-lg transition-colors flex items-center justify-center">
                               <ImageIcon className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
