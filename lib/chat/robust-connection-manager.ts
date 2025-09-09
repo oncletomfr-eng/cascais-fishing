@@ -42,13 +42,13 @@ export enum ConnectionQuality {
 
 // Configuration interface
 export interface RobustConnectionConfig {
-  // Timeout configurations
-  baseTimeout: number;           // Base timeout in ms (default: 15000)
-  maxTimeout: number;            // Maximum timeout in ms (default: 60000)
-  extendedTimeout: number;       // Extended timeout for slow networks (default: 90000)
+  // Timeout configurations - OPTIMIZED FOR FAST UX
+  baseTimeout: number;           // Base timeout in ms (default: 3000)
+  maxTimeout: number;            // Maximum timeout in ms (default: 8000)
+  extendedTimeout: number;       // Extended timeout for slow networks (default: 12000)
   
   // Retry configurations
-  maxRetries: number;            // Maximum retry attempts (default: 5)
+  maxRetries: number;            // Maximum retry attempts (default: 3)
   retryMultiplier: number;       // Exponential backoff multiplier (default: 1.5)
   retryRandomization: number;    // Jitter factor 0-1 (default: 0.3)
   
@@ -66,12 +66,12 @@ export interface RobustConnectionConfig {
   enableSSEFallback: boolean;          // Enable SSE-only mode (default: true)
 }
 
-// Default configuration
+// Default configuration - OPTIMIZED FOR FAST UX 
 export const DEFAULT_ROBUST_CONFIG: RobustConnectionConfig = {
-  baseTimeout: 15000,
-  maxTimeout: 60000,
-  extendedTimeout: 90000,
-  maxRetries: 5,
+  baseTimeout: 3000,        // 3 seconds (was 15s - RIDICULOUS!)
+  maxTimeout: 8000,         // 8 seconds (was 60s - INSANE!)
+  extendedTimeout: 12000,   // 12 seconds (was 90s - WTF!)
+  maxRetries: 3,            // 3 attempts (was 5 - too slow)
   retryMultiplier: 1.5,
   retryRandomization: 0.3,
   enableMultipleStrategies: true,
@@ -527,21 +527,18 @@ export class RobustStreamChatConnectionManager {
   private selectOptimalStrategies(diagnostics: NetworkDiagnostics): ConnectionStrategy[] {
     const strategies: ConnectionStrategy[] = [];
 
-    // Always try direct WebSocket first
+    // Always try direct WebSocket first (BUT WITH FAST TIMEOUT!)
     strategies.push(ConnectionStrategy.DIRECT_WEBSOCKET);
 
-    // Add strategies based on network conditions
-    if (diagnostics.connectivity === 'poor') {
-      strategies.push(ConnectionStrategy.EXTENDED_TIMEOUT);
-    }
-
-    if (diagnostics.restrictions.websocketBlocked) {
-      strategies.push(ConnectionStrategy.MULTIPLE_PORTS);
-      if (this.config.enableLongPolling) {
-        strategies.push(ConnectionStrategy.LONG_POLLING);
-      }
-    } else {
-      strategies.push(ConnectionStrategy.EXTENDED_TIMEOUT);
+    // AGGRESSIVE FALLBACK - Add ALL strategies quickly
+    strategies.push(ConnectionStrategy.EXTENDED_TIMEOUT);
+    
+    // Try multiple ports early
+    strategies.push(ConnectionStrategy.MULTIPLE_PORTS);
+    
+    // Add long-polling fallback 
+    if (this.config.enableLongPolling) {
+      strategies.push(ConnectionStrategy.LONG_POLLING);
     }
 
     // SSE fallback as last resort
