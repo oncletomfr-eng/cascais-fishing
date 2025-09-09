@@ -88,14 +88,14 @@ class EdgeRateLimiter {
   }
 
   private detectSuspiciousActivity(entry: RateLimitEntry, now: number, path?: string): boolean {
-    // Very rapid requests (< 100ms between requests)
+    // Very rapid requests (< 50ms between requests and high volume)
     const avgInterval = (now - entry.firstAttempt) / entry.count;
-    if (avgInterval < 100 && entry.count > 10) {
+    if (avgInterval < 50 && entry.count > 100) {
       return true;
     }
 
-    // High volume of requests to auth endpoints
-    if (path?.includes('/auth/') && entry.count > 20) {
+    // High volume of requests to auth endpoints (more lenient)
+    if (path?.includes('/auth/') && entry.count > 200) {
       return true;
     }
 
@@ -154,8 +154,8 @@ export const RateLimits = {
   // General API endpoints
   api: { limit: 100, windowMs: 60000 }, // 100 requests per minute
   
-  // Authentication endpoints (stricter)
-  auth: { limit: 10, windowMs: 60000 }, // 10 requests per minute
+  // Authentication endpoints (more reasonable)
+  auth: { limit: 500, windowMs: 60000 }, // 500 requests per minute
   
   // Admin endpoints (very strict)
   admin: { limit: 30, windowMs: 300000 }, // 30 requests per 5 minutes
