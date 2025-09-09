@@ -123,10 +123,10 @@ export default auth((req) => {
 
   // 🛡️  SECURITY: Add comprehensive security headers
   const securityHeaders = {
-    // 🔒 Content Security Policy (strict for production)
+    // 🔒 Content Security Policy (with canvas-confetti blob support)
     'Content-Security-Policy': process.env.NODE_ENV === 'production' 
-      ? `default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://*.supabase.com https://vitals.vercel-insights.com wss://*.supabase.com; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';`
-      : `default-src 'self' 'unsafe-eval' 'unsafe-inline'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' ws://localhost:* https://*.supabase.com wss://*.supabase.com;`,
+      ? `default-src 'self' blob:; script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: https://vercel.live https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://*.supabase.com https://vitals.vercel-insights.com wss://*.supabase.com; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';`
+      : `default-src 'self' 'unsafe-eval' 'unsafe-inline' blob:; script-src 'self' 'unsafe-eval' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' ws://localhost:* https://*.supabase.com wss://*.supabase.com;`,
     
     // 🔒 Prevent clickjacking
     'X-Frame-Options': 'DENY',
