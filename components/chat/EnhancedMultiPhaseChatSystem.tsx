@@ -171,30 +171,47 @@ export function EnhancedMultiPhaseChatSystem({
       setChatState(prev => ({ ...prev, isLoading: true, error: null }))
 
       try {
-        // Get Stream Chat token
-        const tokenResponse = await fetch('/api/chat/token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: session.user.id })
-        })
+        // Check if Stream Chat is configured
+        const apiKey = process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY
+        if (!apiKey || apiKey === 'demo-key' || apiKey === 'demo-key-please-configure') {
+          throw new Error('Stream Chat not configured. Please configure NEXT_PUBLIC_STREAM_CHAT_API_KEY.')
+        }
+
+        // Get Stream Chat token with timeout
+        const tokenResponse = await Promise.race([
+          fetch('/api/chat/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: session.user.id })
+          }),
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Token request timeout')), 10000)
+          )
+        ])
 
         if (!tokenResponse.ok) {
-          throw new Error('Failed to get chat token')
+          const errorData = await tokenResponse.json()
+          throw new Error(errorData.error || 'Failed to get chat token')
         }
 
         const { token } = await tokenResponse.json()
 
-        // Initialize Stream Chat client
-        const client = StreamChatClient.getInstance(process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY!)
+        // Initialize Stream Chat client with timeout
+        const client = StreamChatClient.getInstance(apiKey)
         
-        await client.connectUser(
-          {
-            id: session.user.id,
-            name: session.user.name || 'Anonymous',
-            image: session.user.image || undefined,
-          },
-          token
-        )
+        await Promise.race([
+          client.connectUser(
+            {
+              id: session.user.id,
+              name: session.user.name || 'Anonymous',
+              image: session.user.image || undefined,
+            },
+            token
+          ),
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Stream Chat connection timeout')), 15000)
+          )
+        ])
 
         // Get or create channel
         const channel = client.channel('messaging', channelId, {
@@ -231,22 +248,39 @@ export function EnhancedMultiPhaseChatSystem({
 
       } catch (error) {
         console.error('Failed to initialize enhanced chat:', error)
+        
+        let errorMessage = 'Failed to initialize chat'
+        if (error instanceof Error) {
+          if (error.message.includes('timeout')) {
+            errorMessage = 'Chat service connection timeout. Please check your internet connection and try again.'
+          } else if (error.message.includes('not configured')) {
+            errorMessage = 'Chat service is not properly configured. Please contact support.'
+          } else if (error.message.includes('WS connection could not be established')) {
+            errorMessage = 'Chat service is currently unavailable. You can still use other features of the app.'
+          } else {
+            errorMessage = error.message
+          }
+        }
+        
         setChatState(prev => ({
           ...prev,
           isLoading: false,
-          error: error instanceof Error ? error.message : 'Failed to initialize chat'
+          error: errorMessage
         }))
       }
     }
 
-    initializeChat()
+    // Only initialize if not in error state (allows retry)
+    if (!chatState.error) {
+      initializeChat()
+    }
 
     return () => {
       if (chatState.client) {
         chatState.client.disconnectUser()
       }
     }
-  }, [status, session, tripId, channelId, tripDate, calculateCurrentPhase])
+  }, [status, session, tripId, channelId, tripDate, calculateCurrentPhase, chatState.error])
 
   // Handle real-time events
   useEffect(() => {
@@ -328,16 +362,51 @@ export function EnhancedMultiPhaseChatSystem({
     )
   }
 
+  // Handle retry initialization
+  const handleRetryInitialization = () => {
+    setChatState(prev => ({ ...prev, error: null, isLoading: true }))
+    // The useEffect will be triggered by the state change
+  }
+
   // Render error state
   if (chatState.error) {
+    const isConfigurationError = chatState.error.includes('not configured')
+    const isConnectionError = chatState.error.includes('unavailable') || chatState.error.includes('timeout')
+    
     return (
       <Card className={cn('w-full', className)}>
         <CardContent className="p-6">
-          <div className="text-center">
-            <p className="text-red-500 mb-4">{chatState.error}</p>
-            <Button onClick={() => window.location.reload()}>
-              Попробовать снова
-            </Button>
+          <div className="text-center space-y-4">
+            <div className="text-red-500 mb-2">
+              {isConnectionError && (
+                <div className="text-orange-500 text-sm mb-2">
+                  ⚠️ Chat service temporarily unavailable
+                </div>
+              )}
+              <p className="text-sm">{chatState.error}</p>
+            </div>
+            
+            {!isConfigurationError && (
+              <div className="space-y-2">
+                <Button 
+                  onClick={handleRetryInitialization}
+                  variant="outline"
+                  size="sm"
+                >
+                  🔄 Попробовать снова
+                </Button>
+                <div className="text-xs text-gray-500">
+                  Или перезагрузите страницу
+                </div>
+              </div>
+            )}
+            
+            {isConnectionError && (
+              <div className="text-xs text-gray-600 bg-gray-50 p-3 rounded">
+                💡 <strong>Подсказка:</strong> Вы все еще можете использовать другие функции приложения. 
+                Chat будет автоматически переподключаться при восстановлении соединения.
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
