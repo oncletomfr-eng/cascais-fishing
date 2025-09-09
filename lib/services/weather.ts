@@ -101,7 +101,8 @@ export class WeatherService {
    */
   async getMarineConditions(location: WeatherLocation): Promise<MarineConditions | null> {
     if (!this.config.enableMarine) return null;
-    return this.fetchMarineConditions(location);
+    const result = await this.fetchMarineConditions(location);
+    return result || null;
   }
 
   /**
@@ -155,37 +156,29 @@ export class WeatherService {
   }
 
   /**
-   * Fetch current weather from Open-Meteo API
+   * Fetch current weather from Open-Meteo API via server-side proxy
    */
   private async fetchCurrentWeather(location: WeatherLocation): Promise<CurrentWeather> {
     const params = new URLSearchParams({
       latitude: location.latitude.toString(),
       longitude: location.longitude.toString(),
-      current: [
-        'temperature_2m',
-        'relative_humidity_2m',
-        'apparent_temperature',
-        'is_day',
-        'precipitation',
-        'weather_code',
-        'cloud_cover',
-        'pressure_msl',
-        'wind_speed_10m',
-        'wind_direction_10m',
-        'wind_gusts_10m'
-      ].join(','),
-      timezone: 'auto'
+      type: 'current'
     });
 
     const response = await this.fetchWithTimeout(
-      `${this.config.apiBaseUrl}/forecast?${params}`
+      `/api/weather/open-meteo?${params}`
     );
 
     if (!response.ok) {
       throw new Error(`Weather API error: ${response.status}`);
     }
 
-    const data: OpenMeteoCurrentResponse = await response.json();
+    const proxyResponse = await response.json();
+    if (!proxyResponse.success) {
+      throw new Error(`Weather proxy error: ${proxyResponse.error}`);
+    }
+    
+    const data: OpenMeteoCurrentResponse = proxyResponse.data;
     const current = data.current;
 
     const weatherCode = current.weather_code;
@@ -208,38 +201,29 @@ export class WeatherService {
   }
 
   /**
-   * Fetch hourly forecast from Open-Meteo API
+   * Fetch hourly forecast from Open-Meteo API via server-side proxy
    */
   private async fetchHourlyForecast(location: WeatherLocation): Promise<HourlyForecast[]> {
     const params = new URLSearchParams({
       latitude: location.latitude.toString(),
       longitude: location.longitude.toString(),
-      hourly: [
-        'temperature_2m',
-        'relative_humidity_2m',
-        'precipitation_probability',
-        'precipitation',
-        'weather_code',
-        'pressure_msl',
-        'cloud_cover',
-        'visibility',
-        'wind_speed_10m',
-        'wind_direction_10m',
-        'wind_gusts_10m'
-      ].join(','),
-      timezone: 'auto',
-      forecast_days: '3'
+      type: 'hourly'
     });
 
     const response = await this.fetchWithTimeout(
-      `${this.config.apiBaseUrl}/forecast?${params}`
+      `/api/weather/open-meteo?${params}`
     );
 
     if (!response.ok) {
       throw new Error(`Weather API error: ${response.status}`);
     }
 
-    const data: OpenMeteoHourlyResponse = await response.json();
+    const proxyResponse = await response.json();
+    if (!proxyResponse.success) {
+      throw new Error(`Weather proxy error: ${proxyResponse.error}`);
+    }
+    
+    const data: OpenMeteoHourlyResponse = proxyResponse.data;
     const hourly = data.hourly;
 
     return hourly.time.map((time, index) => {
@@ -265,36 +249,29 @@ export class WeatherService {
   }
 
   /**
-   * Fetch daily forecast from Open-Meteo API
+   * Fetch daily forecast from Open-Meteo API via server-side proxy
    */
   private async fetchDailyForecast(location: WeatherLocation): Promise<DailyForecast[]> {
     const params = new URLSearchParams({
       latitude: location.latitude.toString(),
       longitude: location.longitude.toString(),
-      daily: [
-        'weather_code',
-        'temperature_2m_max',
-        'temperature_2m_min',
-        'precipitation_sum',
-        'precipitation_probability_max',
-        'wind_speed_10m_max',
-        'wind_gusts_10m_max',
-        'sunrise',
-        'sunset'
-      ].join(','),
-      timezone: 'auto',
-      forecast_days: '7'
+      type: 'daily'
     });
 
     const response = await this.fetchWithTimeout(
-      `${this.config.apiBaseUrl}/forecast?${params}`
+      `/api/weather/open-meteo?${params}`
     );
 
     if (!response.ok) {
       throw new Error(`Weather API error: ${response.status}`);
     }
 
-    const data: OpenMeteoDailyResponse = await response.json();
+    const proxyResponse = await response.json();
+    if (!proxyResponse.success) {
+      throw new Error(`Weather proxy error: ${proxyResponse.error}`);
+    }
+    
+    const data: OpenMeteoDailyResponse = proxyResponse.data;
     const daily = data.daily;
 
     return daily.time.map((time, index) => {
@@ -318,56 +295,49 @@ export class WeatherService {
   }
 
   /**
-   * Fetch marine conditions from Open-Meteo Marine API with Tomorrow.io fallback
+   * Fetch marine conditions from Open-Meteo Marine API via server-side proxy with Tomorrow.io fallback
    */
   private async fetchMarineConditions(location: WeatherLocation): Promise<MarineConditions | undefined> {
-    // Try Open-Meteo first
+    // Try Open-Meteo Marine proxy first
     try {
       const params = new URLSearchParams({
         latitude: location.latitude.toString(),
-        longitude: location.longitude.toString(),
-        hourly: [
-          'wave_height',
-          'wave_direction',
-          'wave_period',
-          'swell_wave_height',
-          'swell_wave_direction',
-          'swell_wave_period'
-        ].join(','),
-        timezone: 'auto',
-        forecast_days: '1'
+        longitude: location.longitude.toString()
       });
 
       const response = await this.fetchWithTimeout(
-        `https://marine-api.open-meteo.com/v1/marine?${params}`
+        `/api/weather/marine?${params}`
       );
 
       if (response.ok) {
-        const data: OpenMeteoMarineResponse = await response.json();
-        const hourly = data.hourly;
+        const proxyResponse = await response.json();
+        if (proxyResponse.success) {
+          const data: OpenMeteoMarineResponse = proxyResponse.data;
+          const hourly = data.hourly;
 
-        if (hourly.time && hourly.time.length > 0) {
-          // Successfully got Open-Meteo marine data
-          return {
-            waveHeight: hourly.wave_height[0] || 0,
-            wavePeriod: hourly.wave_period[0] || 0,
-            waveDirection: hourly.wave_direction[0] || 0,
-            swellWaveHeight: hourly.swell_wave_height?.[0],
-            swellWavePeriod: hourly.swell_wave_period?.[0],
-            swellWaveDirection: hourly.swell_wave_direction?.[0],
-            timestamp: new Date(hourly.time[0])
-          };
+          if (hourly.time && hourly.time.length > 0) {
+            // Successfully got Open-Meteo marine data via proxy
+            return {
+              waveHeight: hourly.wave_height[0] || 0,
+              wavePeriod: hourly.wave_period[0] || 0,
+              waveDirection: hourly.wave_direction[0] || 0,
+              swellWaveHeight: hourly.swell_wave_height?.[0],
+              swellWavePeriod: hourly.swell_wave_period?.[0],
+              swellWaveDirection: hourly.swell_wave_direction?.[0],
+              timestamp: new Date(hourly.time[0])
+            };
+          }
         }
       }
     } catch (error) {
-      console.warn('Open-Meteo marine API failed, trying Tomorrow.io fallback:', error);
+      console.warn('Open-Meteo marine proxy API failed, trying Tomorrow.io fallback:', error);
     }
 
-    // Fallback to Tomorrow.io Marine API
+    // Fallback to Tomorrow.io Marine API (which uses its own proxy)
     try {
       console.log('Using Tomorrow.io Marine API as fallback');
       const marineData = await tomorrowMarineService.getMarineConditions(location);
-      return marineData;
+      return marineData || undefined;
     } catch (error) {
       console.warn('Tomorrow.io marine API also failed:', error);
       return undefined;
