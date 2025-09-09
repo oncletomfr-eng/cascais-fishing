@@ -84,6 +84,7 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef<number>(0);
   
   // Event handler registries
   const messageHandlers = useRef<Set<(event: ChatSSEEvent) => void>>(new Set());
@@ -247,6 +248,12 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
 
     eventSource.onopen = () => {
       console.log('💬 Chat SSE connection opened');
+      reconnectAttemptsRef.current = 0; // Reset attempts on successful connection
+      setConnectionStatus(prev => ({ 
+        ...prev, 
+        status: 'connecting',
+        reconnectAttempts: 0
+      }));
     };
 
     eventSource.onerror = (error) => {
@@ -258,17 +265,18 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
       }));
 
       // Auto-reconnect logic
-      if (autoReconnect && connectionStatus.reconnectAttempts < maxReconnectAttempts) {
+      if (autoReconnect && reconnectAttemptsRef.current < maxReconnectAttempts) {
+        reconnectAttemptsRef.current += 1;
         setConnectionStatus(prev => ({ 
           ...prev, 
           status: 'reconnecting',
-          reconnectAttempts: prev.reconnectAttempts + 1
+          reconnectAttempts: reconnectAttemptsRef.current
         }));
         
         reconnectTimeoutRef.current = setTimeout(() => {
           disconnect();
           connect();
-        }, Math.min(1000 * Math.pow(2, connectionStatus.reconnectAttempts), 30000)); // Exponential backoff, max 30s
+        }, Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current - 1), 30000)); // Exponential backoff, max 30s
       }
     };
 
@@ -279,7 +287,7 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
       });
     });
 
-  }, [session?.user?.id, channelIds, autoReconnect, maxReconnectAttempts, connectionStatus.reconnectAttempts, handleSSEEvent]);
+  }, [session?.user?.id, channelIds, autoReconnect, maxReconnectAttempts, handleSSEEvent]);
 
   // Disconnect from Chat SSE
   const disconnect = useCallback(() => {
@@ -302,6 +310,7 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
     
     clearTypingTimeout();
     clientIdRef.current = null;
+    reconnectAttemptsRef.current = 0; // Reset attempts counter
     
     setConnectionStatus({
       status: 'disconnected',
@@ -396,7 +405,7 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
     return () => {
       disconnect();
     };
-  }, [status, session?.user?.id, connect, disconnect]);
+  }, [status, session?.user?.id]); // Removed connect/disconnect from deps to prevent infinite loop
 
   // Cleanup on unmount
   useEffect(() => {
