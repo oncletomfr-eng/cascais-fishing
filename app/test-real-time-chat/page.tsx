@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { toast } from '@/hooks/use-toast'
 import { 
   MessageCircle, 
@@ -41,6 +42,9 @@ import {
   useTypingIndicator,
   useReadReceipts
 } from '@/components/chat/real-time'
+
+// Import auth components
+import { useSession, signIn, signOut } from 'next-auth/react'
 
 // Real-time Chat Integration Demo Page
 // Part of Task 19: Real-time Integration & SSE
@@ -131,6 +135,8 @@ const TEST_SCENARIOS: TestScenario[] = [
 ]
 
 export default function TestRealTimeChatPage() {
+  const { data: session, status } = useSession()
+  
   const [testState, setTestState] = useState<ChatTestState>({
     isConnected: false,
     showEnhancedChat: true,
@@ -276,6 +282,62 @@ export default function TestRealTimeChatPage() {
   const totalTests = Object.keys(testState.testResults).length
   const testCoverage = totalTests > 0 ? Math.round((passedTests / totalTests) * 100) : 0
 
+  // Show login if not authenticated
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-500">Загрузка сессии...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (status === 'unauthenticated') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="flex items-center gap-2 justify-center">
+              <MessageCircle className="h-6 w-6 text-blue-500" />
+              Real-time Chat Test
+            </CardTitle>
+            <CardDescription>
+              Для тестирования real-time чата необходима авторизация
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert>
+              <Activity className="h-4 w-4" />
+              <AlertDescription>
+                Тестовая страница требует активную сессию пользователя для подключения к SSE endpoint
+              </AlertDescription>
+            </Alert>
+            <div className="space-y-2">
+              <Button
+                onClick={() => signIn('google')}
+                variant="outline"
+                className="w-full"
+              >
+                Войти через Google
+              </Button>
+              <Button
+                onClick={() => signIn()}
+                className="w-full"
+              >
+                Другие способы входа
+              </Button>
+            </div>
+            <div className="text-center text-sm text-gray-500">
+              После авторизации вы сможете тестировать SSE подключения и real-time функции
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -301,6 +363,30 @@ export default function TestRealTimeChatPage() {
               {chatSSE.isConnected ? "Connected" : "Disconnected"}
             </Badge>
           </div>
+          
+          {/* User Info */}
+          {session && (
+            <div className="flex items-center justify-center space-x-4 mt-4 p-3 bg-white/50 rounded-lg border">
+              <div className="flex items-center space-x-2">
+                <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
+                  <span className="text-green-600 font-semibold text-sm">
+                    {session.user?.name?.charAt(0) || session.user?.email?.charAt(0) || 'U'}
+                  </span>
+                </div>
+                <span className="text-sm font-medium text-gray-700">
+                  {session.user?.name || session.user?.email || 'Test User'}
+                </span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => signOut()}
+                className="h-8"
+              >
+                Выйти
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Test Summary Dashboard */}
