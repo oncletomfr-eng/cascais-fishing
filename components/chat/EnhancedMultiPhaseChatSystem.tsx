@@ -224,13 +224,13 @@ export function EnhancedMultiPhaseChatSystem({
         return
       }
 
-      // Initialize connection manager with production-optimized config
+      // Initialize connection manager with FAST UX config
       const connectionManager = new RobustStreamChatConnectionManager({
-        baseTimeout: 15000,        // 15s base timeout (increased from 3s default)
-        maxTimeout: 90000,         // 90s max timeout for slow networks  
-        extendedTimeout: 120000,   // 2 minutes for very slow networks
-        maxRetries: 6,             // More retry attempts
-        retryMultiplier: 1.4,      // Gradual backoff
+        baseTimeout: 3000,         // 3s base timeout (5x faster!)
+        maxTimeout: 8000,          // 8s max timeout (11x faster!)  
+        extendedTimeout: 12000,    // 12s extended timeout (10x faster!)
+        maxRetries: 3,             // 3 attempts (2x faster!)
+        retryMultiplier: 1.5,      // Standard backoff
         retryRandomization: 0.4,   // Higher jitter for distributed load
         enableMultipleStrategies: true,
         enableNetworkDiagnostics: true,
