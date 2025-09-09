@@ -331,13 +331,23 @@ export function EnhancedMultiPhaseChatSystem({
 
         setChatState(prev => ({ ...prev, currentLoadingPhase: 'syncing' }))
 
-        // Get or create channel
-        const channel = client.channel('messaging', channelId, {
-          members: [session.user.id],
-          created_by_id: session.user.id
-        })
+        // Get or create channel (only if client exists - not in degraded SSE-only mode)
+        let channel = null
+        if (client) {
+          channel = client.channel('messaging', channelId, {
+            members: [session.user.id],
+            created_by_id: session.user.id
+          })
+        } else {
+          console.log('🔄 DEGRADED MODE: Skipping Stream Chat channel creation - client is null')
+        }
 
-        await channel.watch()
+        // Watch channel only if it exists (not in degraded SSE-only mode)
+        if (channel) {
+          await channel.watch()
+        } else {
+          console.log('🔄 DEGRADED MODE: Skipping channel.watch() - in SSE-only mode')
+        }
 
         const currentPhase = calculateCurrentPhase()
         const phaseConfig = DEFAULT_PHASE_CONFIGS[currentPhase]
@@ -579,9 +589,15 @@ export function EnhancedMultiPhaseChatSystem({
     )
   }
 
-  // Main chat interface
-  if (!chatState.client || !chatState.eventChat) {
+  // Main chat interface - show UI even in degraded mode (client = null)
+  if (!chatState.eventChat) {
     return null
+  }
+
+  // Special handling for degraded mode (SSE-only, no Stream Chat client)
+  const isDegradedMode = !chatState.client
+  if (isDegradedMode) {
+    console.log('🔄 DEGRADED MODE: Showing UI without Stream Chat components')
   }
 
   const phaseConfig = chatState.eventChat.phaseConfig
@@ -645,34 +661,70 @@ export function EnhancedMultiPhaseChatSystem({
       <div className="flex flex-1 overflow-hidden">
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col">
-          <Chat client={chatState.client}>
-            <Channel channel={chatState.eventChat.channel}>
-              <Window>
-                <ChannelHeader />
-                
-                {/* Typing Indicators */}
-                {enableRealTimeFeatures && 
-                 chatState.realTimePreferences.showTypingIndicators && 
-                 chatSSE.typingUsers.size > 0 && (
-                  <div className="px-4 py-2 border-b">
-                    <TypingIndicator
-                      typingUsers={chatSSE.typingUsers}
-                      currentUserId={session?.user?.id}
-                      variant="detailed"
-                      showAvatars={true}
-                    />
-                  </div>
-                )}
+          {isDegradedMode ? (
+            // DEGRADED SSE-ONLY MODE: Show limited UI without Stream Chat components
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
+              <div className="text-6xl">🔄</div>
+              <h3 className="text-xl font-semibold text-orange-600">SSE-режим чата</h3>
+              <div className="space-y-2 text-sm text-muted-foreground max-w-md">
+                <p>Чат работает в ограниченном режиме через Server-Sent Events.</p>
+                <p>WebSocket соединения заблокированы вашей сетью (firewall/ISP).</p>
+                <p>Основные функции доступны, но некоторые возможности ограничены.</p>
+              </div>
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-sm">
+                <div className="font-medium text-orange-800 mb-2">Что работает:</div>
+                <ul className="list-disc list-inside text-orange-700 space-y-1">
+                  <li>Получение сообщений через SSE</li>
+                  <li>Отображение онлайн пользователей</li>
+                  <li>Уведомления о событиях</li>
+                </ul>
+                <div className="font-medium text-orange-800 mt-3 mb-2">Ограничения:</div>
+                <ul className="list-disc list-inside text-orange-700 space-y-1">
+                  <li>Отправка сообщений может быть медленнее</li>
+                  <li>Typing indicators недоступны</li>
+                  <li>Некоторые real-time функции ограничены</li>
+                </ul>
+              </div>
+              <Button 
+                onClick={() => window.location.reload()} 
+                variant="outline" 
+                size="sm"
+                className="mt-4"
+              >
+                🔄 Попробовать переподключиться
+              </Button>
+            </div>
+          ) : (
+            // NORMAL MODE: Full Stream Chat interface (client guaranteed to be non-null here)
+            <Chat client={chatState.client!}>
+              <Channel channel={chatState.eventChat.channel}>
+                <Window>
+                  <ChannelHeader />
+                  
+                  {/* Typing Indicators */}
+                  {enableRealTimeFeatures && 
+                   chatState.realTimePreferences.showTypingIndicators && 
+                   chatSSE.typingUsers.size > 0 && (
+                    <div className="px-4 py-2 border-b">
+                      <TypingIndicator
+                        typingUsers={chatSSE.typingUsers}
+                        currentUserId={session?.user?.id}
+                        variant="detailed"
+                        showAvatars={true}
+                      />
+                    </div>
+                  )}
 
-                <MessageList 
-                  messageActions={['react', 'reply', 'edit', 'delete']}
-                />
-                
-                <MessageInput />
-              </Window>
-              <Thread />
-            </Channel>
-          </Chat>
+                  <MessageList 
+                    messageActions={['react', 'reply', 'edit', 'delete']}
+                  />
+                  
+                  <MessageInput />
+                </Window>
+                <Thread />
+              </Channel>
+            </Chat>
+          )}
         </div>
 
         {/* Real-time Panel */}

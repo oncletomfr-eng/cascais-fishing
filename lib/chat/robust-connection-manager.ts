@@ -341,13 +341,9 @@ export class RobustStreamChatConnectionManager {
         });
 
       case ConnectionStrategy.SSE_FALLBACK:
-        // For SSE fallback, Stream Chat WebSocket won't work
-        // Return a client but connection will be handled specially
-        console.log('🔄 SSE_FALLBACK: Using degraded mode, Stream Chat WebSocket disabled');
-        return StreamChat.getInstance(apiKey, {
-          ...baseOptions,
-          timeout: 2000, // Very short timeout since this will fail anyway
-        });
+        // For SSE fallback, NO Stream Chat client needed at all
+        console.log('🔄 SSE_FALLBACK: No Stream Chat client needed - pure SSE mode');
+        return null; // Return null - we don't need Stream Chat client in degraded mode
 
       default:
         return StreamChat.getInstance(apiKey, baseOptions);
