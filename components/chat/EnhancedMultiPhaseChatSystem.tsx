@@ -167,6 +167,9 @@ export function EnhancedMultiPhaseChatSystem({
   useEffect(() => {
     const initializeChat = async () => {
       if (status !== 'authenticated' || !session?.user?.id) return
+      
+      // Skip if already connected/connecting or client exists
+      if (chatState.isLoading || chatState.client) return
 
       setChatState(prev => ({ ...prev, isLoading: true, error: null }))
 
@@ -277,10 +280,10 @@ export function EnhancedMultiPhaseChatSystem({
 
     return () => {
       if (chatState.client) {
-        chatState.client.disconnectUser()
+        chatState.client.disconnectUser().catch(console.error)
       }
     }
-  }, [status, session, tripId, channelId, tripDate, calculateCurrentPhase, chatState.error])
+  }, [status, session, tripId, channelId, tripDate, chatState.error]) // Removed calculateCurrentPhase to prevent re-calls
 
   // Handle real-time events
   useEffect(() => {

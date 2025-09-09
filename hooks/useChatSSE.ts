@@ -149,12 +149,12 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
             reconnectAttempts: 0
           }));
           
-          clientIdRef.current = event.data.clientId;
+          clientIdRef.current = event.clientId;
           
           // Update online users from initial connection
-          if (event.data.onlineUsers) {
+          if (event.onlineUsers) {
             const onlineMap = new Map<string, UserStatus>();
-            event.data.onlineUsers.forEach((user: UserStatus) => {
+            event.onlineUsers.forEach((user: UserStatus) => {
               onlineMap.set(user.userId, user);
             });
             setOnlineUsers(onlineMap);
@@ -164,7 +164,7 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
         case 'chat-heartbeat':
           setConnectionStatus(prev => ({
             ...prev,
-            quality: event.data.connectionQuality || 'good',
+            quality: event.connectionQuality || 'good',
             lastHeartbeat: new Date()
           }));
           
@@ -183,11 +183,11 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
           break;
 
         case 'chat-typing':
-          if (event.userId && event.data.isTyping) {
+          if (event.userId && event.isTyping) {
             setTypingUsers(prev => {
               const updated = new Map(prev);
               updated.set(event.userId!, {
-                userName: event.data.userName || 'Unknown User',
+                userName: event.userName || 'Unknown User',
                 timestamp: new Date()
               });
               return updated;
@@ -214,13 +214,13 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
           if (event.userId) {
             setOnlineUsers(prev => {
               const updated = new Map(prev);
-              if (event.data.status === 'offline') {
+              if (event.status === 'offline') {
                 updated.delete(event.userId!);
               } else {
                 updated.set(event.userId!, {
                   userId: event.userId!,
-                  status: event.data.status,
-                  lastSeen: event.data.timestamp
+                  status: event.status,
+                  lastSeen: event.timestamp
                 });
               }
               return updated;
