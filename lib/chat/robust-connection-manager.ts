@@ -197,11 +197,11 @@ export class RobustStreamChatConnectionManager {
             diagnostics
           );
           
-          if (result.success && this.client) {
+          if (result.success) {
             this.handleSuccessfulConnection(result);
             return { 
               user: result as any, // Stream Chat user response
-              client: this.client 
+              client: this.client // Can be null in degraded SSE-only mode
             };
           }
           
@@ -241,22 +241,22 @@ export class RobustStreamChatConnectionManager {
     const startTime = Date.now();
     
     try {
-      // Special handling for SSE_FALLBACK - skip Stream Chat connection
+      // Special handling for SSE_FALLBACK - skip Stream Chat connection entirely
       if (strategy === ConnectionStrategy.SSE_FALLBACK) {
         console.log('🔄 SSE_FALLBACK: Entering degraded mode - Stream Chat disabled, SSE only');
         
-        // Simulate successful "connection" in degraded mode
         const duration = Date.now() - startTime;
         this.currentState = ConnectionState.DEGRADED;
         
-        // Create a minimal mock client for UI compatibility
-        const client = this.getClientForStrategy(apiKey, strategy);
-        this.client = client;
+        // NO Stream Chat client creation - complete degraded mode
+        this.client = null; // Explicitly set to null
+        
+        console.log('✅ SSE_FALLBACK: Successfully entered degraded SSE-only mode');
         
         return {
           success: true,
-          client,
-          user: userObject, // Return the user object as-is
+          client: null, // No Stream Chat client in degraded mode
+          user: userObject,
           strategy,
           duration,
           quality: ConnectionQuality.POOR, // Degraded quality
