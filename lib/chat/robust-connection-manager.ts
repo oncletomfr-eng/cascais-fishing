@@ -170,22 +170,30 @@ export class RobustStreamChatConnectionManager {
     
     let lastError: Error | null = null;
     
-    // Try each strategy with retries
+    // FAST STRATEGY SWITCHING - Try each strategy with minimal retries
+    let totalAttempt = 0;
+    const maxTotalAttempts = strategies.length + 2; // Max attempts across all strategies
+    
     for (const strategy of strategies) {
       this.currentStrategy = strategy;
       
-      for (let attempt = 1; attempt <= this.config.maxRetries; attempt++) {
-        this.currentAttempt = attempt;
+      // Only 1-2 attempts per strategy (quick switching!)
+      const attemptsPerStrategy = strategy === ConnectionStrategy.DIRECT_WEBSOCKET ? 1 : 
+                                 strategy === ConnectionStrategy.SSE_FALLBACK ? 3 : 2;
+      
+      for (let attempt = 1; attempt <= attemptsPerStrategy && totalAttempt < maxTotalAttempts; attempt++) {
+        totalAttempt++;
+        this.currentAttempt = totalAttempt;
         
         try {
-          console.log(`🔌 Connection attempt ${attempt}/${this.config.maxRetries} using ${strategy}`);
+          console.log(`🔌 Attempt ${totalAttempt}/${maxTotalAttempts} using ${strategy} (local attempt ${attempt})`);
           
           const result = await this.attemptConnection(
             apiKey, 
             userObject, 
             tokenOrProvider, 
             strategy, 
-            attempt,
+            attempt, // Use local attempt for timeout calculation
             diagnostics
           );
           
@@ -199,15 +207,18 @@ export class RobustStreamChatConnectionManager {
           
         } catch (error) {
           lastError = error as Error;
-          console.warn(`❌ Connection attempt ${attempt} failed with ${strategy}:`, error);
+          console.warn(`❌ Attempt ${totalAttempt} FAILED with ${strategy} (${error.message})`);
           
-          // Wait before retry with exponential backoff
-          if (attempt < this.config.maxRetries) {
-            const delay = this.calculateRetryDelay(attempt);
-            console.log(`⏳ Waiting ${delay}ms before retry...`);
-            await this.sleep(delay);
+          // Very short delay between attempts on same strategy
+          if (attempt < attemptsPerStrategy && totalAttempt < maxTotalAttempts) {
+            await this.sleep(500); // Just 0.5 seconds
           }
         }
+      }
+      
+      // Log strategy change
+      if (strategies.indexOf(strategy) < strategies.length - 1) {
+        console.log(`⏭️ SWITCHING from ${strategy} to next strategy...`);
       }
     }
     
@@ -230,6 +241,29 @@ export class RobustStreamChatConnectionManager {
     const startTime = Date.now();
     
     try {
+      // Special handling for SSE_FALLBACK - skip Stream Chat connection
+      if (strategy === ConnectionStrategy.SSE_FALLBACK) {
+        console.log('🔄 SSE_FALLBACK: Entering degraded mode - Stream Chat disabled, SSE only');
+        
+        // Simulate successful "connection" in degraded mode
+        const duration = Date.now() - startTime;
+        this.currentState = ConnectionState.DEGRADED;
+        
+        // Create a minimal mock client for UI compatibility
+        const client = this.getClientForStrategy(apiKey, strategy);
+        this.client = client;
+        
+        return {
+          success: true,
+          client,
+          user: userObject, // Return the user object as-is
+          strategy,
+          duration,
+          quality: ConnectionQuality.POOR, // Degraded quality
+          diagnostics
+        };
+      }
+      
       // Get or create client with strategy-specific options
       const client = this.getClientForStrategy(apiKey, strategy);
       
@@ -304,6 +338,15 @@ export class RobustStreamChatConnectionManager {
           timeout: this.config.maxTimeout,
           // Note: Stream Chat JS SDK doesn't have direct long-polling mode
           // This would be a fallback mechanism
+        });
+
+      case ConnectionStrategy.SSE_FALLBACK:
+        // For SSE fallback, Stream Chat WebSocket won't work
+        // Return a client but connection will be handled specially
+        console.log('🔄 SSE_FALLBACK: Using degraded mode, Stream Chat WebSocket disabled');
+        return StreamChat.getInstance(apiKey, {
+          ...baseOptions,
+          timeout: 2000, // Very short timeout since this will fail anyway
         });
 
       default:
