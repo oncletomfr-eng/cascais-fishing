@@ -11,6 +11,7 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GitHubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
+import { logger, logAuthError, logWarn, logCritical } from "@/lib/error-tracking/logger"
 
 // 🛡️ SECURITY: Validate OAuth configuration to prevent production failures
 const validateOAuthConfig = () => {
@@ -32,13 +33,23 @@ const validateOAuthConfig = () => {
   ));
   
   if (missing.length > 0) {
-    console.error('🚨 MISSING OAuth Environment Variables:', missing.map(v => v.key));
-    console.error('📋 OAuth authentication will fail until these are configured in Vercel dashboard');
+    logCritical('Missing OAuth Environment Variables', undefined, {
+      component: 'auth-config',
+      extra: { 
+        missingVars: missing.map(v => v.key),
+        message: 'OAuth authentication will fail until these are configured in Vercel dashboard'
+      }
+    });
   }
   
   if (invalid.length > 0) {
-    console.error('⚠️  INVALID OAuth Environment Variables (demo/placeholder values):', invalid.map(v => v.key));
-    console.error('🔧 Replace with actual OAuth credentials from Google/GitHub developer consoles');
+    logWarn('Invalid OAuth Environment Variables (demo/placeholder values)', {
+      component: 'auth-config',
+      extra: { 
+        invalidVars: invalid.map(v => v.key),
+        message: 'Replace with actual OAuth credentials from Google/GitHub developer consoles'
+      }
+    });
   }
   
   return { missing: missing.length === 0, valid: invalid.length === 0 };
@@ -181,12 +192,14 @@ export const {
             role: user.role || "PARTICIPANT", // Default role if not provided
           }
         } catch (error) {
-          console.error("🔍 [AUTH DEBUG] Authentication error:", error)
-          console.error("🔍 [AUTH DEBUG] Error details:", {
-            message: error instanceof Error ? error.message : 'Unknown error',
-            name: error instanceof Error ? error.name : 'Unknown',
-            stack: error instanceof Error ? error.stack : undefined
-          })
+          const authError = error instanceof Error ? error : new Error('Unknown authentication error');
+          logAuthError('Credentials authentication failed', authError, {
+            component: 'credentials-provider',
+            extra: {
+              email: credentials?.email,
+              hasPassword: !!credentials?.password
+            }
+          });
           return null
         }
       }
@@ -250,7 +263,11 @@ export const {
       const lastJwtGeneration = token.lastJwtGeneration as number;
       
       if (lastJwtGeneration && (now - lastJwtGeneration) < 1000) {
-        console.warn(`🚨 JWT generation rate limit exceeded for user: ${token.email}`);
+        logWarn('JWT generation rate limit exceeded', {
+          component: 'jwt-callback',
+          user: { email: token.email },
+          extra: { reason: 'rate_limit_exceeded' }
+        });
         // Все равно продолжаем, но логируем подозрительную активность
       }
       
@@ -285,7 +302,10 @@ export const {
             // Временное решение: используем default роль для OAuth
             token.role = "PARTICIPANT" // Будет исправлено после настройки Prisma в Edge Runtime
           } catch (error) {
-            console.error("Error loading user role:", error)
+            logAuthError("Error loading user role", error instanceof Error ? error : new Error(String(error)), {
+              component: 'jwt-callback',
+              user: { id: user.id }
+            });
             token.role = "PARTICIPANT"
           }
         } else {
@@ -320,30 +340,47 @@ export const {
       try {
         // 🚨 CRITICAL: Enhanced OAuth error detection and logging
         if (account?.error) {
-          console.error('🚨 OAuth Sign-in Error:', {
-            provider: account.provider,
-            error: account.error,
-            errorDescription: account.error_description,
-            email: user.email,
-            timestamp: new Date().toISOString()
+          const oauthError = new Error(String(account.error));
+          logAuthError('OAuth Sign-in Error', oauthError, {
+            component: 'oauth-signin',
+            user: { email: user.email },
+            extra: {
+              provider: account.provider,
+              error: account.error,
+              errorDescription: account.error_description
+            }
           });
           
           // Specific error handling for common OAuth issues
           const errorStr = String(account.error);
           if (errorStr.includes('invalid_client') || errorStr.includes('client_id')) {
-            console.error('🚨 CRITICAL: OAuth client_id missing or invalid - check environment variables');
-            console.error('📋 Required variables: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET');
+            logCritical('OAuth client_id missing or invalid', oauthError, {
+              component: 'oauth-config',
+              extra: {
+                message: 'Check environment variables',
+                requiredVars: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GITHUB_CLIENT_ID', 'GITHUB_CLIENT_SECRET']
+              }
+            });
             return false;
           }
           
           if (errorStr.includes('redirect_uri_mismatch')) {
-            console.error('🚨 CRITICAL: OAuth redirect URI mismatch - check OAuth app configuration');
-            console.error('📋 Expected: https://www.cascaisfishing.com/api/auth/callback/' + account.provider);
+            logCritical('OAuth redirect URI mismatch', oauthError, {
+              component: 'oauth-config',
+              extra: {
+                message: 'Check OAuth app configuration',
+                expectedUri: `https://www.cascaisfishing.com/api/auth/callback/${account.provider}`
+              }
+            });
             return false;
           }
           
           if (errorStr.includes('access_denied')) {
-            console.warn('👤 User denied OAuth authorization:', user.email);
+            logWarn('User denied OAuth authorization', {
+              component: 'oauth-signin',
+              user: { email: user.email },
+              extra: { provider: account.provider }
+            });
             return false;
           }
         }
@@ -360,7 +397,11 @@ export const {
           ];
           
           if (suspiciousPatterns.some(pattern => pattern.test(user.email!))) {
-            console.warn(`🚨 Suspicious email blocked: ${user.email}`);
+            logWarn('Suspicious email blocked', {
+              component: 'security-check',
+              user: { email: user.email },
+              extra: { reason: 'suspicious_email_pattern' }
+            });
             return false;
           }
         }
@@ -369,7 +410,11 @@ export const {
         if (account?.provider === "google") {
           // 🛡️  SECURITY: Validate Google account
           if (!profile?.email_verified) {
-            console.warn(`🚨 Google account not verified: ${user.email}`);
+            logWarn('Google account not verified', {
+              component: 'google-oauth',
+              user: { email: user.email },
+              extra: { reason: 'email_not_verified' }
+            });
             return false;
           }
           
@@ -402,11 +447,13 @@ export const {
         
       } catch (error) {
         // 🚨 CRITICAL: Catch and log any unexpected sign-in errors
-        console.error('🚨 CRITICAL Sign-in Error:', {
-          error: error instanceof Error ? error.message : String(error),
-          user: user.email,
-          provider: account?.provider,
-          timestamp: new Date().toISOString()
+        const signInError = error instanceof Error ? error : new Error(String(error));
+        logCritical('Critical Sign-in Error', signInError, {
+          component: 'signin',
+          user: { email: user.email },
+          extra: {
+            provider: account?.provider
+          }
         });
         
         // Allow sign-in to continue unless it's a critical OAuth config error

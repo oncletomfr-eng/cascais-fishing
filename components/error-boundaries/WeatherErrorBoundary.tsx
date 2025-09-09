@@ -49,8 +49,28 @@ export default class WeatherErrorBoundary extends Component<Props, State> {
       userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'SSR'
     });
 
-    // In production, you might want to send this to Sentry or other error tracking
-    // Sentry.captureException(error, { contexts: { react: errorInfo } });
+    // Send error to Sentry in production for monitoring
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+      try {
+        const Sentry = require('@sentry/nextjs');
+        Sentry.captureException(error, { 
+          contexts: { 
+            react: errorInfo,
+            weather: {
+              component: 'WeatherErrorBoundary',
+              timestamp: new Date().toISOString(),
+              userAgent: window.navigator.userAgent
+            }
+          },
+          tags: {
+            component: 'weather',
+            errorBoundary: 'WeatherErrorBoundary'
+          }
+        });
+      } catch (sentryError) {
+        console.warn('Failed to send error to Sentry:', sentryError);
+      }
+    }
   }
 
   handleRetry = () => {

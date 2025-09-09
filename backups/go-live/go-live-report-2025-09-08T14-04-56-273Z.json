@@ -1,0 +1,95 @@
+{
+  "metadata": {
+    "timestamp": "2025-09-08T14:05:02.558Z",
+    "backupId": "go-live-2025-09-08T14-04-56-273Z",
+    "purpose": "Pre-launch final backup for production deployment",
+    "environment": "production-ready"
+  },
+  "validation": {
+    "user": {
+      "totalRecords": 12,
+      "recentRecords": 12,
+      "validationTime": 490,
+      "status": "healthy"
+    },
+    "fisherProfile": {
+      "totalRecords": 11,
+      "recentRecords": 11,
+      "validationTime": 505,
+      "status": "healthy"
+    },
+    "groupTrip": {
+      "totalRecords": 10,
+      "recentRecords": 10,
+      "validationTime": 503,
+      "status": "healthy"
+    },
+    "privateBooking": {
+      "totalRecords": 0,
+      "recentRecords": 0,
+      "validationTime": 473,
+      "status": "healthy"
+    }
+  },
+  "backup": {
+    "user": {
+      "count": 12,
+      "backupTime": 259,
+      "status": "success"
+    },
+    "fisherProfile": {
+      "count": 11,
+      "backupTime": 282,
+      "status": "success"
+    },
+    "groupTrip": {
+      "count": 10,
+      "backupTime": 251,
+      "status": "success"
+    },
+    "privateBooking": {
+      "count": 0,
+      "backupTime": 255,
+      "status": "success"
+    },
+    "userNotification": {
+      "count": 0,
+      "backupTime": 257,
+      "status": "success"
+    },
+    "achievement": {
+      "count": 10,
+      "backupTime": 275,
+      "status": "success"
+    },
+    "userAchievement": {
+      "count": 29,
+      "backupTime": 268,
+      "status": "success"
+    },
+    "commission": {
+      "count": 0,
+      "backupTime": 0,
+      "status": "failed",
+      "error": "Cannot read properties of undefined (reading 'findMany')"
+    },
+    "transaction": {
+      "count": 0,
+      "backupTime": 0,
+      "status": "failed",
+      "error": "Cannot read properties of undefined (reading 'findMany')"
+    }
+  },
+  "summary": {
+    "totalModelsBackedUp": 9,
+    "successfulBackups": 7,
+    "failedBackups": 2,
+    "totalRecordsBackedUp": 72
+  },
+  "launchReadiness": {
+    "databaseConnection": true,
+    "dataIntegrity": true,
+    "backupCompleted": false,
+    "ready": true
+  }
+}

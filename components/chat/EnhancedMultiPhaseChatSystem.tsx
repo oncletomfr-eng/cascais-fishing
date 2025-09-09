@@ -60,12 +60,26 @@ import { useChatSSE } from '@/hooks/useChatSSE'
 import {
   OnlineStatusIndicator,
   OnlineUsersList,
-  ConnectionStatusIndicator,
   TypingIndicator,
   ReadReceiptStatus,
   useTypingIndicator,
   useReadReceipts
 } from './real-time'
+
+// Import robust connection manager and status components
+import { 
+  RobustStreamChatConnectionManager,
+  ConnectionState,
+  ConnectionQuality,
+  ConnectionStrategy,
+  ConnectionEvent,
+  createRetryableTokenProvider
+} from '@/lib/chat/robust-connection-manager'
+import { 
+  ConnectionStatusIndicator,
+  ProgressiveLoadingStates,
+  ConnectionEventToast
+} from './connection-status/ConnectionStatusIndicator'
 
 // Import Stream Chat styles
 import 'stream-chat-react/dist/css/v2/index.css'
@@ -84,7 +98,15 @@ interface EnhancedMultiPhaseChatSystemProps {
 
 interface EnhancedChatState {
   client: StreamChatClient | null
-  eventChat: EventChat | null
+  eventChat: {
+    id: string
+    tripId: string
+    currentPhase: ChatPhase
+    phaseConfig: any
+    channel: any
+    participants: Set<string>
+    isActive: boolean
+  } | null
   currentPhase: ChatPhase
   isLoading: boolean
   error: string | null
@@ -97,6 +119,16 @@ interface EnhancedChatState {
     showReadReceipts: boolean
     enableConnectionMonitoring: boolean
   }
+  // Robust connection fields
+  connectionManager: RobustStreamChatConnectionManager | null
+  connectionState: ConnectionState
+  connectionQuality: ConnectionQuality
+  connectionStrategy: ConnectionStrategy
+  connectionAttempt: number
+  maxAttempts: number
+  connectionEvents: ConnectionEvent[]
+  showConnectionToast: boolean
+  currentLoadingPhase: 'initializing' | 'diagnostics' | 'connecting' | 'authenticating' | 'syncing'
 }
 
 export function EnhancedMultiPhaseChatSystem({
@@ -122,7 +154,17 @@ export function EnhancedMultiPhaseChatSystem({
       showTypingIndicators: true,
       showReadReceipts: true,
       enableConnectionMonitoring: true
-    }
+    },
+    // Robust connection initial state
+    connectionManager: null,
+    connectionState: ConnectionState.DISCONNECTED,
+    connectionQuality: ConnectionQuality.EXCELLENT,
+    connectionStrategy: ConnectionStrategy.DIRECT_WEBSOCKET,
+    connectionAttempt: 0,
+    maxAttempts: 5,
+    connectionEvents: [],
+    showConnectionToast: false,
+    currentLoadingPhase: 'initializing'
   })
 
   // Initialize Chat SSE for real-time features
@@ -163,66 +205,136 @@ export function EnhancedMultiPhaseChatSystem({
     }
   }, [tripDate])
 
-  // Initialize Stream Chat
+  // Initialize Robust Stream Chat Connection
   useEffect(() => {
-    const initializeChat = async () => {
+    const initializeRobustChat = async () => {
       if (status !== 'authenticated' || !session?.user?.id) return
       
-      // Skip if already connected/connecting or client exists
-      if (chatState.isLoading || chatState.client) return
+      // Skip if already connected/connecting or manager exists
+      if (chatState.isLoading || chatState.connectionManager) return
 
-      setChatState(prev => ({ ...prev, isLoading: true, error: null }))
+      // Check if Stream Chat is configured
+      const apiKey = process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY
+      if (!apiKey || apiKey === 'demo-key' || apiKey === 'demo-key-please-configure') {
+        setChatState(prev => ({
+          ...prev,
+          error: 'Stream Chat not configured. Please configure NEXT_PUBLIC_STREAM_CHAT_API_KEY.',
+          connectionState: ConnectionState.FAILED
+        }))
+        return
+      }
+
+      // Initialize connection manager with production-optimized config
+      const connectionManager = new RobustStreamChatConnectionManager({
+        baseTimeout: 15000,        // 15s base timeout (increased from 3s default)
+        maxTimeout: 90000,         // 90s max timeout for slow networks  
+        extendedTimeout: 120000,   // 2 minutes for very slow networks
+        maxRetries: 6,             // More retry attempts
+        retryMultiplier: 1.4,      // Gradual backoff
+        retryRandomization: 0.4,   // Higher jitter for distributed load
+        enableMultipleStrategies: true,
+        enableNetworkDiagnostics: true,
+        enableConnectionCache: true,
+        heartbeatInterval: 45000,  // 45s heartbeat
+        qualityCheckInterval: 10000, // 10s quality checks
+        enableLongPolling: true,
+        enableSSEFallback: true
+      })
+
+      // Setup event listeners for connection state updates
+      const unsubscribeEvents = connectionManager.addEventListener((event: ConnectionEvent) => {
+        console.log('🔔 Connection Event:', event.type, event.state, event.strategy)
+        
+        setChatState(prev => ({
+          ...prev,
+          connectionState: event.state,
+          connectionQuality: event.quality,
+          connectionStrategy: event.strategy,
+          connectionAttempt: event.attempt,
+          connectionEvents: [...prev.connectionEvents.slice(-10), event], // Keep last 10 events
+          showConnectionToast: ['connected', 'error', 'fallback-activated'].includes(event.type),
+          currentLoadingPhase: getLoadingPhaseFromEvent(event)
+        }))
+
+        // Update main state based on connection events
+        if (event.state === ConnectionState.CONNECTED) {
+          setChatState(prev => ({
+            ...prev,
+            isConnected: true,
+            isLoading: false,
+            error: null
+          }))
+        } else if (event.state === ConnectionState.FAILED) {
+          setChatState(prev => ({
+            ...prev,
+            isConnected: false,
+            isLoading: false,
+            error: event.error?.message || 'Connection failed after all attempts'
+          }))
+        } else if ([ConnectionState.CONNECTING, ConnectionState.RECONNECTING].includes(event.state)) {
+          setChatState(prev => ({
+            ...prev,
+            isLoading: true,
+            error: null
+          }))
+        }
+      })
+
+      setChatState(prev => ({
+        ...prev,
+        connectionManager,
+        isLoading: true,
+        error: null,
+        connectionState: ConnectionState.CONNECTING,
+        currentLoadingPhase: 'initializing'
+      }))
 
       try {
-        // Check if Stream Chat is configured
-        const apiKey = process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY
-        if (!apiKey || apiKey === 'demo-key' || apiKey === 'demo-key-please-configure') {
-          throw new Error('Stream Chat not configured. Please configure NEXT_PUBLIC_STREAM_CHAT_API_KEY.')
-        }
-
-        // Get Stream Chat token with timeout
-        const tokenResponse = await Promise.race([
-          fetch('/api/chat/token', {
+        console.log('🚀 Starting robust Stream Chat connection...')
+        
+        // Create retryable token provider
+        const tokenProvider = createRetryableTokenProvider(async () => {
+          setChatState(prev => ({ ...prev, currentLoadingPhase: 'authenticating' }))
+          
+          const response = await fetch('/api/chat/token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: session.user.id })
-          }),
-          new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error('Token request timeout')), 10000)
-          )
-        ])
+          })
 
-        if (!tokenResponse.ok) {
-          const errorData = await tokenResponse.json()
-          throw new Error(errorData.error || 'Failed to get chat token')
-        }
+          if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || 'Failed to get chat token')
+          }
 
-        const { token } = await tokenResponse.json()
+          const { token } = await response.json()
+          return token
+        }, 3)
 
-        // Initialize Stream Chat client with timeout
-        const client = StreamChatClient.getInstance(apiKey)
+        // Connect user with robust connection manager
+        setChatState(prev => ({ ...prev, currentLoadingPhase: 'connecting' }))
         
-        await Promise.race([
-          client.connectUser(
-            {
-              id: session.user.id,
-              name: session.user.name || 'Anonymous',
-              image: session.user.image || undefined,
-            },
-            token
-          ),
-          new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error('Stream Chat connection timeout')), 15000)
-          )
-        ])
+        const { user, client } = await connectionManager.connectUser(
+          apiKey,
+          {
+            id: session.user.id,
+            name: session.user.name || 'Anonymous',
+            image: session.user.image || undefined,
+            email: session.user.email || undefined,
+            // Fishing app specific fields
+            isOnline: true,
+            lastSeen: new Date().toISOString(),
+            profile_type: 'fisher'
+          },
+          tokenProvider
+        )
+
+        setChatState(prev => ({ ...prev, currentLoadingPhase: 'syncing' }))
 
         // Get or create channel
         const channel = client.channel('messaging', channelId, {
-          name: `Trip ${tripId} Chat`,
           members: [session.user.id],
-          created_by_id: session.user.id,
-          trip_id: tripId,
-          trip_date: tripDate.toISOString()
+          created_by_id: session.user.id
         })
 
         await channel.watch()
@@ -230,7 +342,7 @@ export function EnhancedMultiPhaseChatSystem({
         const currentPhase = calculateCurrentPhase()
         const phaseConfig = DEFAULT_PHASE_CONFIGS[currentPhase]
 
-        const eventChat: EventChat = {
+        const eventChat = {
           id: channelId,
           tripId,
           currentPhase,
@@ -246,20 +358,25 @@ export function EnhancedMultiPhaseChatSystem({
           eventChat,
           currentPhase,
           isLoading: false,
-          isConnected: true
+          isConnected: true,
+          connectionState: ConnectionState.CONNECTED
         }))
 
+        console.log('✅ Robust Stream Chat initialization completed successfully!')
+
       } catch (error) {
-        console.error('Failed to initialize enhanced chat:', error)
+        console.error('❌ Robust Stream Chat initialization failed:', error)
         
         let errorMessage = 'Failed to initialize chat'
         if (error instanceof Error) {
           if (error.message.includes('timeout')) {
-            errorMessage = 'Chat service connection timeout. Please check your internet connection and try again.'
+            errorMessage = 'Connection timeout. We tried multiple strategies but couldn\'t establish a stable connection.'
           } else if (error.message.includes('not configured')) {
             errorMessage = 'Chat service is not properly configured. Please contact support.'
-          } else if (error.message.includes('WS connection could not be established')) {
-            errorMessage = 'Chat service is currently unavailable. You can still use other features of the app.'
+          } else if (error.message.includes('network restrictions')) {
+            errorMessage = 'Network restrictions detected. Some features may be limited.'
+          } else if (error.message.includes('WebSocket') || error.message.includes('connection')) {
+            errorMessage = 'Unable to establish real-time connection. Check your network settings.'
           } else {
             errorMessage = error.message
           }
@@ -268,22 +385,72 @@ export function EnhancedMultiPhaseChatSystem({
         setChatState(prev => ({
           ...prev,
           isLoading: false,
-          error: errorMessage
+          error: errorMessage,
+          connectionState: ConnectionState.FAILED
         }))
+      }
+
+      // Cleanup function
+      return () => {
+        unsubscribeEvents()
+        if (connectionManager) {
+          connectionManager.disconnect().catch(console.error)
+        }
       }
     }
 
     // Only initialize if not in error state (allows retry)
     if (!chatState.error) {
-      initializeChat()
-    }
-
-    return () => {
-      if (chatState.client) {
-        chatState.client.disconnectUser().catch(console.error)
+      const cleanup = initializeRobustChat()
+      return () => {
+        if (cleanup && typeof cleanup.then === 'function') {
+          cleanup.then(cleanupFn => cleanupFn?.())
+        }
       }
     }
-  }, [status, session, tripId, channelId, tripDate, chatState.error]) // Removed calculateCurrentPhase to prevent re-calls
+
+  }, [status, session, tripId, channelId, tripDate, chatState.error])
+
+  // Helper function to map connection events to loading phases
+  const getLoadingPhaseFromEvent = (event: ConnectionEvent): 'initializing' | 'diagnostics' | 'connecting' | 'authenticating' | 'syncing' => {
+    if (event.type === 'connecting') {
+      if (event.attempt === 1) return 'diagnostics'
+      return 'connecting'
+    }
+    if (event.state === ConnectionState.CONNECTED) return 'syncing'
+    return 'connecting'
+  }
+
+  // Retry connection function
+  const retryConnection = useCallback(() => {
+    console.log('🔄 User initiated connection retry...')
+    
+    // Reset error state and attempt reconnection
+    setChatState(prev => ({
+      ...prev,
+      error: null,
+      connectionState: ConnectionState.DISCONNECTED,
+      connectionAttempt: 0,
+      connectionEvents: []
+    }))
+    
+    // Trigger reconnection by clearing client and manager
+    if (chatState.connectionManager) {
+      chatState.connectionManager.disconnect().catch(console.error)
+    }
+    
+    setChatState(prev => ({
+      ...prev,
+      connectionManager: null,
+      client: null,
+      isConnected: false
+    }))
+  }, [chatState.connectionManager])
+
+  // Close connection toast
+  const closeConnectionToast = useCallback(() => {
+    setChatState(prev => ({ ...prev, showConnectionToast: false }))
+  }, [])
 
   // Handle real-time events
   useEffect(() => {
@@ -353,13 +520,17 @@ export function EnhancedMultiPhaseChatSystem({
     }
   }, [chatState.realTimePreferences, enableRealTimeFeatures, chatSSE])
 
-  // Render loading state
+  // Render enhanced loading state with progressive indicators
   if (chatState.isLoading) {
     return (
       <Card className={cn('w-full h-96', className)}>
         <CardContent className="flex items-center justify-center h-full">
-          <LoadingIndicator />
-          <span className="ml-2">Подключение к чату...</span>
+          <ProgressiveLoadingStates
+            currentPhase={chatState.currentLoadingPhase}
+            attempt={chatState.connectionAttempt}
+            maxAttempts={chatState.maxAttempts}
+            strategy={chatState.connectionStrategy}
+          />
         </CardContent>
       </Card>
     )
@@ -367,11 +538,10 @@ export function EnhancedMultiPhaseChatSystem({
 
   // Handle retry initialization
   const handleRetryInitialization = () => {
-    setChatState(prev => ({ ...prev, error: null, isLoading: true }))
-    // The useEffect will be triggered by the state change
+    retryConnection()
   }
 
-  // Render error state
+  // Render enhanced error state with connection status
   if (chatState.error) {
     const isConfigurationError = chatState.error.includes('not configured')
     const isConnectionError = chatState.error.includes('unavailable') || chatState.error.includes('timeout')
@@ -379,35 +549,28 @@ export function EnhancedMultiPhaseChatSystem({
     return (
       <Card className={cn('w-full', className)}>
         <CardContent className="p-6">
-          <div className="text-center space-y-4">
-            <div className="text-red-500 mb-2">
-              {isConnectionError && (
-                <div className="text-orange-500 text-sm mb-2">
-                  ⚠️ Chat service temporarily unavailable
-                </div>
-              )}
-              <p className="text-sm">{chatState.error}</p>
-            </div>
-            
-            {!isConfigurationError && (
-              <div className="space-y-2">
-                <Button 
-                  onClick={handleRetryInitialization}
-                  variant="outline"
-                  size="sm"
-                >
-                  🔄 Попробовать снова
-                </Button>
-                <div className="text-xs text-gray-500">
-                  Или перезагрузите страницу
-                </div>
-              </div>
-            )}
+          <div className="space-y-4">
+            <ConnectionStatusIndicator
+              state={chatState.connectionState}
+              quality={chatState.connectionQuality}
+              strategy={chatState.connectionStrategy}
+              attempt={chatState.connectionAttempt}
+              maxAttempts={chatState.maxAttempts}
+              onRetry={!isConfigurationError ? handleRetryInitialization : undefined}
+              showDetails={true}
+              variant="full"
+            />
             
             {isConnectionError && (
-              <div className="text-xs text-gray-600 bg-gray-50 p-3 rounded">
+              <div className="text-xs text-gray-600 bg-blue-50 p-3 rounded border border-blue-200">
                 💡 <strong>Подсказка:</strong> Вы все еще можете использовать другие функции приложения. 
-                Chat будет автоматически переподключаться при восстановлении соединения.
+                Чат будет автоматически переподключаться при восстановлении соединения.
+              </div>
+            )}
+
+            {isConfigurationError && (
+              <div className="text-xs text-red-600 bg-red-50 p-3 rounded border border-red-200">
+                ⚠️ <strong>Конфигурация:</strong> Обратитесь к администратору для настройки службы чата.
               </div>
             )}
           </div>
@@ -437,11 +600,16 @@ export function EnhancedMultiPhaseChatSystem({
         </div>
 
         <div className="flex items-center space-x-2">
-          {/* Connection Status */}
-          {enableRealTimeFeatures && chatState.realTimePreferences.enableConnectionMonitoring && (
+          {/* Enhanced Connection Status */}
+          {chatState.realTimePreferences.enableConnectionMonitoring && (
             <ConnectionStatusIndicator
-              status={chatSSE.connectionStatus.status}
-              quality={chatSSE.connectionStatus.quality}
+              state={chatState.connectionState}
+              quality={chatState.connectionQuality}
+              strategy={chatState.connectionStrategy}
+              attempt={chatState.connectionAttempt}
+              maxAttempts={chatState.maxAttempts}
+              onRetry={chatState.connectionState === ConnectionState.FAILED ? retryConnection : undefined}
+              variant="minimal"
             />
           )}
 
@@ -497,15 +665,10 @@ export function EnhancedMultiPhaseChatSystem({
                 )}
 
                 <MessageList 
-                  Message={StreamChatCustomMessage}
                   messageActions={['react', 'reply', 'edit', 'delete']}
                 />
                 
-                <MessageInput 
-                  onFocus={handleTyping}
-                  onChange={handleTyping}
-                  placeholder={`${phaseConfig.title} - напишите сообщение...`}
-                />
+                <MessageInput />
               </Window>
               <Thread />
             </Channel>
@@ -641,6 +804,16 @@ export function EnhancedMultiPhaseChatSystem({
           )}
         </AnimatePresence>
       </div>
+
+      {/* Connection Event Toast */}
+      <AnimatePresence>
+        {chatState.showConnectionToast && chatState.connectionEvents.length > 0 && (
+          <ConnectionEventToast
+            event={chatState.connectionEvents[chatState.connectionEvents.length - 1]}
+            onClose={closeConnectionToast}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
