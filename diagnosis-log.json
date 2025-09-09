@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-01-11T23:25:00Z", 
+  "diagnosis_step": "2_vercel_production_logs_analysis",
+  "root_cause_identified": "✅ НАЙДЕНА ТОЧНАЯ ПРИЧИНА",
+  "findings": {
+    "critical_issue": "/api/chat/sse endpoint ВСЕГДА timeout через 30 секунд на Vercel",
+    "evidence": [
+      "16:21:48.36 - /api/chat/sse - Vercel Runtime Timeout Error: Task timed out after 30 seconds",
+      "16:20:25.46 - /api/chat/sse - Vercel Runtime Timeout Error: Task timed out after 30 seconds", 
+      "16:20:25.45 - /api/chat/sse - Vercel Runtime Timeout Error: Task timed out after 30 seconds",
+      "16:19:54.29 - /api/chat/sse - Vercel Runtime Timeout Error: Task timed out after 30 seconds",
+      "16:19:54.27 - /api/chat/sse - Vercel Runtime Timeout Error: Task timed out после 30 seconds",
+      "16:19:50.54 - /api/chat/sse - Vercel Runtime Timeout Error: Task timed out after 30 seconds"
+    ],
+    "working_endpoints": [
+      "/api/chat/token - ✅ Stream Chat token generated successfully",
+      "/api/auth/session - ✅ работает нормально",
+      "все другие API endpoints работают"
+    ],
+    "pattern": "ТОЛЬКО /api/chat/sse постоянно timeout, остальное работает"
+  },
+  "technical_analysis": {
+    "vercel_function_timeout": "30 секунд - достигается максимум",
+    "sse_behavior": "SSE соединения должны быть долгоживущими, но Vercel их убивает",
+    "stream_chat_api": "Работает нормально (проверено в Step 5)",
+    "jwt_tokens": "Генерируются успешно"
+  },
+  "exact_cause": "Vercel Serverless Functions имеют лимит 30 секунд - SSE endpoint пытается держать соединение открытым, но Vercel принудительно завершает его",
+  "solution_needed": "Изменить архитектуру SSE endpoint для работы с Vercel limitations"
+}

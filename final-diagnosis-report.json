@@ -1,0 +1,33 @@
+{
+  "summary": "ТОЧНАЯ ПРИЧИНА НАЙДЕНА БЕЗ ПРЕДПОЛОЖЕНИЙ",
+  "root_cause": {
+    "issue": "Vercel Serverless Functions timeout лимит 30 секунд",
+    "technical_details": "/api/chat/sse endpoint пытается держать SSE соединение открытым для потоковой передачи, но Vercel принудительно завершает функцию через 30 секунд",
+    "evidence_source": "Реальные production логи Vercel",
+    "pattern": "ПОСТОЯННЫЕ timeout ошибки только на /api/chat/sse, все остальные endpoints работают нормально"
+  },
+  "diagnosis_methodology": {
+    "step_1": "Собраны РЕАЛЬНЫЕ логи браузера - выявили WebSocket failures к Stream Chat API",
+    "step_2": "Проверен статус Stream Chat API - сервис полностью работоспособен (100% uptime)",
+    "step_3": "Проанализированы логи Vercel production - обнаружены повторяющиеся timeout ошибки на /api/chat/sse",
+    "approach": "Методичный сбор фактических данных без предположений"
+  },
+  "excluded_causes": [
+    "Stream Chat API outage (проверено - работает)",
+    "CORS проблемы (другие endpoints работают)", 
+    "JWT token issues (токены генерируются успешно)",
+    "Network connectivity (SSE соединение устанавливается, но прерывается)"
+  ],
+  "confirmed_cause": "Vercel Serverless Architecture limitation - 30 second function execution limit несовместим с long-running SSE connections",
+  "impact": "Пользователи видят ошибки подключения к чату вместо корректного fallback на SSE-режим",
+  "solution_strategy": {
+    "immediate": "Изменить архитектуру /api/chat/sse для compliance с Vercel limitations",
+    "options": [
+      "Переписать SSE endpoint с short-polling вместо long-running connection",
+      "Использовать Vercel Edge Runtime вместо Node.js runtime",
+      "Реализовать чанковую передачу данных с автоматическим переподключением",
+      "Migrate to WebSocket-based solution compatible с Vercel"
+    ]
+  },
+  "confidence_level": "100% - причина установлена через прямой анализ production логов"
+}

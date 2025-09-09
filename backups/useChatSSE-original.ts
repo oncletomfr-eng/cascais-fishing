@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 
-// Chat Short-Polling Integration Hook (Vercel Compatible)
-// Part of Task 19: Real-time Integration (Fixed for Vercel timeout)
+// Chat SSE Integration Hook
+// Part of Task 19: Real-time Integration & SSE
 
 export interface ChatSSEEvent {
   id: string;
@@ -78,10 +78,9 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
   const [onlineUsers, setOnlineUsers] = useState<Map<string, UserStatus>>(new Map());
   const [typingUsers, setTypingUsers] = useState<Map<string, { userName: string; timestamp: Date }>>(new Map());
   
-  // Refs for managing polling and handlers
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  // Refs for managing EventSource and handlers
+  const eventSourceRef = useRef<EventSource | null>(null);
   const clientIdRef = useRef<string | null>(null);
-  const lastEventIdRef = useRef<string>('0');
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -96,7 +95,7 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
   const {
     autoReconnect = true,
     maxReconnectAttempts = 5,
-    heartbeatTimeout = 10000, // 10 seconds for polling heartbeat
+    heartbeatTimeout = 45000, // 45 seconds (30s heartbeat + 15s grace)
     channelIds,
     preferences = {
       receiveTypingIndicators: true,
@@ -104,10 +103,6 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
       receiveOnlineStatus: true
     }
   } = options;
-  
-  // Polling settings
-  const POLLING_INTERVAL = 2000; // Poll every 2 seconds
-  const CONNECTION_TIMEOUT = 5000; // 5 seconds timeout for each request
 
   // Clear typing timeout
   const clearTypingTimeout = useCallback(() => {
@@ -138,37 +133,61 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
     return () => clearInterval(interval);
   }, [cleanupTypingIndicators]);
 
-  // Handle polling events
-  const handlePollingEvent = useCallback((event: ChatSSEEvent) => {
+  // Handle SSE events
+  const handleSSEEvent = useCallback((eventType: string, data: string) => {
     try {
-      console.log(`💬 Received chat polling event: ${event.type}`, event);
+      const event: ChatSSEEvent = JSON.parse(data);
+      
+      console.log(`💬 Received chat SSE event: ${eventType}`, event);
 
-      switch (event.type) {
-        case 'connection_status':
-          // Handle connection status updates
-          if (event.data?.clientId) {
-            clientIdRef.current = event.data.clientId;
-          }
-          
+      switch (eventType) {
+        case 'chat-connected':
           setConnectionStatus(prev => ({
             ...prev,
             status: 'connected',
             quality: 'good',
-            reconnectAttempts: 0,
-            lastHeartbeat: new Date()
+            reconnectAttempts: 0
           }));
+          
+          clientIdRef.current = event.clientId;
+          
+          // Update online users from initial connection
+          if (event.onlineUsers) {
+            const onlineMap = new Map<string, UserStatus>();
+            event.onlineUsers.forEach((user: UserStatus) => {
+              onlineMap.set(user.userId, user);
+            });
+            setOnlineUsers(onlineMap);
+          }
           break;
 
-        case 'message':
+        case 'chat-heartbeat':
+          setConnectionStatus(prev => ({
+            ...prev,
+            quality: event.connectionQuality || 'good',
+            lastHeartbeat: new Date()
+          }));
+          
+          // Reset heartbeat timeout
+          if (heartbeatTimeoutRef.current) {
+            clearTimeout(heartbeatTimeoutRef.current);
+          }
+          heartbeatTimeoutRef.current = setTimeout(() => {
+            console.warn('💬 Chat SSE heartbeat timeout');
+            setConnectionStatus(prev => ({ ...prev, quality: 'poor' }));
+          }, heartbeatTimeout);
+          break;
+
+        case 'chat-message':
           messageHandlers.current.forEach(handler => handler(event));
           break;
 
-        case 'typing':
-          if (event.userId && event.data?.isTyping) {
+        case 'chat-typing':
+          if (event.userId && event.isTyping) {
             setTypingUsers(prev => {
               const updated = new Map(prev);
               updated.set(event.userId!, {
-                userName: event.data.userName || 'Unknown User',
+                userName: event.userName || 'Unknown User',
                 timestamp: new Date()
               });
               return updated;
@@ -187,20 +206,20 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
           typingHandlers.current.forEach(handler => handler(event));
           break;
 
-        case 'read_receipt':
+        case 'chat-read_receipt':
           receiptHandlers.current.forEach(handler => handler(event));
           break;
 
-        case 'user_status':
-          if (event.userId && event.data) {
+        case 'chat-user_status':
+          if (event.userId) {
             setOnlineUsers(prev => {
               const updated = new Map(prev);
-              if (event.data.status === 'offline') {
+              if (event.status === 'offline') {
                 updated.delete(event.userId!);
               } else {
                 updated.set(event.userId!, {
                   userId: event.userId!,
-                  status: event.data.status,
+                  status: event.status,
                   lastSeen: event.timestamp
                 });
               }
@@ -211,128 +230,72 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
           break;
       }
     } catch (error) {
-      console.error('💬 Error processing chat polling event:', error);
+      console.error('💬 Error parsing chat SSE event:', error);
     }
-  }, [clearTypingTimeout]);
+  }, [heartbeatTimeout, clearTypingTimeout]);
 
-  // Start polling for chat events
+  // Connect to Chat SSE
   const connect = useCallback(() => {
-    if (!session?.user?.id || pollingIntervalRef.current) return;
+    if (!session?.user?.id || eventSourceRef.current) return;
 
-    console.log('💬 Starting chat polling...');
+    console.log('💬 Connecting to Chat SSE...');
     setConnectionStatus(prev => ({ ...prev, status: 'connecting' }));
+
+    const channelParam = channelIds.length > 0 ? `?channels=${channelIds.join(',')}` : '';
+    const eventSource = new EventSource(`/api/chat/sse${channelParam}`);
     
-    // Reset state
-    lastEventIdRef.current = '0';
-    reconnectAttemptsRef.current = 0;
+    eventSourceRef.current = eventSource;
 
-    const performPoll = async () => {
-      try {
-        const channelParam = channelIds.length > 0 ? `channels=${channelIds.join(',')}` : '';
-        const clientParam = clientIdRef.current ? `clientId=${clientIdRef.current}` : '';
-        const lastEventParam = `lastEventId=${lastEventIdRef.current}`;
-        
-        const params = [channelParam, clientParam, lastEventParam]
-          .filter(Boolean)
-          .join('&');
-        
-        const url = `/api/chat/sse?${params}`;
-        
-        console.log(`💬 Polling: ${url}`);
-        
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          signal: AbortSignal.timeout(CONNECTION_TIMEOUT)
-        });
+    eventSource.onopen = () => {
+      console.log('💬 Chat SSE connection opened');
+      reconnectAttemptsRef.current = 0; // Reset attempts on successful connection
+      setConnectionStatus(prev => ({ 
+        ...prev, 
+        status: 'connecting',
+        reconnectAttempts: 0
+      }));
+    };
 
-        if (!response.ok) {
-          throw new Error(`Polling failed: ${response.statusText}`);
-        }
+    eventSource.onerror = (error) => {
+      console.error('💬 Chat SSE connection error:', error);
+      setConnectionStatus(prev => ({ 
+        ...prev, 
+        status: 'error',
+        quality: 'poor' 
+      }));
 
-        const data = await response.json();
-        
-        if (data.success) {
-          // Update client ID if received
-          if (data.clientId && !clientIdRef.current) {
-            clientIdRef.current = data.clientId;
-          }
-          
-          // Update last event ID
-          if (data.lastEventId) {
-            lastEventIdRef.current = data.lastEventId;
-          }
-          
-          // Update online users
-          if (data.onlineUsers) {
-            const onlineMap = new Map<string, UserStatus>();
-            data.onlineUsers.forEach((user: UserStatus) => {
-              onlineMap.set(user.userId, user);
-            });
-            setOnlineUsers(onlineMap);
-          }
-          
-          // Process events
-          if (data.events && Array.isArray(data.events)) {
-            data.events.forEach((event: ChatSSEEvent) => {
-              handlePollingEvent(event);
-            });
-          }
-          
-          // Update connection status on successful poll
-          setConnectionStatus(prev => ({
-            ...prev,
-            status: 'connected',
-            quality: 'good',
-            lastHeartbeat: new Date(),
-            reconnectAttempts: 0
-          }));
-          
-          reconnectAttemptsRef.current = 0; // Reset attempts on success
-        }
-
-      } catch (error) {
-        console.error('💬 Chat polling error:', error);
-        
+      // Auto-reconnect logic
+      if (autoReconnect && reconnectAttemptsRef.current < maxReconnectAttempts) {
+        reconnectAttemptsRef.current += 1;
         setConnectionStatus(prev => ({ 
           ...prev, 
-          status: 'error',
-          quality: 'poor' 
+          status: 'reconnecting',
+          reconnectAttempts: reconnectAttemptsRef.current
         }));
-
-        // Auto-reconnect logic for polling
-        if (autoReconnect && reconnectAttemptsRef.current < maxReconnectAttempts) {
-          reconnectAttemptsRef.current += 1;
-          setConnectionStatus(prev => ({ 
-            ...prev, 
-            status: 'reconnecting',
-            reconnectAttempts: reconnectAttemptsRef.current
-          }));
-        } else if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
-          // Max attempts reached, stop polling
+        
+        reconnectTimeoutRef.current = setTimeout(() => {
           disconnect();
-          return;
-        }
+          connect();
+        }, Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current - 1), 30000)); // Exponential backoff, max 30s
       }
     };
 
-    // Start polling interval
-    pollingIntervalRef.current = setInterval(performPoll, POLLING_INTERVAL);
-    
-    // Perform initial poll immediately
-    performPoll();
+    // Register event listeners for all chat event types
+    ['chat-connected', 'chat-heartbeat', 'chat-message', 'chat-typing', 'chat-read_receipt', 'chat-user_status'].forEach(eventType => {
+      eventSource.addEventListener(eventType, (event) => {
+        handleSSEEvent(eventType, (event as MessageEvent).data);
+      });
+    });
 
-  }, [session?.user?.id, channelIds, autoReconnect, maxReconnectAttempts, handlePollingEvent]);
+  }, [session?.user?.id, channelIds, autoReconnect, maxReconnectAttempts, handleSSEEvent]);
 
-  // Stop polling
+  // Disconnect from Chat SSE
   const disconnect = useCallback(() => {
-    console.log('💬 Stopping chat polling...');
+    console.log('💬 Disconnecting from Chat SSE...');
     
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current);
-      pollingIntervalRef.current = null;
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
     }
     
     if (reconnectTimeoutRef.current) {
@@ -347,7 +310,6 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
     
     clearTypingTimeout();
     clientIdRef.current = null;
-    lastEventIdRef.current = '0';
     reconnectAttemptsRef.current = 0; // Reset attempts counter
     
     setConnectionStatus({
@@ -367,10 +329,10 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
     setTimeout(connect, 1000);
   }, [disconnect, connect]);
 
-  // API request helper for chat actions
-  const chatPollingRequest = useCallback(async (action: string, data: any) => {
+  // API request helper with authentication
+  const chatSSERequest = useCallback(async (action: string, data: any) => {
     if (!clientIdRef.current) {
-      throw new Error('Not connected to chat polling');
+      throw new Error('Not connected to Chat SSE');
     }
 
     const response = await fetch('/api/chat/sse', {
@@ -386,7 +348,7 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
     });
 
     if (!response.ok) {
-      throw new Error(`Chat request failed: ${response.statusText}`);
+      throw new Error(`Chat SSE request failed: ${response.statusText}`);
     }
 
     return response.json();
@@ -394,24 +356,24 @@ export function useChatSSE(options: ChatSSEOptions): ChatSSEHookReturn {
 
   // Action functions
   const sendTypingIndicator = useCallback(async (channelId: string) => {
-    await chatPollingRequest('send_typing_indicator', { channelIds: [channelId] });
-  }, [chatPollingRequest]);
+    await chatSSERequest('send_typing_indicator', { channelIds: [channelId] });
+  }, [chatSSERequest]);
 
   const sendReadReceipt = useCallback(async (messageId: string, channelId: string) => {
-    await chatPollingRequest('send_read_receipt', { messageId, channelIds: [channelId] });
-  }, [chatPollingRequest]);
+    await chatSSERequest('send_read_receipt', { messageId, channelIds: [channelId] });
+  }, [chatSSERequest]);
 
   const subscribeToChannels = useCallback(async (newChannelIds: string[]) => {
-    await chatPollingRequest('subscribe_channels', { channelIds: newChannelIds });
-  }, [chatPollingRequest]);
+    await chatSSERequest('subscribe_channels', { channelIds: newChannelIds });
+  }, [chatSSERequest]);
 
   const unsubscribeFromChannels = useCallback(async (oldChannelIds: string[]) => {
-    await chatPollingRequest('unsubscribe_channels', { channelIds: oldChannelIds });
-  }, [chatPollingRequest]);
+    await chatSSERequest('unsubscribe_channels', { channelIds: oldChannelIds });
+  }, [chatSSERequest]);
 
   const updatePreferences = useCallback(async (newPreferences: Partial<ChatSSEOptions['preferences']>) => {
-    await chatPollingRequest('update_preferences', { preferences: newPreferences });
-  }, [chatPollingRequest]);
+    await chatSSERequest('update_preferences', { preferences: newPreferences });
+  }, [chatSSERequest]);
 
   // Event handler registration functions
   const onMessage = useCallback((handler: (event: ChatSSEEvent) => void) => {

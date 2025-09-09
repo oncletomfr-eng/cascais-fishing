@@ -11,7 +11,7 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GitHubProvider from "next-auth/providers/github"
 import GoogleProvider from "next-auth/providers/google"
-import { logger, logAuthError, logWarn, logCritical } from "@/lib/error-tracking/logger"
+import { logger, logAuthError, logWarn } from "@/lib/error-tracking/logger"
 
 // 🛡️ SECURITY: Validate OAuth configuration to prevent production failures
 const validateOAuthConfig = () => {
@@ -33,12 +33,9 @@ const validateOAuthConfig = () => {
   ));
   
   if (missing.length > 0) {
-    logCritical('Missing OAuth Environment Variables', undefined, {
-      component: 'auth-config',
-      extra: { 
-        missingVars: missing.map(v => v.key),
-        message: 'OAuth authentication will fail until these are configured in Vercel dashboard'
-      }
+    console.error('🔥 CRITICAL: Missing OAuth Environment Variables', {
+      missingVars: missing.map(v => v.key),
+      message: 'OAuth authentication will fail until these are configured in Vercel dashboard'
     });
   }
   
@@ -354,7 +351,7 @@ export const {
           // Specific error handling for common OAuth issues
           const errorStr = String(account.error);
           if (errorStr.includes('invalid_client') || errorStr.includes('client_id')) {
-            logCritical('OAuth client_id missing or invalid', oauthError, {
+            console.error('🔥 CRITICAL: OAuth client_id missing or invalid', oauthError, {
               component: 'oauth-config',
               extra: {
                 message: 'Check environment variables',
@@ -365,7 +362,7 @@ export const {
           }
           
           if (errorStr.includes('redirect_uri_mismatch')) {
-            logCritical('OAuth redirect URI mismatch', oauthError, {
+            console.error('🔥 CRITICAL: OAuth redirect URI mismatch', oauthError, {
               component: 'oauth-config',
               extra: {
                 message: 'Check OAuth app configuration',
@@ -448,7 +445,7 @@ export const {
       } catch (error) {
         // 🚨 CRITICAL: Catch and log any unexpected sign-in errors
         const signInError = error instanceof Error ? error : new Error(String(error));
-        logCritical('Critical Sign-in Error', signInError, {
+        console.error('🔥 CRITICAL: Sign-in Error', signInError, {
           component: 'signin',
           user: { email: user.email },
           extra: {
