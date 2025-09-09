@@ -16,10 +16,10 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value: [
-              // Default sources
-              "default-src 'self'",
-              // Scripts: self, Stripe, and inline scripts (needed for Next.js)
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://hooks.stripe.com",
+              // Default sources with canvas-confetti support
+              "default-src 'self' blob:",
+              // Scripts: self, Stripe, canvas-confetti blob support, and inline scripts (needed for Next.js)
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://js.stripe.com https://hooks.stripe.com",
               // Styles: self, inline styles, and Stripe
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               // Images: self, data, blob, and common image CDNs
