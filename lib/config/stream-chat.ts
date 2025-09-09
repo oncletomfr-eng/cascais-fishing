@@ -44,8 +44,9 @@ function validateEnvironment(): StreamChatConfig {
   
   // Validate in production
   if (environment === 'production') {
-    if (!apiKey.startsWith('mmhpkn') && !apiKey.startsWith('dz5f4d')) {
-      console.warn('⚠️ Stream Chat API key format may not be production-ready');
+    // Basic validation - Stream Chat API keys are typically 12 characters
+    if (apiKey.length < 10 || apiKey.length > 20) {
+      console.warn('⚠️ Stream Chat API key length may not be standard format');
     }
     
     if (apiSecret && apiSecret.length < 20) {
