@@ -259,7 +259,7 @@ export default function CaptainRevenueTracking({ captainId, className }: Captain
   }, [revenueData, dateRange])
 
   // Calculate metrics
-  const metrics = useMemo((): RevenueMetrics => {
+  const metrics = useMemo(() => {((): RevenueMetrics => {
     const now = new Date()
     const currentMonthStart = startOfMonth(now)
     const currentMonthEnd = endOfMonth(now)
