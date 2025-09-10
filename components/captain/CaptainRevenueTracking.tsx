@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
 import { 
   LineChart, 
   Line, 
@@ -44,9 +45,11 @@ import {
   Banknote,
   Receipt,
   PiggyBank,
-  Calculator
+  Calculator,
+  AlertCircle
 } from 'lucide-react'
 import { format, startOfMonth, endOfMonth, subMonths, addMonths, isWithinInterval } from 'date-fns'
+import type { DateRange as ReactDayPickerDateRange } from 'react-day-picker'
 import { ru } from 'date-fns/locale'
 
 // Captain Revenue Tracking Component
@@ -259,7 +262,7 @@ export default function CaptainRevenueTracking({ captainId, className }: Captain
   }, [revenueData, dateRange])
 
   // Calculate metrics
-  const metrics = useMemo(() => {((): RevenueMetrics => {
+  const metrics = useMemo((): RevenueMetrics => {
     const now = new Date()
     const currentMonthStart = startOfMonth(now)
     const currentMonthEnd = endOfMonth(now)
@@ -412,8 +415,12 @@ export default function CaptainRevenueTracking({ captainId, className }: Captain
                 initialFocus
                 mode="range"
                 defaultMonth={dateRange.from}
-                selected={dateRange}
-                onSelect={setDateRange}
+                selected={dateRange as ReactDayPickerDateRange}
+                onSelect={(range) => {
+                  if (range?.from && range?.to) {
+                    setDateRange({ from: range.from, to: range.to })
+                  }
+                }}
                 numberOfMonths={2}
               />
             </PopoverContent>
@@ -649,7 +656,7 @@ export default function CaptainRevenueTracking({ captainId, className }: Captain
                 switch (status) {
                   case 'completed': return <CreditCard className="h-4 w-4 text-green-600" />
                   case 'processing': return <Clock className="h-4 w-4 text-blue-600" />
-                  case 'upcoming': return <Calendar className="h-4 w-4 text-yellow-600" />
+                  case 'upcoming': return <CalendarIcon className="h-4 w-4 text-yellow-600" />
                   case 'failed': return <AlertCircle className="h-4 w-4 text-red-600" />
                   default: return null
                 }

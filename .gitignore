@@ -28,7 +28,7 @@ next-env.d.ts
 /lib/generated/prisma
 
 # Logs
-logs
+/logs/
 *.log
 dev-debug.log
 # Dependency directories
