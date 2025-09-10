@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Label } from '@/components/ui/label'
 import { 
   LineChart, 
   Line, 
@@ -521,6 +522,14 @@ export default function CaptainRevenueTracking({ captainId, className }: Captain
                         <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
                         <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                       </linearGradient>
+                      <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorCommission" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                      </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
@@ -541,18 +550,20 @@ export default function CaptainRevenueTracking({ captainId, className }: Captain
                       fill="url(#colorRevenue)"
                       name="Общий доход"
                     />
-                    <Line
+                    <Area
                       type="monotone"
                       dataKey="earnings"
                       stroke="#10b981"
-                      strokeWidth={2}
+                      fill="url(#colorEarnings)"
+                      fillOpacity={0.6}
                       name="Чистая прибыль"
                     />
-                    <Line
+                    <Area
                       type="monotone"
                       dataKey="commission"
                       stroke="#f59e0b"
-                      strokeWidth={2}
+                      fill="url(#colorCommission)"
+                      fillOpacity={0.4}
                       name="Комиссия"
                     />
                   </AreaChart>
