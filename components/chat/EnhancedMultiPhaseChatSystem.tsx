@@ -94,6 +94,7 @@ interface EnhancedMultiPhaseChatSystemProps {
   onToggle?: () => void
   enableRealTimeFeatures?: boolean
   className?: string
+  forceSSEOnly?: boolean
 }
 
 interface EnhancedChatState {
@@ -137,7 +138,8 @@ export function EnhancedMultiPhaseChatSystem({
   isOpen = false,
   onToggle,
   enableRealTimeFeatures = true,
-  className
+  className,
+  forceSSEOnly = false
 }: EnhancedMultiPhaseChatSystemProps) {
   const { data: session, status } = useSession()
   const [chatState, setChatState] = useState<EnhancedChatState>({
@@ -213,16 +215,49 @@ export function EnhancedMultiPhaseChatSystem({
       // Skip if already connected/connecting or manager exists
       if (chatState.isLoading || chatState.connectionManager) return
 
-      // Check if Stream Chat is configured
+      // Check Stream Chat configuration
       const apiKey = process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY
-      if (!apiKey || apiKey === 'demo-key' || apiKey === 'demo-key-please-configure') {
+      const streamChatError = !apiKey || apiKey === 'demo-key' || apiKey === 'demo-key-please-configure'
+      const isStreamChatConfigured = !streamChatError
+      
+      // Determine connection method
+      const shouldUseStreamChat = isStreamChatConfigured && !streamChatError && !forceSSEOnly
+      const shouldUseSSEOnly = !shouldUseStreamChat || forceSSEOnly
+
+      // If forced to use SSE-only or Stream Chat is misconfigured, initialize degraded mode
+      if (shouldUseSSEOnly) {
+        console.log('🔄 Initializing SSE-only mode:', {
+          forceSSEOnly,
+          streamChatError,
+          isStreamChatConfigured
+        })
+
+        // Initialize degraded mode with SSE support only
+        const eventChat = {
+          id: channelId,
+          tripId,
+          currentPhase: calculateCurrentPhase(),
+          phaseConfig: DEFAULT_PHASE_CONFIGS[calculateCurrentPhase()],
+          channel: null, // No Stream Chat channel in SSE-only mode
+          participants: new Set([session.user.id]),
+          isActive: true
+        }
+
         setChatState(prev => ({
           ...prev,
-          error: 'Stream Chat not configured. Please configure NEXT_PUBLIC_STREAM_CHAT_API_KEY.',
-          connectionState: ConnectionState.FAILED
+          client: null, // No Stream Chat client
+          eventChat,
+          currentPhase: calculateCurrentPhase(),
+          isLoading: false,
+          isConnected: true, // SSE connection is considered "connected"
+          connectionState: ConnectionState.CONNECTED
         }))
+        
+        console.log('✅ SSE-only mode initialized successfully!')
         return
       }
+
+      // Continue with Stream Chat initialization if not in SSE-only mode
 
       // Initialize connection manager with FAST UX config
       const connectionManager = new RobustStreamChatConnectionManager({
@@ -616,10 +651,21 @@ export function EnhancedMultiPhaseChatSystem({
         </div>
 
         <div className="flex items-center space-x-2">
+          {/* Connection Mode Badge */}
+          <Badge 
+            variant={isDegradedMode || forceSSEOnly ? "destructive" : "default"} 
+            className="text-xs"
+          >
+            {isDegradedMode || forceSSEOnly ? 'SSE Mode' : 'Hybrid Mode'}
+          </Badge>
+
           {/* Enhanced Connection Status */}
           {chatState.realTimePreferences.enableConnectionMonitoring && (
             <ConnectionStatusIndicator
-              state={chatState.connectionState}
+              state={isDegradedMode || forceSSEOnly ? 
+                (chatSSE.connectionStatus.quality === 'good' ? ConnectionState.CONNECTED : ConnectionState.CONNECTING) : 
+                chatState.connectionState
+              }
               quality={chatState.connectionQuality}
               strategy={chatState.connectionStrategy}
               attempt={chatState.connectionAttempt}

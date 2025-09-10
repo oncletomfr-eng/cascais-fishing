@@ -163,7 +163,29 @@ export async function testStreamChatConnection(): Promise<{
 }
 
 /**
- * Generate secure user token with validation
+ * Phase 3.1: Create temporary token provider for development
+ */
+export function createTemporaryTokenProvider() {
+  if (process.env.NODE_ENV === 'development') {
+    return async (userId: string) => {
+      const tempToken = `temp_token_${userId}_${Date.now()}`;
+      console.log(`🔧 Generated temporary token for development: ${userId}`);
+      return tempToken;
+    };
+  }
+  throw new Error('Temporary tokens only allowed in development');
+}
+
+/**
+ * Phase 3.2: Sleep utility for retry mechanism
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Generate secure user token with validation and Phase 3 improvements
+ * Phase 3.2: Enhanced error handling, fallback tokens, retry mechanism
  */
 export async function generateUserToken(
   userId: string,
@@ -178,6 +200,7 @@ export async function generateUserToken(
   token: string;
   user: any;
   expiresAt?: Date;
+  isDevelopmentToken?: boolean;
 }> {
   if (typeof window !== 'undefined') {
     throw new Error('generateUserToken() can only be called on the server-side');
@@ -188,46 +211,88 @@ export async function generateUserToken(
     throw new Error('Valid userId is required for token generation');
   }
   
-  try {
-    const client = getStreamChatServerClient();
-    
-    // Create or update user data
-    const streamUser = {
-      id: userId,
-      name: userData?.name || 'Anonymous User',
-      email: userData?.email || '',
-      image: userData?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData?.name || 'User')}&background=0ea5e9&color=fff`,
-      role: userData?.role || 'user',
-      // Fishing app specific fields
-      isOnline: true,
-      lastSeen: new Date().toISOString(),
-      profile_type: 'fisher',
-      // Additional metadata
-      ...userData
-    };
-    
-    // Update/create user on Stream Chat
-    await client.upsertUser(streamUser);
-    
-    // Generate token with optional expiration
-    const tokenOptions = process.env.NODE_ENV === 'production' 
-      ? { exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60 } // 24 hours in production
-      : undefined; // No expiration in development
-    
-    const token = client.createToken(userId, tokenOptions?.exp);
-    
-    console.log(`🔑 Generated Stream Chat token for user: ${userId}`);
-    
-    return {
-      token,
-      user: streamUser,
-      expiresAt: tokenOptions?.exp ? new Date(tokenOptions.exp * 1000) : undefined
-    };
-    
-  } catch (error) {
-    console.error(`❌ Failed to generate token for user ${userId}:`, error);
-    throw new Error(`Token generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  // Create user data structure first (needed for fallback)
+  const streamUser = {
+    id: userId,
+    name: userData?.name || 'Anonymous User',
+    email: userData?.email || '',
+    image: userData?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData?.name || 'User')}&background=0ea5e9&color=fff`,
+    role: userData?.role || 'user',
+    // Fishing app specific fields
+    isOnline: true,
+    lastSeen: new Date().toISOString(),
+    profile_type: 'fisher',
+    // Additional metadata
+    ...userData
+  };
+
+  // Phase 3.2: Retry mechanism with detailed error logging
+  let retries = 0;
+  const maxRetries = 3;
+  
+  while (retries < maxRetries) {
+    try {
+      const client = getStreamChatServerClient();
+      
+      // Update/create user on Stream Chat
+      await client.upsertUser(streamUser);
+      
+      // Generate token with optional expiration
+      const tokenOptions = process.env.NODE_ENV === 'production' 
+        ? { exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60 } // 24 hours in production
+        : undefined; // No expiration in development
+      
+      const token = client.createToken(userId, tokenOptions?.exp);
+      
+      console.log(`🔑 Generated Stream Chat token for user: ${userId} (attempt ${retries + 1}/${maxRetries})`);
+      
+      return {
+        token,
+        user: streamUser,
+        expiresAt: tokenOptions?.exp ? new Date(tokenOptions.exp * 1000) : undefined,
+        isDevelopmentToken: false
+      };
+      
+    } catch (error) {
+      retries++;
+      
+      // Phase 3.2: Detailed error logging
+      const apiKey = process.env.NEXT_PUBLIC_STREAM_CHAT_API_KEY;
+      console.error('Stream Chat Error Details:', {
+        userId,
+        attempt: `${retries}/${maxRetries}`,
+        apiKey: apiKey ? apiKey.slice(0, 8) + '...' : 'not set',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorType: error?.constructor?.name || 'UnknownError',
+        timestamp: new Date().toISOString()
+      });
+      
+      // Phase 3.2: If this is the last retry and we're in development, use fallback
+      if (retries === maxRetries && process.env.NODE_ENV === 'development') {
+        console.warn(`⚠️ Stream Chat failed after ${maxRetries} attempts, using development fallback token`);
+        
+        // Phase 3.2: Development fallback token
+        const developmentToken = `dev_token_${userId}_${Date.now()}`;
+        
+        return {
+          token: developmentToken,
+          user: streamUser,
+          expiresAt: undefined,
+          isDevelopmentToken: true
+        };
+      }
+      
+      // If not the last retry, wait before retrying
+      if (retries < maxRetries) {
+        const waitTime = 1000 * retries; // 1s, 2s, 3s
+        console.log(`🔄 Retrying Stream Chat token generation in ${waitTime}ms...`);
+        await sleep(waitTime);
+      }
+    }
   }
+  
+  // If all retries failed and we're not in development, throw the error
+  throw new Error(`Token generation failed after ${maxRetries} attempts. Check Stream Chat configuration and API keys.`);
 }
 
 /**
@@ -397,5 +462,7 @@ export const streamChatConfig = {
   createTripChannel,
   healthCheck: streamChatHealthCheck,
   isConfigured: isStreamChatConfigured,
-  getSetupInstructions: getStreamChatSetupInstructions
+  getSetupInstructions: getStreamChatSetupInstructions,
+  // Phase 3.1: Temporary token provider for development
+  createTemporaryTokenProvider
 };
